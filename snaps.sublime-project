@@ -1,0 +1,20 @@
+{
+ "folders": [
+  {
+   "folder_exclude_patterns": [
+    ".sass-cache",
+    "bin",
+    "generated",
+    "node_modules",
+    "public.dev",
+    "public",
+    "artwork",
+    "tiles"
+   ],
+   "path": "/D/dev/github/snaps.js"
+  }
+ ],
+ "settings": {
+  "build_on_save": false
+ }
+}
