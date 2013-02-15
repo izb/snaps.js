@@ -1,15 +1,15 @@
 /*global late_require:true*/
 
 define(['lodash',
-        'isoengine/tile',
-        'isoengine/sprites/spritedef',
-        'isoengine/sprites/sprite',
-        'isoengine/input/keyboard',
-        'isoengine/input/mouse',
+        'snap/tile',
+        'snap/sprites/spritedef',
+        'snap/sprites/sprite',
+        'snap/input/keyboard',
+        'snap/input/mouse',
         'util/preload',
 
         /* Plugins */
-        'isoengine/plugins/default-plugins',
+        'snap/plugins/default-plugins',
 
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
@@ -19,7 +19,7 @@ function(_, Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
 
     'use strict';
 
-    function IsoEngine(game, canvasID, settings) {
+    function Snap(game, canvasID, settings) {
 
         var _this = this;
 
@@ -564,5 +564,5 @@ function(_, Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
         };
     }
 
-    return IsoEngine;
+    return Snap;
 });
