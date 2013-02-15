@@ -6,7 +6,7 @@
     "contributors": [],
     "name": "snapsjs",
     "description": "A JavaScript isometric game engine.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "homepage": "http://github.com/izb/snaps.js",
     "repository": {
         "type": "git",
@@ -20,7 +20,7 @@
           "jquery": ">1.9"
         },
         "main": "lib/snaps.min.js",
-        "include": ["lib"]
+        "include": ["lib/snaps.min.js"]
     },
     "dependencies": {
         "requirejs": "~2.1.4",
