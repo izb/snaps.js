@@ -10,25 +10,30 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
         requirejs: {
-            modules: {
+            snaps: {
                 out:'lib/snap.js',
                 baseUrl: 'src',
                 paths: {
                     jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min'
                 },
-                pragmas: {
-                    doExclude: true
-                },
-                optimize: 'none',
-                skipModuleInsertion: false,
+                //pragmas: {
+                //    doExclude: true
+                //},
+                //optimize: 'none',
+                //skipModuleInsertion: false,
                 optimizeAllPluginResources: true,
                 findNestedDependencies: true,
-                /* Bend the module array into a require.js-pleasing shape */
-                modules: (function(){ return modules.map(function(name) { return {name:name,excludeShallow:nonmodules}; }); }())
+                //dir:'src',
+                name: 'snaps/main'
+            },
+            snaps2: {
+                baseUrl:'src',
+                name:'snaps/main',
+                out: 'lib/snaps'
             }
         }
 
     });
 
-    grunt.registerTask('default', 'notest test summarize');
+    grunt.registerTask('default', 'requirejs:snaps2');
 };

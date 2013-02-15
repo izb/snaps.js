@@ -519,11 +519,53 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "grunt.js",
+			"settings":
+			{
+				"buffer_size": 912,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "Searching 26 files for \"isoengine\"\n\nD:\\dev\\github\\snaps.js\\snaps.sublime-workspace:\n  607  		\"/D/dev/github/1gam/feb2013/client/.gitignore\",\n  608  		\"/D/dev/github/1gam/.gitignore\",\n  609: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/plugins/sprite/link.js\",\n  610  		\"/D/dev/github/1gam/feb2013/1gam-feb2013.sublime-workspace\",\n  611  		\"/D/dev/github/1gam/feb2013/client/src/assets/index.php\",\n  ...\n  614  		\"/D/dev/github/1gam/feb2013/client/tasks/lib/closureopts.js\",\n  615  		\"/D/dev/github/1gam/feb2013/1gam-feb2013.sublime-project\",\n  616: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/plugins/default-plugins.js\",\n  617: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/plugins/bounce.js\",\n  618: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/plugins/sprite-updates.js\",\n  619  		\"/D/dev/github/1gam/feb2013/client/public/www/index.php\",\n  620  		\"/D/dev/github/1gam/feb2013/client/src/stylesheets/index.scss\",\n  621  		\"/D/dev/github/1gam/feb2013/client/src/modules/util/preload.js\",\n  622: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/input/keyboard.js\",\n  623: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/sprites/sprite.js\",\n  624: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/sprite.js\",\n  625: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/tile.js\",\n  626  		\"/D/dev/github/1gam/feb2013/client/src/modules/main.js\",\n  627  		\"/D/dev/github/1gam/feb2013/client/src/modules/util/url.js\",\n  ...\n  632  		\"/D/dev/github/1gam/feb2013/client/public.dev/www/js/stats.min.js\",\n  633  		\"/D/dev/github/1gam/feb2013/tiles/scratch.tmx\",\n  634: 		\"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/main.js\",\n  635  		\"/D/dev/github/1gam/feb2013/client/tasks/tmxprocess.js\",\n  636  		\"/D/dev/github/1gam/feb2013/client/generated/modules/ui/main.js\",\n  ...\n  640  		\"/D/dev/github/1gam/feb2013/client/test/mocha/browser/js/spec.js\",\n  641  		\"/D/dev/github/1gam/feb2013/client/generated/modules/exodus/main.js\",\n  642: 		\"/D/dev/github/1gam/feb2013/client/generated/modules/isoengine/main.js\",\n  643  		\"/D/dev/github/1gam/feb2013/client/generated/templates/example.js\",\n  644  		\"/D/dev/github/1gam/feb2013/client/generated/templates.amd/example.js\",\n  ...\n  810  			\"scripts_vendor\",\n  811  			\"vendor\",\n  812: 			\"new IsoEngine\",\n  813  			\"example\",\n  814  			\"templates.amd\",\n\nD:\\dev\\github\\snaps.js\\src\\snap\\main.js:\n    2  \n    3  define(['lodash',\n    4:         'isoengine/tile',\n    5:         'isoengine/sprites/spritedef',\n    6:         'isoengine/sprites/sprite',\n    7:         'isoengine/input/keyboard',\n    8:         'isoengine/input/mouse',\n    9          'util/preload',\n   10  \n   11          /* Plugins */\n   12:         'isoengine/plugins/default-plugins',\n   13  \n   14          /* Non-referenced */\n   ..\n   20      'use strict';\n   21  \n   22:     function IsoEngine(game, canvasID, settings) {\n   23  \n   24          var _this = this;\n   ..\n  565      }\n  566  \n  567:     return IsoEngine;\n  568  });\n  569  \n\nD:\\dev\\github\\snaps.js\\src\\snap\\plugins\\default-plugins.js:\n    1  define([\n    2:     'isoengine/plugins/sprite/bounce',\n    3:     'isoengine/plugins/sprite/follow-mouse',\n    4:     'isoengine/plugins/sprite/link',\n    5:     'isoengine/plugins/sprite/8way'\n    6      ],\n    7  function(regBounce, regFollowMouse, regLink, reg8way) {\n\nD:\\dev\\github\\snaps.js\\src\\isoengine\\main.js:\n    2  \n    3  define(['lodash',\n    4:         'isoengine/tile',\n    5:         'isoengine/sprites/spritedef',\n    6:         'isoengine/sprites/sprite',\n    7:         'isoengine/input/keyboard',\n    8:         'isoengine/input/mouse',\n    9          'util/preload',\n   10  \n   11          /* Plugins */\n   12:         'isoengine/plugins/default-plugins',\n   13  \n   14          /* Non-referenced */\n   ..\n   20      'use strict';\n   21  \n   22:     function IsoEngine(game, canvasID, settings) {\n   23  \n   24          var _this = this;\n   ..\n  565      }\n  566  \n  567:     return IsoEngine;\n  568  });\n  569  \n\n31 matches across 4 files\n",
+			"settings":
+			{
+				"buffer_size": 4079,
+				"line_ending": "Windows",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "src/snap/main.js",
+			"settings":
+			{
+				"buffer_size": 19869,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/dev/github/1gam/mar2013/client/grunt.js",
+			"settings":
+			{
+				"buffer_size": 15371,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/isoengine/main.js",
+			"settings":
+			{
+				"buffer_size": 19909,
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 235.0,
+		"height": 60.0,
 		"selected_items":
 		[
 			[
@@ -604,6 +646,11 @@
 	},
 	"file_history":
 	[
+		"/C/Users/Ian/Desktop/lodash-1.0.0.tar/lodash-1.0.0/package/package.json",
+		"/C/Users/Ian/Desktop/lodash-1.0.0.tar/lodash-1.0.0/package/lodash.js",
+		"/C/Users/Ian/Desktop/lodash-1.0.0.tar/lodash-1.0.0/package/dist/lodash.min.js",
+		"/C/Users/Ian/Desktop/lodash-1.0.0.tar/lodash-1.0.0/package/dist/lodash.js",
+		"/C/Users/Ian/Desktop/lodash-1.0.0.tar/lodash-1.0.0/package/dist/lodash.compat.js",
 		"/D/dev/github/1gam/feb2013/client/.gitignore",
 		"/D/dev/github/1gam/.gitignore",
 		"/D/dev/github/1gam/feb2013/client/src/modules/isoengine/plugins/sprite/link.js",
@@ -726,12 +773,7 @@
 		"/D/dev/github/whiskyblender.com/tasks/handlebars.js",
 		"/D/dev/github/whiskyblender.com/tasks/maplink.js",
 		"/D/dev/github/whiskyblender.com/tasks/pngout.js",
-		"/D/dev/github/whiskyblender.com/tasks/templatize.js",
-		"/D/dev/github/whiskyblender.com/src/modules/lab/accordion.js",
-		"/D/dev/github/whiskyblender.com/src/modules/lab/darkening-bottle.js",
-		"/D/dev/github/whiskyblender.com/src/modules/lab/navbar.js",
-		"/D/dev/github/whiskyblender.com/src/modules/lab/shopdata.js",
-		"/D/dev/github/whiskyblender.com/src/modules/lab/throbber.js"
+		"/D/dev/github/whiskyblender.com/tasks/templatize.js"
 	],
 	"find":
 	{
@@ -739,7 +781,7 @@
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 92.0,
 		"where_history":
 		[
 			"",
@@ -767,6 +809,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"isoengine",
 			"feb2013",
 			"mapup",
 			"stand_n",
@@ -893,8 +936,7 @@
 			"oorswatch",
 			"radius",
 			"jshint",
-			"late_require",
-			"require(['social/main']"
+			"late_require"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -940,8 +982,629 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "grunt.js",
+					"settings":
+					{
+						"buffer_size": 912,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								838,
+								838
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 61.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"settings":
+					{
+						"buffer_size": 4079,
+						"regions":
+						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										239,
+										248
+									],
+									[
+										612,
+										621
+									],
+									[
+										707,
+										716
+									],
+									[
+										793,
+										802
+									],
+									[
+										1101,
+										1110
+									],
+									[
+										1187,
+										1196
+									],
+									[
+										1273,
+										1282
+									],
+									[
+										1351,
+										1360
+									],
+									[
+										1703,
+										1712
+									],
+									[
+										2087,
+										2096
+									],
+									[
+										2334,
+										2343
+									],
+									[
+										2485,
+										2494
+									],
+									[
+										2518,
+										2527
+									],
+									[
+										2564,
+										2573
+									],
+									[
+										2607,
+										2616
+									],
+									[
+										2650,
+										2659
+									],
+									[
+										2758,
+										2767
+									],
+									[
+										2897,
+										2906
+									],
+									[
+										3021,
+										3030
+									],
+									[
+										3140,
+										3149
+									],
+									[
+										3186,
+										3195
+									],
+									[
+										3238,
+										3247
+									],
+									[
+										3282,
+										3291
+									],
+									[
+										3486,
+										3495
+									],
+									[
+										3519,
+										3528
+									],
+									[
+										3565,
+										3574
+									],
+									[
+										3608,
+										3617
+									],
+									[
+										3651,
+										3660
+									],
+									[
+										3759,
+										3768
+									],
+									[
+										3898,
+										3907
+									],
+									[
+										4022,
+										4031
+									]
+								],
+								"scope": ""
+							}
+						},
+						"selection":
+						[
+							[
+								2494,
+								2494
+							]
+						],
+						"settings":
+						{
+							"detect_indentation": false,
+							"output_tag": 1,
+							"result_base_dir": "",
+							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 180.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/snap/main.js",
+					"settings":
+					{
+						"buffer_size": 19869,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								19869,
+								19869
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 8023.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/D/dev/github/1gam/mar2013/client/grunt.js",
+					"settings":
+					{
+						"buffer_size": 15371,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								15371
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/isoengine/main.js",
+					"settings":
+					{
+						"buffer_size": 19909,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								19909,
+								19909
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": "warning",
+								"box-model": true,
+								"box-sizing": "warning",
+								"compatible-vendor-prefixes": "warning",
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": "warning",
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": "warning",
+								"overqualified-elements": "warning",
+								"qualified-headings": "warning",
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"star-property-hack": "warning",
+								"text-indent": "warning",
+								"underscore-property-hack": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": true,
+								"zero-units": "warning"
+							},
+							"gjslint_ignore":
+							[
+								110
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"browser": true,
+								"evil": true,
+								"regexdash": true,
+								"sub": true,
+								"trailing": true,
+								"wsh": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": true,
+							"sublimelinter_delay": 2,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],

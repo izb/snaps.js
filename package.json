@@ -20,6 +20,10 @@
           "jquery": ">1.9"
         }
     },
+    "dependencies": {
+        "requirejs": "~2.1.4",
+        "grunt-requirejs": "~0.3.1"
+    },
     "devDependencies": {
     },
     "keywords": ["snaps","isometric","game","engine"]

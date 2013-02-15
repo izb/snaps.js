@@ -1,8 +1,8 @@
 define([
-    'isoengine/plugins/sprite/bounce',
-    'isoengine/plugins/sprite/follow-mouse',
-    'isoengine/plugins/sprite/link',
-    'isoengine/plugins/sprite/8way'
+    'snaps/plugins/sprite/bounce',
+    'snaps/plugins/sprite/follow-mouse',
+    'snaps/plugins/sprite/link',
+    'snaps/plugins/sprite/8way'
     ],
 function(regBounce, regFollowMouse, regLink, reg8way) {
 
