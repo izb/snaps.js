@@ -1,0 +1,23 @@
+define(['jquery'], function($) {
+
+    'use strict';
+
+    /** Called with the sprite as the 'this' context.
+     * @return true normally, or false to prevent any further
+     * plugins being called on this sprite for this frame.
+     */
+    var bounce = function() {
+        var b = this.state.jogPos(this.epoch, this.eng.getNow());
+        b*=2;
+        b-=1;
+        b*=b;
+
+        this.h = this.bounce_base + this.bounce_height * (1-b);
+        return true;
+    };
+
+    return function(eng) {
+        eng.registerSpriteUpdater('bounce', bounce, $.noop);
+    };
+
+});
