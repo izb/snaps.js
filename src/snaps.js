@@ -64,13 +64,21 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
         this.game = game;
         var map = game.map;
-        this.map = map;
 
-        this.minxoffset = map.tilewidth/2;
-        this.minyoffset = map.tileheight/2;
+        this.minxoffset = 0;
+        this.minyoffset = 0;
+        this.maxxoffset = 0;
+        this.maxyoffset = 0;
 
-        this.maxxoffset = map.width * map.tilewidth - this.clientWidth;
-        this.maxyoffset = map.height * (map.tileheight/2) - this.clientHeight;
+        if (map!==undefined) {
+            this.map = map;
+
+            this.minxoffset = map.tilewidth/2;
+            this.minyoffset = map.tileheight/2;
+
+            this.maxxoffset = map.width * map.tilewidth - this.clientWidth;
+            this.maxyoffset = map.height * (map.tileheight/2) - this.clientHeight;
+        }
 
         /* Start in SW-corner by default */
         this.xoffset = this.minxoffset;
@@ -101,13 +109,16 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
         var preloader = new util.Preloader();
 
-        /* Add tiles to the preloader */
-        var storeTile = function(image, ts){
-            ts.image = image;
-        };
-        for (var i = 0; i < map.tilesets.length; i++) {
-            var ts = map.tilesets[i];
-            preloader.add(ts.image, ts, storeTile);
+
+        if (map!==undefined) {
+            /* Add tiles to the preloader */
+            var storeTile = function(image, ts){
+                ts.image = image;
+            };
+            for (var i = 0; i < map.tilesets.length; i++) {
+                var ts = map.tilesets[i];
+                preloader.add(ts.image, ts, storeTile);
+            }
         }
 
         /* Add game-added images to the preloader */
@@ -156,6 +167,10 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         };
 
         function resolveTiles() {
+            if (_this.map===undefined) {
+                return;
+            }
+
             var i, j, k, ts;
 
             for (k = _this.map.tilesets.length - 1; k >= 0; k--) {
@@ -205,18 +220,18 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
         function dbugOverlays() {
 
-            var l, layerEndY, layerEndX, r, x, y, stagger;
+            if (_this.dbgShowRegions && _this.map!==undefined) {
 
-            var xstep = _this.map.tilewidth;
-            var ystep = _this.map.tileheight / 2;
+                var l, layerEndY, layerEndX, r, x, y, stagger;
 
-            var starty = Math.floor((_this.yoffset-ystep) / ystep);
-            var endy = Math.floor((_this.yoffset+_this.clientHeight-ystep+_this.maxYOverdraw) / ystep)+1;
+                var xstep = _this.map.tilewidth;
+                var ystep = _this.map.tileheight / 2;
 
-            var startx = Math.floor((_this.xoffset+_this.clientWidth -1 ) / xstep);
-            var endx = Math.floor((_this.xoffset-xstep/2-_this.maxXOverdraw) / xstep);
+                var starty = Math.floor((_this.yoffset-ystep) / ystep);
+                var endy = Math.floor((_this.yoffset+_this.clientHeight-ystep+_this.maxYOverdraw) / ystep)+1;
 
-            if (_this.dbgShowRegions) {
+                var startx = Math.floor((_this.xoffset+_this.clientWidth -1 ) / xstep);
+                var endx = Math.floor((_this.xoffset-xstep/2-_this.maxXOverdraw) / xstep);
 
                 l = _this.map.layers[0];
 
@@ -398,7 +413,6 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
             var spriteCursor = 0;
 
-
             var stagger = 0;
             var x, y, r, l, i, layerEndY, layerEndX;
             for (i = 0; i < _this.map.layers.length; i++) {
@@ -426,6 +440,10 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
                     }
                 }
             }
+        };
+
+        this.drawSprite = function(name) {
+            _this.spriteMap[name].draw(_this.ctx, _this.xoffset, _this.yoffset, _this.now);
         };
 
         this.mouseScreenPos = function() {

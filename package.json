@@ -4,9 +4,8 @@
         "email": "ian.beveridge@gmail.com"
     },
     "contributors": [],
-    "name": "snapsjs",
+    "name": "snaps",
     "description": "A JavaScript isometric game engine.",
-    "version": "0.1.6",
     "homepage": "http://github.com/izb/snaps.js",
     "repository": {
         "type": "git",
@@ -15,10 +14,11 @@
     "bugs": {
         "url": "https://github.com/izb/snaps.js/issues"
     },
+    "version": "0.1.10",
     "jam": {
         "dependencies": {
         },
-        "main": "lib/snaps.min.js",
+        "main": "lib/snaps-0.1.10.min.js",
         "include": ["lib/snaps-*.js"]
     },
     "dependencies": {
