@@ -1,14 +1,14 @@
 /*global late_require:true*/
 
-define(['snaps/tile',
-        'snaps/sprites/spritedef',
-        'snaps/sprites/sprite',
-        'snaps/input/keyboard',
-        'snaps/input/mouse',
+define(['tile',
+        'sprites/spritedef',
+        'sprites/sprite',
+        'input/keyboard',
+        'input/mouse',
         'util/preload',
 
         /* Plugins */
-        'snaps/plugins/default-plugins',
+        'plugins/default-plugins',
 
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],

@@ -37,11 +37,8 @@ module.exports = function(grunt) {
             snaps: {
                 out:'tmp/snaps.js',
                 baseUrl: 'src',
-                paths: {
-                    jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min'
-                },
                 optimize: 'none',
-                name: 'snaps/main'
+                name: 'snaps'
             }
         },
         copy: {

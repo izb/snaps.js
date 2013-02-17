@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+define(function() {
 
     'use strict';
 
@@ -17,7 +17,7 @@ define(['jquery'], function($) {
     };
 
     return function(eng) {
-        eng.registerSpriteUpdater('bounce', bounce, $.noop);
+        eng.registerSpriteUpdater('bounce', bounce, function(){});
     };
 
 });

@@ -1,8 +1,8 @@
 define([
-    'snaps/plugins/sprite/bounce',
-    'snaps/plugins/sprite/follow-mouse',
-    'snaps/plugins/sprite/link',
-    'snaps/plugins/sprite/8way'
+    'plugins/sprite/bounce',
+    'plugins/sprite/follow-mouse',
+    'plugins/sprite/link',
+    'plugins/sprite/8way'
     ],
 function(regBounce, regFollowMouse, regLink, reg8way) {
 

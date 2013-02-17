@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+define(function() {
 
     'use strict';
 
@@ -15,7 +15,7 @@ define(['jquery'], function($) {
     };
 
     return function(eng) {
-        eng.registerSpriteUpdater('follow_mouse', followMouse, $.noop);
+        eng.registerSpriteUpdater('follow_mouse', followMouse, function(){});
     };
 
 });
