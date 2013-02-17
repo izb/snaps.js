@@ -2,6 +2,18 @@ define(function() {
 
     'use strict';
 
+    /*
+     * Example options:
+     *
+     * opts:{
+     *     bounce_height:100,
+     *     bounce_base:64,
+     * }
+     *
+     * Bounces up 100px from a 'floor' height of 64px. Bounce duration
+     * is the current animation sequence duration.
+     */
+
     /** Called with the sprite as the 'this' context.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.

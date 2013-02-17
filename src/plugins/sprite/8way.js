@@ -23,17 +23,17 @@ define(function() {
             /* dy!=0 => Division is ok */
             var r = dx/dy;
             if (r>=0) {
-                if (r < 0.5) {
+                if (r < 0.41421) {
                     d = dy>0?'s':'n';
-                } else if(r > 2) {
+                } else if(r > 2.4142) {
                     d = dx>0?'e':'w';
                 } else {
                     d = dx>0?'se':'nw';
                 }
             } else {
-                if (r > -0.5) {
+                if (r > -0.41421) {
                     d = dy>0?'s':'n';
-                } else if(r < -2) {
+                } else if(r < -2.4142) {
                     d = dx>0?'e':'w';
                 } else {
                     d = dx>0?'ne':'sw';

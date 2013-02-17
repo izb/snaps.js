@@ -39,7 +39,7 @@ define(function() {
         }
         this.stateName = state;
         this.stateExt = ext;
-        if (ext!==undefined) {
+        if (ext!==undefined && this.def.states.hasOwnProperty(state + '_' + ext)) {
             state = state + '_' + ext;
         }
         if (!this.def.states.hasOwnProperty(state)) {

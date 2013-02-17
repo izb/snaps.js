@@ -5,7 +5,7 @@ define(['tile',
         'sprites/sprite',
         'input/keyboard',
         'input/mouse',
-        'util/preload',
+        'util/all',
 
         /* Plugins */
         'plugins/default-plugins',
@@ -13,7 +13,7 @@ define(['tile',
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
-function(Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
+function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         regPlugins) {
 
     'use strict';
@@ -21,6 +21,8 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
     function Snaps(game, canvasID, settings) {
 
         var _this = this;
+
+        this.util = util;
 
         var stats = null;
 
@@ -97,7 +99,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
             _this.game.onEngineStart(this);
         }
 
-        var preloader = new Preloader();
+        var preloader = new util.Preloader();
 
         /* Add tiles to the preloader */
         var storeTile = function(image, ts){
@@ -459,9 +461,15 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
                 opts = {};
             }
 
-            if (opts.name===undefined) {
-                opts.name = "unnamed"+_this.nextName;
+            var name = opts.name;
+
+            if (name===undefined) {
+                name = "unnamed"+_this.nextName;
                 _this.nextName++;
+            } else {
+                if(_this.spriteMap.hasOwnProperty(name)) {
+                    throw "Warning: duplicate sprite name " + name;
+                }
             }
 
             var sd = _this.spriteDefs[defName];
@@ -487,7 +495,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
 
             /* TODO: error cases */
             _this.sprites.push(s);
-            _this.spriteMap[opts.name] = s;
+            _this.spriteMap[name] = s;
         };
 
         /** Marks a time in the future for a timer to trigger. Timers are
@@ -562,6 +570,8 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, Preloader,
             /* TODO */
         };
     }
+
+    Snaps.util = util;
 
     return Snaps;
 });
