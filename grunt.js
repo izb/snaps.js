@@ -6,10 +6,12 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-requirejs');
     grunt.loadNpmTasks('grunt-closure-tools');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     /* Project config */
 
     grunt.initConfig({
+        pkg: grunt.file.readJSON('package.json'),
         jshint: {
             options: {
                 curly: true,
@@ -33,13 +35,20 @@ module.exports = function(grunt) {
         },
         requirejs: {
             snaps: {
-                out:'lib/snaps.js',
+                out:'tmp/snaps.js',
                 baseUrl: 'src',
                 paths: {
                     jquery: 'https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min'
                 },
                 optimize: 'none',
                 name: 'snaps/main'
+            }
+        },
+        copy: {
+            lib: {
+                files: {
+                    "lib/snaps-<%= pkg.version %>.js": "tmp/snaps.js"
+                }
             }
         },
         closureCompiler:  {
@@ -52,11 +61,11 @@ module.exports = function(grunt) {
                     warning_level: 'verbose',
                     summary_detail_level: 3
                 },
-                js: 'lib/snaps.js',
-                output_file: 'lib/snaps.min.js'
+                js: 'tmp/snaps.js',
+                output_file: 'lib/snaps-<%= pkg.version %>.min.js'
             }
         }
     });
 
-    grunt.registerTask('default', 'lint:build requirejs:snaps closureCompiler');
+    grunt.registerTask('default', 'lint:build requirejs:snaps copy:lib closureCompiler');
 };

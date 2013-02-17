@@ -218,3 +218,8 @@ node_modules/
 
 *.sublime-workspace
 *.sublime-project
+
+grunt-exodus.js
+
+tmp/
+exodus.bat
