@@ -46,8 +46,11 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         this.imageCache = {};
 
         this.spriteUpdaters = {};
+        this.fxUpdaters = {};
 
         this.timers = {};
+
+        this.activeFX = [];
 
         _this.now = +new Date();
 
@@ -98,6 +101,11 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
         this.registerSpriteUpdater = function(name, fn, init) {
             _this.spriteUpdaters[name] = {fn:fn, init:init};
+        };
+
+        this.registerFxPlugin = function(name, fn, init) {
+            init.call(this);
+            _this.fxUpdaters[name] = fn;
         };
 
         /* Register the default plugins */
@@ -301,6 +309,23 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             }
         }
 
+        this.updateFX = function(now) {
+            for (var i = _this.activeFX.length - 1; i >= 0; i--) {
+                var fx = _this.activeFX[i];
+                if (!fx.update(now)) {
+                    _this.activeFX.splice(i, 1);
+                }
+            };
+        };
+
+        this.fx = function(name, opts) {
+            _this.fxUpdaters[name]
+            if (!_this.fxUpdaters.hasOwnProperty(name)) {
+                throw "Can't spawn FX for unregistered FX type: " + name;
+            }
+            _this.activeFX.push(new _this.fxUpdaters[name](opts));
+        }
+
         function loop() {
             window.requestAnimationFrame(loop);
             if (stats!==null) {
@@ -320,6 +345,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             var time = _this.now - _this.lastFrameTime;
             var step = 1000/60; /* TODO: The monitor may not refresh at 60Hz. We should measure the refresh rate on startup. */
             time = Math.max(16,Math.floor((((time+12) / step)|0)*step));
+            _this.updateFX(time);
             update(time);
             draw(_this.ctx);
             dbugOverlays();

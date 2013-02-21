@@ -19,7 +19,7 @@ define(function() {
      * plugins being called on this sprite for this frame.
      */
     var bounce = function() {
-        var b = this.state.jogPos(this.epoch, this.eng.getNow());
+        var b = this.state.jogPos(this.epoch, this.sn.getNow());
         b*=2;
         b-=1;
         b*=b;
@@ -28,8 +28,8 @@ define(function() {
         return true;
     };
 
-    return function(eng) {
-        eng.registerSpriteUpdater('bounce', bounce, function(){});
+    return function(sn) {
+        sn.registerSpriteUpdater('bounce', bounce, function(){});
     };
 
 });

@@ -8,14 +8,14 @@ define(function() {
      */
     var followMouse = function() {
 
-        var pos = this.eng.mouseWorldPos();
+        var pos = this.sn.mouseWorldPos();
         this.x = pos.x;
         this.y = pos.y;
         return true;
     };
 
-    return function(eng) {
-        eng.registerSpriteUpdater('follow_mouse', followMouse, function(){});
+    return function(sn) {
+        sn.registerSpriteUpdater('follow_mouse', followMouse, function(){});
     };
 
 });

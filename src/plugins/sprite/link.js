@@ -33,12 +33,12 @@ define(function() {
 
     var init = function() {
         for (var i = this.link_to.length - 1; i >= 0; i--) {
-            this.link_to[i].sprite = this.eng.spriteMap[this.link_to[i].name];
+            this.link_to[i].sprite = this.sn.spriteMap[this.link_to[i].name];
         }
     };
 
-    return function(eng) {
-        eng.registerSpriteUpdater('link', link, init);
+    return function(sn) {
+        sn.registerSpriteUpdater('link', link, init);
     };
 
 });

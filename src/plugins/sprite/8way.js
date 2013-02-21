@@ -55,8 +55,8 @@ define(function() {
         this.direction = 'e';
     };
 
-    return function(eng) {
-        eng.registerSpriteUpdater('8way', face8way, init);
+    return function(sn) {
+        sn.registerSpriteUpdater('8way', face8way, init);
     };
 
 });

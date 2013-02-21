@@ -2,9 +2,9 @@ define(function() {
 
     'use strict';
 
-    function Sprite(eng, def, x, y, h, maxloops, updates) {
+    function Sprite(sn, def, x, y, h, maxloops, updates) {
         this.def = def;
-        this.eng = eng;
+        this.sn = sn;
         this.x = x;
         this.y = y;
         this.h = h;
@@ -46,7 +46,7 @@ define(function() {
             throw "Bad sprite definition. Missing state: "+state;
         }
         this.state = this.def.states[state];
-        this.epoch = this.eng.getNow();
+        this.epoch = this.sn.getNow();
     };
 
     Sprite.prototype.stateName = function() {
@@ -73,7 +73,7 @@ define(function() {
         }
     };
 
-    Sprite.prototype.draw = function(ctx, screenx, screeny, now) {
+    Sprite.prototype.drawAt = function(ctx, screenx, screeny, now) {
         if (!this.active) {
             /* This may have been set by prior call to update, so check here */
             return;
@@ -81,7 +81,15 @@ define(function() {
         var x = this.x - screenx - this.def.x;
         var y = this.y - screeny - this.def.y - this.h;
 
-        this.state.draw(ctx, x, y, this.epoch, now);
+        this.state.draw(ctx, screenx, screeny, this.epoch, now);
+    };
+
+    Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
+        this.drawAt(
+                ctx,
+                this.x - offsetx - this.def.x,
+                this.y - offsety - this.def.y - this.h,
+                now);
     };
 
     return Sprite;
