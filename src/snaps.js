@@ -499,7 +499,24 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             var tw = _this.map.tilewidth;
             var th = _this.map.tileheight;
 
-            var oddx =
+            var oddtilex = Math.floor(x%tw);
+            var oddtiley = Math.floor(y%th);
+
+            if(_this.hitTest[oddtilex + oddtiley * tw] === 0) { /* TODO: Check for white and swap blocks. Anything not white must be a hit. We might want colours other than black */
+                /* On odd tile */
+
+                var oddx = Math.floor(x/tw);
+                var oddy = Math.floor(y/th);
+
+                return {x:evenx*2,y:eveny*2};
+            } else {
+                /* On even tile */
+
+                var evenx = Math.floor((x+tw/2)/tw);
+                var eveny = Math.floor((y+th/2)/th);
+
+                return {x:evenx*2+1,y:eveny*2+1};
+            }
         };
 
         this.screenToTilePos = function(x, y) {
