@@ -42,6 +42,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         this.dbgShowMouse = !!settings.showMouse;
         this.dbgShowCounts = !!settings.showCounts;
         this.dbgShowRegions = !!settings.showRegions;
+        this.dbgShowMouseTile = !!settings.showMouseTile;
 
         this.imageCache = {};
 
@@ -117,26 +118,46 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
         var preloader = new util.Preloader();
 
-
         if (map!==undefined) {
             /* Add tiles to the preloader */
             var storeTile = function(image, ts){
                 ts.image = image;
             };
+
             for (var i = 0; i < map.tilesets.length; i++) {
                 var ts = map.tilesets[i];
                 preloader.add(ts.image, ts, storeTile);
             }
+
+            if (typeof game.hitTests !== 'object' || game.hitTests.hit===undefined) {
+                throw "Game must define a hitTests object with at least a 'hit' property";
+            }
+
+            var storeHitTest = function(image, name) {
+                if (image.width!==map.tilewidth || image.height!==map.tileheight) {
+                    throw "Hit test image "+name+" does not match map tile size";
+                }
+
+                if (name==='hit') {
+                    this.hitTest = util.Bitmap.imageToRGBAData(image);
+                } else {
+                    /* TODO: Figure out what to do with custom hit test images */
+                }
+            };
+
+            for(var testName in game.hitTests) {
+                preloader.add(game.hitTests[testName], testName, storeHitTest);
+            }
         }
 
         /* Add game-added images to the preloader */
-        if (typeof _this.game.preloadImages === 'object') {
+        if (typeof game.preloadImages === 'object') {
 
             var storePreloaded = function(image, tag){
                 _this.imageCache[tag] = image;
             };
-            for(var pathName in _this.game.preloadImages) {
-                preloader.add(_this.game.preloadImages[pathName], pathName, storePreloaded);
+            for(var pathName in game.preloadImages) {
+                preloader.add(game.preloadImages[pathName], pathName, storePreloaded);
             }
         }
 
@@ -296,16 +317,21 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
                 debugText(
                         "Screen: "+_this.mouse.x+","+_this.mouse.y,5, 15);
                 debugText(
-                        "World: "+(_this.mouse.x+_this.xoffset)+","+(_this.mouse.y+_this.yoffset),
-                        5, 30);
+                        "World: "+(_this.mouse.x+_this.xoffset)+","+(_this.mouse.y+_this.yoffset), 5, 30);
                 debugText(
-                        "Origin: "+(_this.xoffset)+","+(_this.yoffset),
-                        5, 45);
+                        "Origin: "+(_this.xoffset)+","+(_this.yoffset), 5, 45);
             }
 
             if (_this.dbgShowCounts) {
                 debugText(
                         "Sprites: "+_this.sprites.length,5, _this.clientHeight-15);
+            }
+
+            if (_this.dbgShowMouseTile) {
+                var worldPos = mouseWorldPos();
+                var tilePos = _this.worldToTilePos(worldPos.x, worldPos.y);
+                debugText(
+                        "Mouse in tile: "+tilePos.x+", "+tilePos.y,5, _this.clientHeight-30);
             }
         }
 
@@ -467,6 +493,21 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
         this.mouseWorldPos = function() {
             return {x:_this.mouse.x+_this.xoffset, y:_this.mouse.y+_this.yoffset};
+        };
+
+        this.worldToTilePos = function(x, y) {
+            var tw = _this.map.tilewidth;
+            var th = _this.map.tileheight;
+
+            var oddx =
+        };
+
+        this.screenToTilePos = function(x, y) {
+            return _this.worldToTilePos(x+_this.xoffset, y+_this.yoffset);
+        };
+
+        this.screenToWorldPos = function(x, y) {
+            return {x:x+_this.xoffset, y:y+_this.yoffset};
         };
 
         this.nextName = 1;
