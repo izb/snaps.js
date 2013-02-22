@@ -2,11 +2,12 @@ define(function() {
 
     'use strict';
 
-    function Composite(sn, x, y, h) {
+    function Composite(sn, x, y, h, endCallback) {
         this.sn = sn;
         this.x = x;
         this.y = y;
         this.h = h;
+        this.endCallback = endCallback;
         this.active = true;
         this.sprites = [];
     }
@@ -16,6 +17,11 @@ define(function() {
     };
 
     Composite.prototype.isActive = function(now) {
+
+        if (!this.active) {
+            return false;
+        }
+
         var isactive = false;
 
         for (var i = this.sprites.length - 1; i >= 0; i--) {
@@ -28,6 +34,11 @@ define(function() {
         }
 
         this.active = isactive;
+
+        if (!this.active && this.endCallback !== undefined) {
+            this.endCallback();
+        }
+
         return isactive;
     };
 

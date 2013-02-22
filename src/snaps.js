@@ -528,6 +528,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
          * Normally you'd set this to 1 for things like explosions.
          * 'update' An array of functions that are called in-order for this
          * sprite.
+         * 'endCallback' A function called when the sprite naturally ends
          */
         this.spawnSprite = function(defName, stateName, stateExt, x, y, h, opts) {
 
@@ -556,7 +557,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
                 }
             }
 
-            var s = new Sprite(_this, sd, x, y, h, opts.maxloops, updates);
+            var s = new Sprite(_this, sd, x, y, h, opts.maxloops, updates, opts.endCallback);
             s.setState(stateName, stateExt);
 
             if (opts.opts !== undefined) {

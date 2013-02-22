@@ -2,7 +2,7 @@ define(function() {
 
     'use strict';
 
-    function Sprite(sn, def, x, y, h, maxloops, updates) {
+    function Sprite(sn, def, x, y, h, maxloops, updates, endCallback) {
         this.def = def;
         this.sn = sn;
         this.x = x;
@@ -15,6 +15,7 @@ define(function() {
         }
         this.maxloops = maxloops;
         this.updates = updates;
+        this.endCallback = endCallback;
     }
 
     Sprite.prototype.init = function() {
@@ -27,8 +28,12 @@ define(function() {
     };
 
     Sprite.prototype.isActive = function(now) {
-        if (this.maxloops>0 && this.state.dur * this.maxloops <= (now - this.epoch)) {
+        if (this.active && this.maxloops>0 && this.state.dur * this.maxloops <= (now - this.epoch)) {
             this.active = false;
+
+            if (this.endCallback!==undefined) {
+                this.endCallback();
+            }
         }
         return this.active;
     };
