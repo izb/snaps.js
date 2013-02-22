@@ -25,7 +25,7 @@ define(function() {
             } else {
                 this.sprites.splice(i,1);
             }
-        };
+        }
 
         this.active = isactive;
         return isactive;
@@ -51,7 +51,7 @@ define(function() {
             /* For sprites in a composite, the x/y position is relative to the
              * composite screen position. The height is ignored. */
             s.drawAt(ctx, x + s.x, y + s.y, now);
-        };
+        }
     };
 
     return Composite;

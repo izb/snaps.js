@@ -10,7 +10,10 @@ define([
      * {
      *     number: {Function/Number}, // The number of particles to spawn, either a number or a function
      *     def: {String}, // The sprite definition to spawn
+     *     state: {String}, // The sprite state to spawn
      *     duration: {Function/Number}, // The time cap on the particle animation. Individual sprites may outlive this.
+     *     x: {Number}, // X world position to spawn particles
+     *     y: {Number}, // Y world position to spawn particles
      *     TODO: More!
      * }
      */

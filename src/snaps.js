@@ -315,16 +315,15 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
                 if (!fx.update(now)) {
                     _this.activeFX.splice(i, 1);
                 }
-            };
+            }
         };
 
         this.fx = function(name, opts) {
-            _this.fxUpdaters[name]
             if (!_this.fxUpdaters.hasOwnProperty(name)) {
                 throw "Can't spawn FX for unregistered FX type: " + name;
             }
             _this.activeFX.push(new _this.fxUpdaters[name](opts));
-        }
+        };
 
         function loop() {
             window.requestAnimationFrame(loop);
@@ -334,17 +333,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
 
             _this.now = +new Date();
 
-            /* We get time jitters with requestAnimationFrame because
-             * 1/60s is actually a pretty inconvenient number. To compensate
-             * for this, we work out what our likely 1/60 fps is and give
-             * a roughly rounded version of the timing to the game. We are
-             * working on the premise that consistent error is preferable
-             * to erratic accuracy with rounding errors.
-             * E.g. 16/17ms jitters will all end up be reported as 16 */
-
             var time = _this.now - _this.lastFrameTime;
-            var step = 1000/60; /* TODO: The monitor may not refresh at 60Hz. We should measure the refresh rate on startup. */
-            time = Math.max(16,Math.floor((((time+12) / step)|0)*step));
             _this.updateFX(time);
             update(time);
             draw(_this.ctx);
