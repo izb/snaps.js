@@ -139,7 +139,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
                 }
 
                 if (name==='hit') {
-                    this.hitTest = util.Bitmap.imageToRGBAData(image);
+                    _this.hitTest = util.Bitmap.imageToRData(image);
                 } else {
                     /* TODO: Figure out what to do with custom hit test images */
                 }
@@ -328,7 +328,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             }
 
             if (_this.dbgShowMouseTile) {
-                var worldPos = mouseWorldPos();
+                var worldPos = _this.mouseWorldPos();
                 var tilePos = _this.worldToTilePos(worldPos.x, worldPos.y);
                 debugText(
                         "Mouse in tile: "+tilePos.x+", "+tilePos.y,5, _this.clientHeight-30);
@@ -502,20 +502,20 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             var oddtilex = Math.floor(x%tw);
             var oddtiley = Math.floor(y%th);
 
-            if(_this.hitTest[oddtilex + oddtiley * tw] === 0) { /* TODO: Check for white and swap blocks. Anything not white must be a hit. We might want colours other than black */
-                /* On odd tile */
-
-                var oddx = Math.floor(x/tw);
-                var oddy = Math.floor(y/th);
-
-                return {x:evenx*2,y:eveny*2};
-            } else {
+            if(_this.hitTest[oddtilex + oddtiley * tw] !== 255) {
                 /* On even tile */
 
                 var evenx = Math.floor((x+tw/2)/tw);
                 var eveny = Math.floor((y+th/2)/th);
 
-                return {x:evenx*2+1,y:eveny*2+1};
+                return {x:evenx+1,y:eveny*2+1};
+            } else {
+                /* On odd tile */
+
+                var oddx = Math.floor(x/tw);
+                var oddy = Math.floor(y/th);
+
+                return {x:oddx,y:oddy*2};
             }
         };
 

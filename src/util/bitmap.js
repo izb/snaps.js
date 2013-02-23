@@ -3,7 +3,7 @@ define(function() {
     'use strict';
 
     return {
-        imageToRGBAData: function(image)
+        imageToRData: function(image)
         {
             var w = image.width;
             var h = image.height;
@@ -15,7 +15,15 @@ define(function() {
 
             ctx.drawImage(image, 0, 0);
 
-            return ctx.getImageData(0,0,w,h).data;
+            var rgba = ctx.getImageData(0,0,w,h).data;
+
+            var r = new Array(rgba.length/4);
+
+            for (var i = 0; i < rgba.length; i+=4) {
+                r[i] = rgba[i];
+            }
+
+            return r;
         }
     };
 
