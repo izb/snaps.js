@@ -116,7 +116,7 @@ define(function() {
         if (th!==undefined) {
             this.h=th;
         }
-    }
+    };
 
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
         this.drawAt(

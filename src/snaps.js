@@ -529,8 +529,8 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             if(!_this.colliders.hasOwnProperty(type)) {
                 throw "Warning: undefined collider plugin: " + type;
             }
-            return new _this.colliders[type](opts);
-        }
+            return new _this.colliders[type].fn(opts);
+        };
 
         this.nextName = 1;
 
