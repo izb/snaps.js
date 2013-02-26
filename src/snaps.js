@@ -47,6 +47,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         this.imageCache = {};
 
         this.spriteUpdaters = {};
+        this.colliders = {};
         this.fxUpdaters = {};
 
         this.timers = {};
@@ -107,6 +108,10 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         this.registerFxPlugin = function(name, fn, init) {
             init.call(this);
             _this.fxUpdaters[name] = fn;
+        };
+
+        this.registerColliderPlugin = function(name, fn, init) {
+            _this.colliders[name] = {fn:fn, init:init};
         };
 
         /* Register the default plugins */
@@ -496,27 +501,20 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         };
 
         this.worldToTilePos = function(x, y) {
+            // http://gamedev.stackexchange.com/a/48507/3188
+
             var tw = _this.map.tilewidth;
             var th = _this.map.tileheight;
 
             var eventilex = Math.floor(x%tw);
             var eventiley = Math.floor(y%th);
 
-            if (_this.hitTest[eventilex + eventiley * tw] !== 255) {
-                /* On even tile */
+            var step = (_this.hitTest[eventilex + eventiley * tw] !== 255)? 1:2; /* 1==even,2==odd */
 
-                return {
-                    x: Math.floor((x + tw) / tw) - 1,
-                    y: 2 * (Math.floor((y + th) / th) - 1)
-                };
-            } else {
-                /* On odd tile */
-
-                return {
-                    x: Math.floor((x + tw / 2) / tw) - 1,
-                    y: 2 * (Math.floor((y + th / 2) / th)) - 1
-                };
-            }
+            return {
+                x: Math.floor((x + tw / step) / tw) - 1,
+                y: 2 * (Math.floor((y + th / step) / th)) - 1
+            };
         };
 
         this.screenToTilePos = function(x, y) {
@@ -526,6 +524,13 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         this.screenToWorldPos = function(x, y) {
             return {x:x+_this.xoffset, y:y+_this.yoffset};
         };
+
+        this.createCollider = function(type, opts) {
+            if(!_this.colliders.hasOwnProperty(type)) {
+                throw "Warning: undefined collider plugin: " + type;
+            }
+            return new _this.colliders[type](opts);
+        }
 
         this.nextName = 1;
 
@@ -574,7 +579,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
                 }
             }
 
-            var s = new Sprite(_this, sd, x, y, h, opts.maxloops, updates, opts.endCallback);
+            var s = new Sprite(_this, sd, x, y, h, opts.maxloops, updates, opts.collider, opts.endCallback);
             s.setState(stateName, stateExt);
 
             if (opts.opts !== undefined) {
@@ -632,12 +637,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         };
 
         this.moveSprite = function(sprite, x, y, h) {
-            var s = _this.spriteMap[sprite];
-            s.x=x;
-            s.y=y;
-            if (h!==undefined) {
-                s.h=h;
-            }
+            _this.spriteMap[sprite].moveTo(x,y,h);
         };
 
         this.updateSprites = function() {

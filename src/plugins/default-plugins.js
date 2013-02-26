@@ -4,11 +4,14 @@ define([
     'plugins/sprite/link',
     'plugins/sprite/8way',
 
-    'plugins/fx/particles'
+    'plugins/fx/particles',
+
+    'plugins/collision/trace-collider'
     ],
 function(
         regBounce, regFollowMouse, regLink, reg8way,
-        regParticles) {
+        regParticles,
+        regTraceCollider) {
 
     'use strict';
 
@@ -21,6 +24,8 @@ function(
         reg8way(sn);
 
         regParticles(sn);
+
+        regTraceCollider(sn);
     };
 
 });

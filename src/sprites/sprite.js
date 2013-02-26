@@ -2,7 +2,21 @@ define(function() {
 
     'use strict';
 
-    function Sprite(sn, def, x, y, h, maxloops, updates, endCallback) {
+    /** Creates a new sprite object.
+     * @param {Object} sn Snaps engine ref
+     * @param {Object} def The sprite definition to use
+     * @param {Number} x X world position
+     * @param {Number} y Y world position
+     * @param {Number} h Height from the ground
+     * @param {Number} maxloops How many times should the initial state loop
+     * before the sprite is automatically destroyed? Set to 0 or undefined
+     * if it does not automatically expire.
+     * @param {Array} updates An array of functions to call to update this sprite.
+     * @param {Object} collider A collider to test for collisions during movement
+     * @param {Function} endCallback An optional function to call when the sprite is
+     * destroyed.
+     */
+    function Sprite(sn, def, x, y, h, maxloops, updates, collider, endCallback) {
         this.def = def;
         this.sn = sn;
         this.x = x;
@@ -88,6 +102,21 @@ define(function() {
 
         this.state.draw(ctx, screenx, screeny, this.epoch, now);
     };
+
+    /** Move a sprite, taking collision into account. If there is a collision,
+     * the sprite will be moved to the point of collision.
+     * @param  {Number} tx Target x
+     * @param  {Number} ty Target y
+     * @param  {Number} th Target height
+     */
+    Sprite.prototype.moveTo = function(tx,ty,th) {
+        /* TODO: Collision test */
+        this.x=tx;
+        this.y=ty;
+        if (th!==undefined) {
+            this.h=th;
+        }
+    }
 
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
         this.drawAt(
