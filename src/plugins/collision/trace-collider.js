@@ -11,6 +11,7 @@ define(function() {
     }
 
     /** FX plugin callbacks should return true to continue, or false if complete.
+     * Should be called with context set to the sprite.
      * @return {Boolean} See description
      */
     TraceCollider.prototype.test = function(x,y,dx,dy) {
