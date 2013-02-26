@@ -499,23 +499,23 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             var tw = _this.map.tilewidth;
             var th = _this.map.tileheight;
 
-            var oddtilex = Math.floor(x%tw);
-            var oddtiley = Math.floor(y%th);
+            var eventilex = Math.floor(x%tw);
+            var eventiley = Math.floor(y%th);
 
-            if(_this.hitTest[oddtilex + oddtiley * tw] !== 255) {
+            if (_this.hitTest[eventilex + eventiley * tw] !== 255) {
                 /* On even tile */
 
-                var evenx = Math.floor((x+tw/2)/tw);
-                var eveny = Math.floor((y+th/2)/th);
-
-                return {x:evenx+1,y:eveny*2+1};
+                return {
+                    x: Math.floor((x + tw) / tw) - 1,
+                    y: 2 * (Math.floor((y + th) / th) - 1)
+                };
             } else {
                 /* On odd tile */
 
-                var oddx = Math.floor(x/tw);
-                var oddy = Math.floor(y/th);
-
-                return {x:oddx,y:oddy*2};
+                return {
+                    x: Math.floor((x + tw / 2) / tw) - 1,
+                    y: 2 * (Math.floor((y + th / 2) / th)) - 1
+                };
             }
         };
 

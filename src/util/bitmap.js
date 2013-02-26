@@ -19,8 +19,8 @@ define(function() {
 
             var r = new Array(rgba.length/4);
 
-            for (var i = 0; i < rgba.length; i+=4) {
-                r[i] = rgba[i];
+            for (var i = 0; i < r.length; i++) {
+                r[i] = rgba[i*4];
             }
 
             return r;
