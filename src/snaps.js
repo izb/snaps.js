@@ -1,11 +1,11 @@
 /*global late_require:true*/
 
-define(['tile',
-        'sprites/spritedef',
+define(['sprites/spritedef',
         'sprites/sprite',
         'input/keyboard',
         'input/mouse',
         'util/all',
+        'map/staggered-isometric',
 
         /* Plugins */
         'plugins/default-plugins',
@@ -13,10 +13,14 @@ define(['tile',
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
-function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
+function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins) {
 
     'use strict';
+
+    var debugText = util.debug.debugText;
+    var copyProps = util.js.copyProps;
+    var Preloader = util.Preloader;
 
     function Snaps(game, canvasID, settings) {
 
@@ -68,29 +72,15 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         this.ctx.fillRect (0,0,c.clientWidth,c.clientHeight);
 
         this.game = game;
-        var map = game.map;
+        if (game.map!==undefined) {
+            if (typeof game.hitTests !== 'object' || game.hitTests.hit===undefined) {
+                throw "Game must define a hitTests object with at least a 'hit' property";
+            }
 
-        this.minxoffset = 0;
-        this.minyoffset = 0;
-        this.maxxoffset = 0;
-        this.maxyoffset = 0;
-
-        if (map!==undefined) {
-            this.map = map;
-
-            this.minxoffset = map.tilewidth/2;
-            this.minyoffset = map.tileheight/2;
-
-            this.maxxoffset = map.width * map.tilewidth - this.clientWidth;
-            this.maxyoffset = map.height * (map.tileheight/2) - this.clientHeight;
+            /* Obviously we're assuming it's always a staggered isometric map.
+             * We don't yet support anything else. */
+            this.map = new StaggeredIsometric(game.map, game.hitTests, this.clientWidth, this.clientHeight);
         }
-
-        /* Start in SW-corner by default */
-        this.xoffset = this.minxoffset;
-        this.yoffset = this.maxyoffset;
-
-        this.maxXOverdraw = 0;
-        this.maxYOverdraw = 0;
 
         var draw = _this.game.draw;
         var update = _this.game.update;
@@ -121,38 +111,11 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             _this.game.onEngineStart(this);
         }
 
-        var preloader = new util.Preloader();
+        var preloader = new Preloader();
 
-        if (map!==undefined) {
-            /* Add tiles to the preloader */
-            var storeTile = function(image, ts){
-                ts.image = image;
-            };
+        if (this.map!==undefined) {
 
-            for (var i = 0; i < map.tilesets.length; i++) {
-                var ts = map.tilesets[i];
-                preloader.add(ts.image, ts, storeTile);
-            }
-
-            if (typeof game.hitTests !== 'object' || game.hitTests.hit===undefined) {
-                throw "Game must define a hitTests object with at least a 'hit' property";
-            }
-
-            var storeHitTest = function(image, name) {
-                if (image.width!==map.tilewidth || image.height!==map.tileheight) {
-                    throw "Hit test image "+name+" does not match map tile size";
-                }
-
-                if (name==='hit') {
-                    _this.hitTest = util.Bitmap.imageToRData(image);
-                } else {
-                    /* TODO: Figure out what to do with custom hit test images */
-                }
-            };
-
-            for(var testName in game.hitTests) {
-                preloader.add(game.hitTests[testName], testName, storeHitTest);
-            }
+            this.map.primePreloader(preloader);
         }
 
         /* Add game-added images to the preloader */
@@ -200,146 +163,6 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             }
         };
 
-        function resolveTiles() {
-            if (_this.map===undefined) {
-                return;
-            }
-
-            var i, j, k, ts;
-
-            for (k = _this.map.tilesets.length - 1; k >= 0; k--) {
-                ts = _this.map.tilesets[k];
-                ts.xspan = Math.floor(ts.imagewidth / ts.tilewidth);
-                ts.yspan = Math.floor(ts.imageheight / ts.tileheight);
-            }
-
-            for (i = 0; i < _this.map.layers.length; i++) {
-                var l = _this.map.layers[i];
-                l.rows = [];
-                var row = [];
-                for (j = 0; j < l.data.length; j++) {
-                    var d = l.data[j];
-                    for (k = _this.map.tilesets.length - 1; k >= 0; k--) {
-                        ts = _this.map.tilesets[k];
-                        if(ts.firstgid<=d) {
-                            break;
-                        }
-                    }
-                    var t = d - ts.firstgid;
-                    var y = Math.floor(t / ts.xspan);
-                    var x = t - ts.xspan * y;
-
-                    var xoverdraw = ts.tilewidth - _this.map.tilewidth;
-                    var yoverdraw = ts.tileheight - _this.map.tileheight;
-
-                    _this.maxXOverdraw = Math.max(xoverdraw, _this.maxXOverdraw);
-                    _this.maxYOverdraw = Math.max(yoverdraw, _this.maxYOverdraw);
-
-                    row.push(new Tile(
-                            ts.image,
-                            x * ts.tilewidth,
-                            y * ts.tileheight,
-                            ts.tilewidth,
-                            ts.tileheight,
-                            ts.tilewidth - _this.map.tilewidth,
-                            ts.tileheight - _this.map.tileheight
-                        ));
-                    if (row.length>= l.width) {
-                        l.rows.push(row);
-                        row = [];
-                    }
-                }
-            }
-        }
-
-        function dbugOverlays() {
-
-            if (_this.dbgShowRegions && _this.map!==undefined) {
-
-                var l, layerEndY, layerEndX, r, x, y, stagger;
-
-                var xstep = _this.map.tilewidth;
-                var ystep = _this.map.tileheight / 2;
-
-                var starty = Math.floor((_this.yoffset-ystep) / ystep);
-                var endy = Math.floor((_this.yoffset+_this.clientHeight-ystep+_this.maxYOverdraw) / ystep)+1;
-
-                var startx = Math.floor((_this.xoffset+_this.clientWidth -1 ) / xstep);
-                var endx = Math.floor((_this.xoffset-xstep/2-_this.maxXOverdraw) / xstep);
-
-                l = _this.map.layers[0];
-
-                layerEndY = Math.min(endy, l.rows.length-1);
-                layerEndX = Math.max(endx, 0);
-
-                for (y = starty; y <= layerEndY; y++) {
-                    r = l.rows[y];
-                    var redgreen;
-                    if (y&1) {
-                        stagger = _this.map.tilewidth/2;
-                        redgreen = '#f00';
-                    } else {
-                        stagger = 0;
-                        redgreen = '#0f0';
-                    }
-
-                    for (x = startx; x >= layerEndX; x--) {
-                        _this.ctx.strokeStyle = redgreen;
-                        var rx = Math.floor(-_this.xoffset) + stagger + x * xstep;
-                        var ry = Math.floor(-_this.yoffset) + y * ystep;
-                        var rw = _this.map.tilewidth;
-                        var rh = _this.map.tileheight;
-
-                        _this.ctx.strokeRect(rx, ry, rw, rh);
-                        _this.ctx.strokeStyle = '#aaa';
-                        _this.ctx.beginPath();
-                        _this.ctx.moveTo(rx, ry + rh/2);
-                        _this.ctx.lineTo(rx+rw/2, ry);
-                        _this.ctx.lineTo(rx+rw, ry+rh/2);
-                        _this.ctx.lineTo(rx+rw/2, ry+rh);
-                        _this.ctx.closePath();
-                        _this.ctx.stroke();
-                    }
-                }
-
-                for (i = 0; i < _this.map.layers.length; i++) {
-                    l = _this.map.layers[i];
-
-                    for (y = 0; y < l.rows.length; y++) {
-                        r = l.rows[y];
-                        stagger = y&1?_this.map.tilewidth/2:0;
-                        for (x = r.length-1; x >= 0; x--) {
-                            debugText(
-                                    x+","+y,
-                                    85+Math.floor(-_this.xoffset) + stagger + x * xstep,
-                                    55+Math.floor(-_this.yoffset) + y * ystep);
-                        }
-                    }
-                }
-            }
-
-            if (_this.dbgShowMouse) {
-                debugText(
-                        "Screen: "+_this.mouse.x+","+_this.mouse.y,5, 15);
-                debugText(
-                        "World: "+(_this.mouse.x+_this.xoffset)+","+(_this.mouse.y+_this.yoffset), 5, 30);
-                debugText(
-                        "Origin: "+(_this.xoffset)+","+(_this.yoffset), 5, 45);
-            }
-
-            if (_this.dbgShowCounts) {
-                debugText(
-                        "Sprites: "+_this.sprites.length,5, _this.clientHeight-15);
-            }
-
-            if (_this.dbgShowMouseTile) {
-                var worldPos = _this.mouseWorldPos();
-                var tilePos = _this.worldToTilePos(worldPos.x, worldPos.y);
-                debugText(
-                        "Mouse in tile: "+tilePos.x+", "+tilePos.y,5, _this.clientHeight-30);
-            }
-        }
-
         this.updateFX = function(now) {
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
@@ -356,6 +179,30 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             _this.activeFX.push(new _this.fxUpdaters[name](opts));
         };
 
+        function drawDebug() {
+
+            if (_this.dbgShowMouse) {
+                debugText(_this.ctx,
+                        "Screen: "+_this.mouse.x+","+_this.mouse.y,5, 15);
+                debugText(_this.ctx,
+                        "World: "+(_this.mouse.x+_this.xoffset)+","+(_this.mouse.y+_this.yoffset), 5, 30);
+                debugText(_this.ctx,
+                        "Origin: "+(_this.xoffset)+","+(_this.yoffset), 5, 45);
+            }
+
+            if (_this.dbgShowCounts) {
+                debugText(_this.ctx,
+                        "Sprites: "+_this.sprites.length,5, _this.clientHeight-15);
+            }
+
+            if (_this.dbgShowMouseTile && _this.map!==undefined) {
+                var worldPos = _this.mouseWorldPos();
+                var tilePos = _this.worldToTilePos(worldPos.x, worldPos.y);
+                debugText(_this.ctx,
+                        "Mouse in tile: "+tilePos.x+", "+tilePos.y,5, _this.clientHeight-30);
+            }
+        }
+
         function loop() {
             window.requestAnimationFrame(loop);
             if (stats!==null) {
@@ -368,7 +215,12 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
             _this.updateFX(time);
             update(time);
             draw(_this.ctx);
-            dbugOverlays();
+            if (_this.dbgShowRegions && _this.map!==undefined) {
+                _this.map.drawDebugRegions(_this.ctx, _this.xoffset, _this.yoffset);
+            }
+
+            drawDebug();
+
             _this.lastFrameTime = _this.now;
 
             if (stats!==null) {
@@ -382,7 +234,9 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
                 function() {
 
                     /* Resolve the layers into handy image references */
-                    resolveTiles();
+                    if (_this.map!==undefined) {
+                        _this.map.resolveTiles();
+                    }
 
                     /* Tell the game where we're at */
                     if (typeof _this.game.onResourcesLoaded === 'function') {
@@ -412,84 +266,15 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         };
 
         this.scroll = function(dx,dy) {
-            _this.xoffset+=dx;
-            _this.yoffset+=dy;
-
-            if (_this.xoffset < _this.minxoffset) {
-                _this.xoffset = _this.minxoffset;
-            } else if (_this.xoffset > _this.maxxoffset) {
-                _this.xoffset = _this.maxxoffset;
-            }
-
-            if (_this.yoffset < _this.minyoffset) {
-                _this.yoffset = _this.minyoffset;
-            } else if (_this.yoffset > _this.maxyoffset) {
-                _this.yoffset = _this.maxyoffset;
-            }
-        };
-
-        var debugText = function(text, x, y) {
-            _this.ctx.fillStyle = "black";
-            _this.ctx.font = "bold 16px Arial";
-            _this.ctx.fillText(text,x+1, y);
-            _this.ctx.fillText(text,x-1, y);
-            _this.ctx.fillText(text,x, y+1);
-            _this.ctx.fillText(text,x, y-1);
-            _this.ctx.fillStyle = "white";
-            _this.ctx.fillText(text,x, y);
+            _this.map.scroll(dx, dy);
         };
 
         this.drawWorld = function() {
-            var xstep = _this.map.tilewidth;
-            var ystep = _this.map.tileheight / 2;
-
-            var starty = Math.floor((_this.yoffset-ystep) / ystep);
-            var endy = Math.floor((_this.yoffset+_this.clientHeight-ystep+_this.maxYOverdraw) / ystep)+1;
-
-            var startx = Math.floor((_this.xoffset+_this.clientWidth -1 ) / xstep);
-            var endx = Math.floor((_this.xoffset-xstep/2-_this.maxXOverdraw) / xstep);
-
-            /* Sort sprites first by height, then by y-axis */
-            this.sprites.sort(function(a, b) {
-                return a.h-b.h;
-            });
-            this.sprites.sort(function(a, b) {
-                return a.y-b.y;
-            });
-
-            var spriteCursor = 0;
-
-            var stagger = 0;
-            var x, y, r, l, i, layerEndY, layerEndX;
-            for (i = 0; i < _this.map.layers.length; i++) {
-                l = _this.map.layers[i];
-
-                layerEndY = Math.min(endy, l.rows.length-1);
-                layerEndX = Math.max(endx, 0);
-
-                for (y = starty; y <= layerEndY; y++) {
-                    r = l.rows[y];
-                    stagger = y&1?_this.map.tilewidth/2:0;
-                    for (x = startx; x >= layerEndX; x--) {
-                        var t = r[x];
-                        t.draw(
-                                _this.ctx,
-                                Math.floor(-_this.xoffset) + stagger + x * xstep,
-                                Math.floor(-_this.yoffset) + y * ystep);
-                    }
-
-                    if (i==1) {
-                        var z = (y+2) * ystep;
-                        while(spriteCursor<this.sprites.length && z>=this.sprites[spriteCursor].y) {
-                            _this.sprites[spriteCursor++].draw(_this.ctx, _this.xoffset, _this.yoffset, _this.now);
-                        }
-                    }
-                }
-            }
+            this.map.drawWorld(_this.ctx, _this.now, _this.sprites);
         };
 
-        this.drawSprite = function(name) {
-            _this.spriteMap[name].draw(_this.ctx, _this.xoffset, _this.yoffset, _this.now);
+        this.drawSpriteWorld = function(name) {
+            _this.spriteMap[name].draw(_this.ctx, _this.map.xoffset, _this.map.yoffset, _this.now);
         };
 
         this.mouseScreenPos = function() {
@@ -497,32 +282,19 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         };
 
         this.mouseWorldPos = function() {
-            return {x:_this.mouse.x+_this.xoffset, y:_this.mouse.y+_this.yoffset};
+            return _this.map.screenToWorldPos(_this.mouse.x, _this.mouse.y);
         };
 
         this.worldToTilePos = function(x, y) {
-            // http://gamedev.stackexchange.com/a/48507/3188
-
-            var tw = _this.map.tilewidth;
-            var th = _this.map.tileheight;
-
-            var eventilex = Math.floor(x%tw);
-            var eventiley = Math.floor(y%th);
-
-            var step = (_this.hitTest[eventilex + eventiley * tw] !== 255)? 1:2; /* 1==even,2==odd */
-
-            return {
-                x: Math.floor((x + tw / step) / tw) - 1,
-                y: 2 * (Math.floor((y + th / step) / th)) - 1
-            };
+            return this.map.worldToTilePos(x,y);
         };
 
         this.screenToTilePos = function(x, y) {
-            return _this.worldToTilePos(x+_this.xoffset, y+_this.yoffset);
+            return this.map.screenToTilePos(x,y);
         };
 
         this.screenToWorldPos = function(x, y) {
-            return {x:x+_this.xoffset, y:y+_this.yoffset};
+            return this.map.screenToWorldPos(x,y);
         };
 
         this.createCollider = function(type, opts) {
@@ -659,7 +431,7 @@ function(Tile, SpriteDef, Sprite, Keyboard, Mouse, util,
         };
 
         this.resizeCanvas = function() {
-            /* TODO */
+            /* TODO: Remember the map should be resized to the new client width/height too */
         };
     }
 

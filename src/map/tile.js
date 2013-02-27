@@ -2,7 +2,7 @@ define(function() {
 
     'use strict';
 
-    function Tile(img, x, y, w, h, xoverdraw, yoverdraw) {
+    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps) {
         this.img = img;
         this.x = x;
         this.y = y;
@@ -10,6 +10,7 @@ define(function() {
         this.h = h;
         this.xoverdraw = xoverdraw;
         this.yoverdraw = yoverdraw;
+        this.defaultProps = defaultProps;
     }
 
     Tile.prototype.draw = function(ctx, x, y) {
