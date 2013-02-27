@@ -2,8 +2,9 @@ define(function() {
 
     'use strict';
 
-    function TraceCollider(opts) {
+    function TraceCollider(opts, sn) {
         this.opts = opts;
+        this.sn = sn;
 
         /* TODO: Whisker range option */
 
@@ -11,7 +12,7 @@ define(function() {
     }
 
     /** The mighty Bresenham's line drawing algorithm.
-     * Parameters should be integers.
+     * Parameters MUST be integers.
      */
     TraceCollider.prototype.trace = function(x0, y0, dx, dy){
         var x1 = x0 + dx;
@@ -21,23 +22,30 @@ define(function() {
         var sx = (x0 < x1) ? 1 : -1;
         var sy = (y0 < y1) ? 1 : -1;
         var err = dx-dy;
-var count = 30;
-var pocX = x0;
-var pocY = y0;
-        while(true){
-            //setPixel(x0,y0); TODO: Whatevers
-if (--count===0) {
-    pocX = x0;
-    pocY = y0;
-}
 
-            if ((x0===x1) && (y0===y1)) break;
+        while(true){
+            if(this.sn.getTilePropAtWorldPos('solid',x0,y0)==='1') {
+                break;
+            }
+
+            if ((x0===x1) && (y0===y1)) {
+                break;
+            }
+
             var e2 = 2*err;
-            if (e2 >-dy){ err -= dy; x0  += sx; }
-            if (e2 < dx){ err += dx; y0  += sy; }
+
+            if (e2 >-dy){
+                err -= dy;
+                x0  += sx;
+            }
+
+            if (e2 < dx) {
+                err += dx;
+                y0  += sy;
+            }
         }
 
-        return {x:pocX, y:pocY};
+        return {x:x0, y:y0};
     };
 
     /** FX plugin callbacks should return true to continue, or false if complete.

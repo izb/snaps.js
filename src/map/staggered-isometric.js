@@ -72,7 +72,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     StaggeredIsometric.prototype.resolveTiles = function() {
 
-        var i, j, k, ts;
+        var i, j, k, ts, tileprops;
 
         var map = this.data;
 
@@ -88,38 +88,51 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             var row = [];
             for (j = 0; j < l.data.length; j++) {
                 var d = l.data[j];
-                for (k = map.tilesets.length - 1; k >= 0; k--) {
-                    ts = map.tilesets[k];
-                    if(ts.firstgid<=d) {
-                        break;
+                if (d===0) {
+                    row.push(null);
+                } else {
+                    for (k = map.tilesets.length - 1; k >= 0; k--) {
+                        ts = map.tilesets[k];
+                        if(ts.firstgid<=d) {
+                            break;
+                        }
                     }
+                    var t = d - ts.firstgid;
+                    var y = Math.floor(t / ts.xspan);
+                    var x = t - ts.xspan * y;
+
+                    var xoverdraw = ts.tilewidth - map.tilewidth;
+                    var yoverdraw = ts.tileheight - map.tileheight;
+
+                    this.maxXOverdraw = Math.max(xoverdraw, this.maxXOverdraw);
+                    this.maxYOverdraw = Math.max(yoverdraw, this.maxYOverdraw);
+
+                    tileprops = undefined;
+                    if (ts.tileproperties!==undefined && ts.tileproperties.hasOwnProperty(t)) {
+                        tileprops = ts.tileproperties[t];
+                    }
+
+                    row.push(new Tile(
+                            ts.image,
+                            x * ts.tilewidth,
+                            y * ts.tileheight,
+                            ts.tilewidth,
+                            ts.tileheight,
+                            ts.tilewidth - map.tilewidth,
+                            ts.tileheight - map.tileheight,
+                            ts.properties,
+                            tileprops
+                        ));
                 }
-                var t = d - ts.firstgid;
-                var y = Math.floor(t / ts.xspan);
-                var x = t - ts.xspan * y;
 
-                var xoverdraw = ts.tilewidth - map.tilewidth;
-                var yoverdraw = ts.tileheight - map.tileheight;
-
-                this.maxXOverdraw = Math.max(xoverdraw, this.maxXOverdraw);
-                this.maxYOverdraw = Math.max(yoverdraw, this.maxYOverdraw);
-
-                row.push(new Tile(
-                        ts.image,
-                        x * ts.tilewidth,
-                        y * ts.tileheight,
-                        ts.tilewidth,
-                        ts.tileheight,
-                        ts.tilewidth - map.tilewidth,
-                        ts.tileheight - map.tileheight,
-                        ts.properties
-                    ));
                 if (row.length>= l.width) {
                     l.rows.push(row);
                     row = [];
                 }
             }
         }
+
+        console.log(this.data);
     };
 
     StaggeredIsometric.prototype.drawDebugRegions = function(ctx) {
@@ -236,6 +249,22 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
+        var xy = this.worldToTilePos(x, y);
+        var layers = this.data.layers;
+        var propval;
+        for (var i = layers.length - 1; i >= 0; i--) {
+            var t = layers[i].rows[xy.y][xy.x];
+            if (t!==null) {
+                propval = t.getProperty(prop);
+                if (propval!==undefined) {
+                    return propval;
+                }
+            }
+        }
+        throw "Missing property '"+prop+"' on tile.";
+    };
+
     StaggeredIsometric.prototype.screenToTilePos = function(x, y) {
         return this.worldToTilePos(x+this.xoffset, y+this.yoffset);
     };
@@ -282,10 +311,12 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 stagger = y&1?map.tilewidth/2:0;
                 for (x = startx; x >= layerEndX; x--) {
                     var t = r[x];
-                    t.draw(
-                            ctx,
-                            Math.floor(-this.xoffset) + stagger + x * xstep,
-                            Math.floor(-this.yoffset) + y * ystep);
+                    if (t!==null) {
+                        t.draw(
+                                ctx,
+                                Math.floor(-this.xoffset) + stagger + x * xstep,
+                                Math.floor(-this.yoffset) + y * ystep);
+                    }
                 }
 
                 if (i==1) {

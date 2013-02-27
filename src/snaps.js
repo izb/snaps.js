@@ -289,6 +289,10 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             return this.map.worldToTilePos(x,y);
         };
 
+        this.getTilePropAtWorldPos = function(prop, x, y) {
+            return this.map.getTilePropAtWorldPos(prop, x,y);
+        };
+
         this.screenToTilePos = function(x, y) {
             return this.map.screenToTilePos(x,y);
         };
@@ -305,7 +309,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             if(!_this.colliders.hasOwnProperty(type)) {
                 throw "Warning: undefined collider plugin: " + type;
             }
-            return new _this.colliders[type].fn(opts);
+            return new _this.colliders[type].fn(opts, _this);
         };
 
         this.nextName = 1;
