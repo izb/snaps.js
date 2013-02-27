@@ -244,6 +244,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         return {x:x+this.xoffset, y:y+this.yoffset};
     };
 
+    StaggeredIsometric.prototype.worldToScreenPos = function(x, y) {
+        return {x:x-this.xoffset, y:y-this.yoffset};
+    };
+
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
 
         var map = this.data;

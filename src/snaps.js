@@ -297,6 +297,10 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             return this.map.screenToWorldPos(x,y);
         };
 
+        this.worldToScreenPos = function(x, y) {
+            return this.map.worldToScreenPos(x,y);
+        };
+
         this.createCollider = function(type, opts) {
             if(!_this.colliders.hasOwnProperty(type)) {
                 throw "Warning: undefined collider plugin: " + type;
