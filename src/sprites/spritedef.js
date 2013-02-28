@@ -21,7 +21,7 @@ define(function() {
         ctx.drawImage(
                 /* src */
                 def.image,
-                pos.x, pos.y,
+                pos[0], pos[1],
                 def.w, def.h,
                 /*dest*/
                 x, y,
@@ -48,7 +48,7 @@ define(function() {
             var idx = seq[i];
             var x = this.w * (idx % xmax);
             var y = this.h * Math.floor(idx / xmax);
-            pos.push({x:x,y:y});
+            pos.push([x,y]);
         }
         this.states[name] = new State(pos, dur, this);
     };

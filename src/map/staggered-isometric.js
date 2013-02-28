@@ -5,6 +5,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
     var debugText = debug.debugText;
     var copyProps = js.copyProps;
 
+    var xy = [0,0]; // work area
+
     function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight) {
         this.data = tileData;
         this.hitTests = hitTests;
@@ -26,6 +28,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     }
 
+    /** Values returned from this function should be cached.
+     */
     StaggeredIsometric.prototype.minOffsets = function() {
 
         return {
@@ -200,10 +204,6 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
-    StaggeredIsometric.prototype.screenToWorldPos = function(x,y) {
-        return {x:x+this.xoffset, y:y+this.yoffset};
-    };
-
     StaggeredIsometric.prototype.scroll = function(dx,dy) {
         this.xoffset+=dx;
         this.yoffset+=dy;
@@ -221,7 +221,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
-    StaggeredIsometric.prototype.worldToTilePos = function(x, y) {
+    StaggeredIsometric.prototype.worldToTilePos = function(x, y, out) {
         // http://gamedev.stackexchange.com/a/48507/3188
 
         var map = this.data;
@@ -235,26 +235,23 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         if (this.hitTest[eventilex + eventiley * tw] !== 255) {
             /* On even tile */
 
-            return {
-                x: Math.floor((x + tw) / tw) - 1,
-                y: 2 * (Math.floor((y + th) / th) - 1)
-            };
+            out[0] = Math.floor((x + tw) / tw) - 1;
+            out[1] = 2 * (Math.floor((y + th) / th) - 1);
+
         } else {
             /* On odd tile */
 
-            return {
-                x: Math.floor((x + tw / 2) / tw) - 1,
-                y: 2 * (Math.floor((y + th / 2) / th)) - 1
-            };
+            out[0] = Math.floor((x + tw / 2) / tw) - 1;
+            out[1] = 2 * (Math.floor((y + th / 2) / th)) - 1;
         }
     };
 
     StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
-        var xy = this.worldToTilePos(x, y);
+        this.worldToTilePos(x, y, xy);
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
-            var t = layers[i].rows[xy.y][xy.x];
+            var t = layers[i].rows[xy[1]][xy[0]];
             if (t!==null) {
                 propval = t.getProperty(prop);
                 if (propval!==undefined) {
@@ -265,16 +262,23 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         throw "Missing property '"+prop+"' on tile.";
     };
 
-    StaggeredIsometric.prototype.screenToTilePos = function(x, y) {
-        return this.worldToTilePos(x+this.xoffset, y+this.yoffset);
+    StaggeredIsometric.prototype.screenToTilePos = function(x, y, out) {
+        this.worldToTilePos(x+this.xoffset, y+this.yoffset, out);
     };
 
-    StaggeredIsometric.prototype.screenToWorldPos = function(x, y) {
-        return {x:x+this.xoffset, y:y+this.yoffset};
+    /** Convert a screen coordinate to a world coordinate.
+     * @param {Array} out Returned values via passed-in array. Must be 2-length.
+     * Order is x,y
+     * @return {undefined} See 'out'
+     */
+    StaggeredIsometric.prototype.screenToWorldPos = function(x,y,out) {
+        out[0] = x+this.xoffset;
+        out[1] = y+this.yoffset;
     };
 
-    StaggeredIsometric.prototype.worldToScreenPos = function(x, y) {
-        return {x:x-this.xoffset, y:y-this.yoffset};
+    StaggeredIsometric.prototype.worldToScreenPos = function(x, y, out) {
+        out[0] = x-this.xoffset;
+        out[1] = y-this.yoffset;
     };
 
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {

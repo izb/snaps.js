@@ -5,13 +5,12 @@ define(function() {
     /** Convert a click event position (event.pageX/Y) into coords relative
      * to a canvas.
      */
-    HTMLCanvasElement.prototype.relCoords = function(x,y){
+    HTMLCanvasElement.prototype.relCoords = function(x,y,out){
 
+        /* TODO: Doesn't the mouse handler do this too? Consolidate this code. */
         var rect = this.getBoundingClientRect();
-        return {
-            x: x - rect.left - window.pageXOffset,
-            y: y - rect.top - window.pageYOffset
-        };
+        out[0] = x - rect.left - window.pageXOffset;
+        out[1] = y - rect.top - window.pageYOffset;
     };
 
     return {

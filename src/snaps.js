@@ -196,10 +196,12 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             }
 
             if (_this.dbgShowMouseTile && _this.map!==undefined) {
-                var worldPos = _this.mouseWorldPos();
-                var tilePos = _this.worldToTilePos(worldPos.x, worldPos.y);
+                var worldPos = [0,0];
+                _this.mouseWorldPos(worldPos);
+                var tilePos = [0,0]; /* TODO: Guarantee that input and output can match. */
+                _this.worldToTilePos(worldPos[0], worldPos[1], tilePos);
                 debugText(_this.ctx,
-                        "Mouse in tile: "+tilePos.x+", "+tilePos.y,5, _this.clientHeight-30);
+                        "Mouse in tile: "+tilePos[0]+", "+tilePos[1],5, _this.clientHeight-30);
             }
         }
 
@@ -277,32 +279,33 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             _this.spriteMap[name].draw(_this.ctx, _this.map.xoffset, _this.map.yoffset, _this.now);
         };
 
-        this.mouseScreenPos = function() {
-            return {x:_this.mouse.x, y:_this.mouse.y};
+        this.mouseScreenPos = function(out) {
+            out[0] = _this.mouse.x;
+            out[1] = _this.mouse.y;
         };
 
-        this.mouseWorldPos = function() {
-            return _this.map.screenToWorldPos(_this.mouse.x, _this.mouse.y);
+        this.mouseWorldPos = function(out) {
+            _this.map.screenToWorldPos(_this.mouse.x, _this.mouse.y, out);
         };
 
-        this.worldToTilePos = function(x, y) {
-            return this.map.worldToTilePos(x,y);
+        this.worldToTilePos = function(x, y, out) {
+            this.map.worldToTilePos(x,y, out);
+        };
+
+        this.screenToTilePos = function(x, y, out) {
+            this.map.screenToTilePos(x,y, out);
+        };
+
+        this.screenToWorldPos = function(x, y, out) {
+            this.map.screenToWorldPos(x,y, out);
+        };
+
+        this.worldToScreenPos = function(x, y, out) {
+            this.map.worldToScreenPos(x,y, out);
         };
 
         this.getTilePropAtWorldPos = function(prop, x, y) {
             return this.map.getTilePropAtWorldPos(prop, x,y);
-        };
-
-        this.screenToTilePos = function(x, y) {
-            return this.map.screenToTilePos(x,y);
-        };
-
-        this.screenToWorldPos = function(x, y) {
-            return this.map.screenToWorldPos(x,y);
-        };
-
-        this.worldToScreenPos = function(x, y) {
-            return this.map.worldToScreenPos(x,y);
         };
 
         this.createCollider = function(type, opts) {

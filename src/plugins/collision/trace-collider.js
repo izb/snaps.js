@@ -14,7 +14,7 @@ define(function() {
     /** The mighty Bresenham's line drawing algorithm.
      * Parameters MUST be integers.
      */
-    TraceCollider.prototype.trace = function(x0, y0, dx, dy){
+    TraceCollider.prototype.trace = function(x0, y0, dx, dy, out){
         var x1 = x0 + dx;
         var y1 = y0 + dy;
         dx = Math.abs(dx);
@@ -23,8 +23,12 @@ define(function() {
         var sy = (y0 < y1) ? 1 : -1;
         var err = dx-dy;
 
+        var collided = false;
         while(true){
             if(this.sn.getTilePropAtWorldPos('solid',x0,y0)==='1') {
+                collided = true;
+                out[0] = x0;
+                out[1] = y0;
                 break;
             }
 
@@ -45,7 +49,7 @@ define(function() {
             }
         }
 
-        return {x:x0, y:y0};
+        return collided;
     };
 
     /** FX plugin callbacks should return true to continue, or false if complete.
