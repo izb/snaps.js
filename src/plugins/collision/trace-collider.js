@@ -49,6 +49,8 @@ define(function() {
             }
         }
 
+        out[0] = x0;
+        out[1] = y0;
         return collided;
     };
 
