@@ -6,7 +6,9 @@ define(function() {
         opts = opts||{};
         this.sn = sn;
 
-        this.whisker = opts.whisker;
+        if (opts.whisker>0) {
+            this.whisker = opts.whisker;
+        }
 
         /* TODO: Whisker range option */
 
@@ -17,6 +19,19 @@ define(function() {
      * Parameters MUST be integers.
      */
     TraceCollider.prototype.trace = function(x0, y0, dx, dy, out){
+
+        if (dx == 0 && dy==0) {
+            out[0] = x0;
+            out[1] = y0;
+            return (this.sn.getTilePropAtWorldPos('solid',x0,y0)==='1');
+        }
+
+        if (this.whisker!==undefined) {
+            var len = Math.sqrt((dx*dx) + (dy*dy));
+            dx = Math.floor(dx+this.whisker*dx/len);
+            dy = Math.floor(dy+this.whisker*dy/len);
+        }
+
         var x1 = x0 + dx;
         var y1 = y0 + dy;
         dx = Math.abs(dx);
