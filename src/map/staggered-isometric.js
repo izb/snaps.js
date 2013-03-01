@@ -281,6 +281,21 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         out[1] = y-this.yoffset;
     };
 
+    StaggeredIsometric.prototype.insertLayer = function(idx, layer) {
+        this.data.layers.splice(idx,0,layer);
+    }
+
+
+    StaggeredIsometric.prototype.updateLayers = function(idx, layer, now) {
+        for (i = 0; i < map.layers.length; i++) {
+            l = map.layers[i];
+            if (l.hasOwnProperty('update')) {
+                l.update(now);
+            }
+        }
+    }
+
+
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
 
         var map = this.data;
@@ -306,6 +321,15 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var x, y, r, l, i, layerEndY, layerEndX;
         for (i = 0; i < map.layers.length; i++) {
             l = map.layers[i];
+
+            if (!l.visible) {
+                continue;
+            }
+
+            if (l.hasOwnProperty('draw')) {
+                l.draw(ctx, now);
+                continue;
+            }
 
             layerEndY = Math.min(endy, l.rows.length-1);
             layerEndX = Math.max(endx, 0);

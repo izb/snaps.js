@@ -53,6 +53,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
         this.spriteUpdaters = {};
         this.colliders = {};
         this.fxUpdaters = {};
+        this.layerPlugins = {};
 
         this.timers = {};
 
@@ -98,6 +99,11 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
         this.registerFxPlugin = function(name, fn, init) {
             init.call(this);
             _this.fxUpdaters[name] = fn;
+        };
+
+        this.registerLayerPlugin = function(name, fn, init) {
+            init.call(this);
+            _this.layerPlugins[name] = fn;
         };
 
         this.registerColliderPlugin = function(name, fn, init) {
@@ -179,6 +185,17 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             _this.activeFX.push(new _this.fxUpdaters[name](opts));
         };
 
+        this.addLayer = function(name, type, opts, idx) {
+            /* TODO: index must be in range. name must be unique. */
+
+            if (!_this.layerPlugins.hasOwnProperty(type)) {
+                throw "Can't spawn layer for unregistered layer type: " + type;
+            }
+            var layer = new _this.layerPlugins[type](name, opts, _this);
+            _this.map.insertLayer(idx, layer);
+            return layer;
+        };
+
         function drawDebug() {
 
             if (_this.dbgShowMouse) {
@@ -215,8 +232,9 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
             var time = _this.now - _this.lastFrameTime;
             _this.updateFX(time);
-            update(time);
-            draw(_this.ctx);
+            _this.map.updateLayers(time);
+            update(time); /* This fn is in the game code */
+            draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {
                 _this.map.drawDebugRegions(_this.ctx, _this.xoffset, _this.yoffset);
             }
