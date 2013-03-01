@@ -198,7 +198,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             if (_this.dbgShowMouseTile && _this.map!==undefined) {
                 var worldPos = [0,0];
                 _this.mouseWorldPos(worldPos);
-                var tilePos = [0,0]; /* TODO: Guarantee that input and output can match. */
+                var tilePos = [0,0];
                 _this.worldToTilePos(worldPos[0], worldPos[1], tilePos);
                 debugText(_this.ctx,
                         "Mouse in tile: "+tilePos[0]+", "+tilePos[1],5, _this.clientHeight-30);

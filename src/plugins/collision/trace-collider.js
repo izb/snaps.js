@@ -3,8 +3,10 @@ define(function() {
     'use strict';
 
     function TraceCollider(opts, sn) {
-        this.opts = opts;
+        opts = opts||{};
         this.sn = sn;
+
+        this.whisker = opts.whisker;
 
         /* TODO: Whisker range option */
 
