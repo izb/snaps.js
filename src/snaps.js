@@ -229,7 +229,6 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             }
 
             _this.now = +new Date();
-
             var time = _this.now - _this.lastFrameTime;
             _this.updateFX(time);
             _this.map.updateLayers(time);
@@ -437,8 +436,8 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             return false;
         };
 
-        this.moveSprite = function(sprite, x, y, h) {
-            _this.spriteMap[sprite].moveTo(x,y,h);
+        this.sprite = function(sprite) {
+            return _this.spriteMap[sprite];
         };
 
         this.updateSprites = function() {

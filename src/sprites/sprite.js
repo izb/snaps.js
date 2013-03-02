@@ -110,12 +110,27 @@ define(function() {
      * @param  {Number} th Target height
      */
     Sprite.prototype.moveTo = function(tx,ty,th) {
-        /* TODO: Collision test */
+        var dx = tx-this.x;
+        var dy = ty-this.y;
         this.x=tx;
         this.y=ty;
+        this.directionx = this.x + dx;
+        this.directiony = this.y + dy;
         if (th!==undefined) {
             this.h=th;
         }
+    };
+
+    /** Sets the direction of the sprite. This is expressed as a world
+     * position to look towards. This is not used in sprite rendering
+     * directly, but can be picked up by plugins. Direction is set automatically
+     * if the sprite moves, but you can then override direction by calling this.
+     * @param {Number} tox World X position to orient towards.
+     * @param {Number} toy World Y position to orient towards.
+     */
+    Sprite.prototype.setDirection = function(tox, toy) {
+        this.directionx = tox;
+        this.directiony = toy;
     };
 
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {

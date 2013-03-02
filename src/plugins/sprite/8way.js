@@ -8,8 +8,8 @@ define(function() {
      */
     var face8way = function() {
 
-        var dx = this.x - this.oldx;
-        var dy = 2*(this.y - this.oldy); /* Because Y is halved in isometric land */
+        var dx = this.directionx - this.x;
+        var dy = 2*(this.directiony - this.y); /* Because Y is halved in isometric land */
 
         var d;
 

@@ -29,37 +29,33 @@ define(['util/js'], function(js) {
     OcclusionScan.prototype.draw = function(ctx, now) {
 
         var endW = [0,0];
-        var endS = [0,0];
         var startS = [0,0];
-        var pocW = [0,0];
+        var poc = [0,0];
 
-        for (var i = -200; i < 200; i++) {
+        for (var i = -200; i < 200; i+=2) {
             ctx.lineWidth = 1;
-            ctx.strokeStyle = 'red';
+            ctx.strokeStyle = 'yellow';
             ctx.beginPath();
-            var startW = _this.testLine[1];
-            this.sn.worldToScreenPos(startW.x, startW.y, startS);
             this.sn.mouseWorldPos(endW);
-            this.sn.worldToScreenPos(endW[0]+i, endW[1], endS);
 
-            var dx = endW[0]+i - startW.x;
-            var dy = endW[1] - startW.y;
+            var dx = endW[0]+i - this.x;
+            var dy = endW[1] - this.y;
             var collided = this.collider.trace(
-                    Math.floor(startW.x),
-                    Math.floor(startW.y),
+                    Math.floor(this.x),
+                    Math.floor(this.y),
                     Math.floor(dx),
                     Math.floor(dy),
-                    pocW);
-            var pocS = [0,0];
-            this.sn.worldToScreenPos(pocW[0], pocW[1], pocS);
+                    poc);
+            this.sn.worldToScreenPos(poc[0], poc[1], poc);
 
+            this.sn.worldToScreenPos(this.x, this.y, startS);
             ctx.moveTo(startS[0], startS[1]);
-            ctx.lineTo(pocS[0], pocS[1]);
+            ctx.lineTo(poc[0], poc[1]);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.strokeStyle = 'green';
-            ctx.arc(pocS[0],pocS[1],5,0,2*Math.PI);
+            ctx.strokeStyle = collided?'red':'green';
+            ctx.arc(poc[0],poc[1],5,0,2*Math.PI);
             ctx.stroke();
         }
     };

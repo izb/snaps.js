@@ -20,10 +20,12 @@ define(function() {
      */
     TraceCollider.prototype.trace = function(x0, y0, dx, dy, out){
 
-        if (dx == 0 && dy==0) {
+        var result;
+        if (dx === 0 && dy === 0) {
             out[0] = x0;
             out[1] = y0;
-            return (this.sn.getTilePropAtWorldPos('solid',x0,y0)==='1');
+            result = this.sn.getTilePropAtWorldPos('solid',x0,y0);
+            return (result==='1'||result===undefined);
         }
 
         if (this.whisker!==undefined) {
@@ -42,7 +44,9 @@ define(function() {
 
         var collided = false;
         while(true){
-            if(this.sn.getTilePropAtWorldPos('solid',x0,y0)==='1') {
+            result = this.sn.getTilePropAtWorldPos('solid',x0,y0);
+
+            if(result==='1'||result===undefined) {
                 collided = true;
                 out[0] = x0;
                 out[1] = y0;

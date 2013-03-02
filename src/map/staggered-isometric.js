@@ -135,8 +135,6 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 }
             }
         }
-
-        console.log(this.data);
     };
 
     StaggeredIsometric.prototype.drawDebugRegions = function(ctx) {
@@ -188,18 +186,16 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             }
         }
 
-        for (i = 0; i < map.layers.length; i++) {
-            l = map.layers[i];
+        l = map.layers[0];
 
-            for (y = 0; y < l.rows.length; y++) {
-                r = l.rows[y];
-                stagger = y&1?map.tilewidth/2:0;
-                for (x = r.length-1; x >= 0; x--) {
-                    debugText(ctx,
-                            x+","+y,
-                            85+Math.floor(-this.xoffset) + stagger + x * xstep,
-                            55+Math.floor(-this.yoffset) + y * ystep);
-                }
+        for (y = 0; y < l.rows.length; y++) {
+            r = l.rows[y];
+            stagger = y&1?map.tilewidth/2:0;
+            for (x = r.length-1; x >= 0; x--) {
+                debugText(ctx,
+                        x+","+y,
+                        85+Math.floor(-this.xoffset) + stagger + x * xstep,
+                        55+Math.floor(-this.yoffset) + y * ystep);
             }
         }
     };
@@ -251,15 +247,20 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
-            var t = layers[i].rows[xy[1]][xy[0]];
-            if (t!==null) {
-                propval = t.getProperty(prop);
-                if (propval!==undefined) {
-                    return propval;
+            var rows = layers[i].rows;
+            if (rows!==undefined) {
+                if (xy[1]>=0&&xy[1]<rows.length) {
+                    var t = rows[xy[1]][xy[0]];
+                    if (t) {
+                        propval = t.getProperty(prop);
+                        if (propval!==undefined) {
+                            return propval;
+                        }
+                    }
                 }
             }
         }
-        throw "Missing property '"+prop+"' on tile.";
+        return undefined;
     };
 
     StaggeredIsometric.prototype.screenToTilePos = function(x, y, out) {
@@ -283,17 +284,18 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     StaggeredIsometric.prototype.insertLayer = function(idx, layer) {
         this.data.layers.splice(idx,0,layer);
-    }
+    };
 
 
     StaggeredIsometric.prototype.updateLayers = function(idx, layer, now) {
-        for (i = 0; i < map.layers.length; i++) {
-            l = map.layers[i];
+        var map = this.data;
+        for (var i = 0; i < map.layers.length; i++) {
+            var l = map.layers[i];
             if (l.hasOwnProperty('update')) {
                 l.update(now);
             }
         }
-    }
+    };
 
 
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
@@ -319,15 +321,17 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
         var stagger = 0;
         var x, y, r, l, i, layerEndY, layerEndX;
+        var top = map.layers.length-1;
         for (i = 0; i < map.layers.length; i++) {
             l = map.layers[i];
 
-            if (!l.visible) {
+            if ('draw' in l) {
+                l.draw(ctx, now);
                 continue;
             }
 
-            if (l.hasOwnProperty('draw')) {
-                l.draw(ctx, now);
+            if (!l.visible) {
+                console.log("l"+i, l);
                 continue;
             }
 
@@ -347,7 +351,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                     }
                 }
 
-                if (i==1) {
+                if (i==top) {
                     var z = (y+2) * ystep;
                     while(spriteCursor<sprites.length && z>=sprites[spriteCursor].y) {
                         sprites[spriteCursor++].draw(ctx, this.xoffset, this.yoffset, now);
