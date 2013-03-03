@@ -15,15 +15,14 @@ define(function() {
         /* TODO: Do something */
     }
 
-    /** The mighty Bresenham's line drawing algorithm.
-     * Parameters MUST be integers.
-     */
-    TraceCollider.prototype.trace = function(x0, y0, dx, dy, out){
+    var doTrace = function(x0, y0, dx, dy, out) {
 
         var w = this.whisker;
 
-        var ox1 = x0 + dx;
-        var oy1 = y0 + dy;
+        var ox0 = x0;
+        var oy0 = y0;
+        var odx = dx;
+        var ody = dy;
 
         var result;
         if (dx === 0 && dy === 0) {
@@ -50,14 +49,13 @@ define(function() {
         var sy = (y0 < y1) ? 1 : -1;
         var err = dx-dy;
 
+        /* The mighty Bresenham's line algorithm */
         var collided = false;
         while(true){
             result = this.sn.getTilePropAtWorldPos('solid',x0,y0);
 
             if(result==='1'||result===undefined) {
                 collided = true;
-                out[0] = x0;
-                out[1] = y0;
                 break;
             }
 
@@ -90,23 +88,35 @@ define(function() {
             y0-=(cdy*w);
         }
 
-        if (collided) {
-            out[0] = x0;
-            out[1] = y0;
-        } else {
-            out[0] = ox1;
-            out[1] = oy1;
+        if (collided && out !==undefined) {
+            if (out!==undefined) {
+                out[0] = x0;
+                out[1] = y0;
+            }
+
+            if (dx>dy) {
+                return (ox0-x0)/(-odx);
+            } else {
+                return (oy0-y0)/(-ody);
+            }
+        } else if (out!==undefined) {
+            out[0] = ox0+odx;
+            out[1] = oy0+ody;
         }
-        return collided;
+        return 1;
     };
 
-    /** FX plugin callbacks should return true to continue, or false if complete.
-     * Should be called with context set to the sprite.
-     * @return {Boolean} See description
+    /** Perform a trace to test for collision along a line.
+     * @param  {Array} out An optional 2-length array which will recieve the
+     * point of contact. You can interpret this as the position to which the
+     * character can go along its path at which it will be touching a solid
+     * object. If there is no collision, the output position will be the
+     * desired new position.
+     * @return {Boolean} True if there was a collision.
      */
-    TraceCollider.prototype.test = function(x,y,dx,dy) {
-
-        return false;
+    TraceCollider.prototype.test = function(x0, y0, dx, dy, out){
+        var ratio = doTrace.call(this, x0, y0, dx, dy, out);
+        return ratio<1;
     };
 
     return function(sn) {

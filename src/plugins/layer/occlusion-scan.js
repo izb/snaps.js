@@ -40,7 +40,7 @@ define(['util/js'], function(js) {
 
             var dx = endW[0]+i - this.x;
             var dy = endW[1] - this.y;
-            var collided = this.collider.trace(
+            var collided = this.collider.test(
                     Math.floor(this.x),
                     Math.floor(this.y),
                     Math.floor(dx),
