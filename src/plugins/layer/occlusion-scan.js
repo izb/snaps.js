@@ -55,7 +55,7 @@ define(['util/js'], function(js) {
 
             ctx.beginPath();
             ctx.strokeStyle = collided?'red':'green';
-            ctx.arc(poc[0],poc[1],5,0,2*Math.PI);
+            ctx.arc(poc[0],poc[1],2.5,0,2*Math.PI);
             ctx.stroke();
         }
     };

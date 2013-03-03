@@ -20,6 +20,11 @@ define(function() {
      */
     TraceCollider.prototype.trace = function(x0, y0, dx, dy, out){
 
+        var w = this.whisker;
+
+        var ox1 = x0 + dx;
+        var oy1 = y0 + dy;
+
         var result;
         if (dx === 0 && dy === 0) {
             out[0] = x0;
@@ -28,10 +33,13 @@ define(function() {
             return (result==='1'||result===undefined);
         }
 
-        if (this.whisker!==undefined) {
+        var nwx,nwy;
+        if (w!==undefined) {
             var len = Math.sqrt((dx*dx) + (dy*dy));
-            dx = Math.floor(dx+this.whisker*dx/len);
-            dy = Math.floor(dy+this.whisker*dy/len);
+            nwx = dx/len;
+            nwy = dy/len;
+            dx = Math.floor(dx+w*nwx);
+            dy = Math.floor(dy+w*nwy);
         }
 
         var x1 = x0 + dx;
@@ -70,8 +78,25 @@ define(function() {
             }
         }
 
-        out[0] = x0;
-        out[1] = y0;
+        if (w!==undefined) {
+            var cdx = nwx*w;
+            var cdy = nwy*w;
+            var hcdy = cdy*2;
+            var wlen = Math.sqrt((cdx*cdx) + (hcdy*hcdy));
+            cdx = cdx/wlen;
+            cdy = cdy/wlen;
+            /* Move the POC to the centre, not the whisker tip. */
+            x0-=(cdx*w);
+            y0-=(cdy*w);
+        }
+
+        if (collided) {
+            out[0] = x0;
+            out[1] = y0;
+        } else {
+            out[0] = ox1;
+            out[1] = oy1;
+        }
         return collided;
     };
 
