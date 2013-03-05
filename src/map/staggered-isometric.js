@@ -74,6 +74,18 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    var fixTypes = function(props) {
+        if (props===undefined) {
+            return props;
+        }
+        for (var prop in props) {
+            if (prop==='height' && typeof props[prop]==='string') {
+                props[prop] = parseInt(props[prop], 10);
+            }
+        }
+        return props;
+    };
+
     StaggeredIsometric.prototype.resolveTiles = function() {
 
         var i, j, k, ts, tileprops;
@@ -124,8 +136,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                             ts.tileheight,
                             ts.tilewidth - map.tilewidth,
                             ts.tileheight - map.tileheight,
-                            ts.properties,
-                            tileprops
+                            fixTypes(ts.properties),
+                            fixTypes(tileprops)
                         ));
                 }
 
@@ -215,6 +227,15 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         } else if (this.yoffset > this.maxyoffset) {
             this.yoffset = this.maxyoffset;
         }
+    };
+
+    StaggeredIsometric.prototype.getScreenEdges = function() {
+        return {
+            le:this.minxoffset,
+            te:this.minyoffset,
+            re:this.maxxoffset+this.clientWidth,
+            be:this.maxyoffset+this.clientHeight
+        };
     };
 
     StaggeredIsometric.prototype.worldToTilePos = function(x, y, out) {
@@ -331,7 +352,6 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             }
 
             if (!l.visible) {
-                console.log("l"+i, l);
                 continue;
             }
 

@@ -202,9 +202,9 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
                 debugText(_this.ctx,
                         "Screen: "+_this.mouse.x+","+_this.mouse.y,5, 15);
                 debugText(_this.ctx,
-                        "World: "+(_this.mouse.x+_this.xoffset)+","+(_this.mouse.y+_this.yoffset), 5, 30);
+                        "World: "+(_this.mouse.x+_this.map.xoffset)+","+(_this.mouse.y+_this.map.yoffset), 5, 30);
                 debugText(_this.ctx,
-                        "Origin: "+(_this.xoffset)+","+(_this.yoffset), 5, 45);
+                        "Origin: "+(_this.map.xoffset)+","+(_this.map.yoffset), 5, 45);
             }
 
             if (_this.dbgShowCounts) {
@@ -235,7 +235,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             update(time); /* This fn is in the game code */
             draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {
-                _this.map.drawDebugRegions(_this.ctx, _this.xoffset, _this.yoffset);
+                _this.map.drawDebugRegions(_this.ctx);
             }
 
             drawDebug();
@@ -286,6 +286,10 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
         this.scroll = function(dx,dy) {
             _this.map.scroll(dx, dy);
+        };
+
+        this.getScreenEdges = function() {
+            return _this.map.getScreenEdges();
         };
 
         this.drawWorld = function() {

@@ -30,32 +30,62 @@ define(['util/js'], function(js) {
 
         var endW = [0,0];
         var startS = [0,0];
-        var poc = [0,0];
+        var limit = [0,0];
+        var i,dx,dy,collided;
 
-        for (var i = -200; i < 200; i+=2) {
+        for (i = -200; i < 200; i+=8) {
             ctx.lineWidth = 1;
             ctx.strokeStyle = 'yellow';
             ctx.beginPath();
             this.sn.mouseWorldPos(endW);
 
-            var dx = endW[0]+i - this.x;
-            var dy = endW[1] - this.y;
-            var collided = this.collider.test(
+            dx = endW[0]+i - this.x;
+            dy = endW[1] - this.y;
+            collided = this.collider.test(
                     Math.floor(this.x),
                     Math.floor(this.y),
                     Math.floor(dx),
                     Math.floor(dy),
-                    poc);
-            this.sn.worldToScreenPos(poc[0], poc[1], poc);
+                    0,
+                    limit);
+            this.sn.worldToScreenPos(limit[0], limit[1], limit);
 
             this.sn.worldToScreenPos(this.x, this.y, startS);
             ctx.moveTo(startS[0], startS[1]);
-            ctx.lineTo(poc[0], poc[1]);
+            ctx.lineTo(limit[0], limit[1]);
             ctx.stroke();
 
             ctx.beginPath();
             ctx.strokeStyle = collided?'red':'green';
-            ctx.arc(poc[0],poc[1],2.5,0,2*Math.PI);
+            ctx.arc(limit[0],limit[1],2.5,0,2*Math.PI);
+            ctx.stroke();
+        }
+
+        for (i = -200; i < 200; i+=8) {
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'yellow';
+            ctx.beginPath();
+            this.sn.mouseWorldPos(endW);
+
+            dx = endW[0] - this.x;
+            dy = endW[1]+i - this.y;
+            collided = this.collider.test(
+                    Math.floor(this.x),
+                    Math.floor(this.y),
+                    Math.floor(dx),
+                    Math.floor(dy),
+                    0,
+                    limit);
+            this.sn.worldToScreenPos(limit[0], limit[1], limit);
+
+            this.sn.worldToScreenPos(this.x, this.y, startS);
+            ctx.moveTo(startS[0], startS[1]);
+            ctx.lineTo(limit[0], limit[1]);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = collided?'red':'green';
+            ctx.arc(limit[0],limit[1],2.5,0,2*Math.PI);
             ctx.stroke();
         }
     };
