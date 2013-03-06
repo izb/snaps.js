@@ -237,8 +237,8 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
             _this.now = +new Date();
             var time = _this.now - _this.lastFrameTime;
-            if (this.camera) {
-                this.camera.update(time);
+            if (_this.camera) {
+                _this.camera.update(time);
             }
             _this.updateFX(time);
             _this.map.updateLayers(time);

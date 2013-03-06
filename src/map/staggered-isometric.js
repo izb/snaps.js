@@ -230,7 +230,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
     };
 
     StaggeredIsometric.prototype.scroll = function(dx,dy) {
-        this.scrollTo(this.xoffset+dx, this.yoffset+dy)
+        this.scrollTo(this.xoffset+dx, this.yoffset+dy);
     };
 
     StaggeredIsometric.prototype.getScreenEdges = function() {
