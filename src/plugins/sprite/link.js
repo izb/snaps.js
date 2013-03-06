@@ -2,6 +2,8 @@ define(function() {
 
     'use strict';
 
+    var sn;
+
     /*
      * Example options:
      *
@@ -37,7 +39,8 @@ define(function() {
         }
     };
 
-    return function(sn) {
+    return function(snaps) {
+        sn = snaps;
         sn.registerSpriteUpdater('link', link, init);
     };
 

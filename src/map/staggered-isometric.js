@@ -212,9 +212,9 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
-    StaggeredIsometric.prototype.scroll = function(dx,dy) {
-        this.xoffset+=dx;
-        this.yoffset+=dy;
+    StaggeredIsometric.prototype.scrollTo = function(x, y) {
+        this.xoffset=x;
+        this.yoffset=y;
 
         if (this.xoffset < this.minxoffset) {
             this.xoffset = this.minxoffset;
@@ -227,6 +227,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         } else if (this.yoffset > this.maxyoffset) {
             this.yoffset = this.maxyoffset;
         }
+    };
+
+    StaggeredIsometric.prototype.scroll = function(dx,dy) {
+        this.scrollTo(this.xoffset+dx, this.yoffset+dy)
     };
 
     StaggeredIsometric.prototype.getScreenEdges = function() {

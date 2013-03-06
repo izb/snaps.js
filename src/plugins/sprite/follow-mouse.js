@@ -3,6 +3,7 @@ define(function() {
     'use strict';
 
     var pos = [0,0];
+    var sn;
 
     /** Called with the sprite as the 'this' context.
      * @return true normally, or false to prevent any further
@@ -16,7 +17,8 @@ define(function() {
         return true;
     };
 
-    return function(sn) {
+    return function(snaps) {
+        sn = snaps;
         sn.registerSpriteUpdater('follow_mouse', followMouse, function(){});
     };
 

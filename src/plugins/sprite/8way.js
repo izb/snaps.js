@@ -2,6 +2,8 @@ define(function() {
 
     'use strict';
 
+    var sn;
+
     /** Called with the sprite as the 'this' context.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
@@ -55,7 +57,8 @@ define(function() {
         this.direction = 'e';
     };
 
-    return function(sn) {
+    return function(snaps) {
+        sn = snaps;
         sn.registerSpriteUpdater('8way', face8way, init);
     };
 

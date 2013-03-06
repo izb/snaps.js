@@ -8,12 +8,15 @@ define([
 
     'plugins/fx/particles',
 
+    'plugins/camera/push-cam',
+
     'plugins/collision/trace-collider'
     ],
 function(
         regBounce, regFollowMouse, regLink, reg8way,
         regOcclusionScan,
         regParticles,
+        regPushCam,
         regTraceCollider) {
 
     'use strict';
@@ -29,6 +32,8 @@ function(
         regOcclusionScan(sn);
 
         regParticles(sn);
+
+        regPushCam(sn);
 
         regTraceCollider(sn);
     };

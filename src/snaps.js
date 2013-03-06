@@ -54,8 +54,11 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
         this.colliders = {};
         this.fxUpdaters = {};
         this.layerPlugins = {};
+        this.cameraPlugins = {};
 
         this.timers = {};
+        this.cameras = {};
+        this.camera = null;
 
         this.activeFX = [];
 
@@ -108,6 +111,10 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
         this.registerColliderPlugin = function(name, fn, init) {
             _this.colliders[name] = {fn:fn, init:init};
+        };
+
+        this.registerCameraPlugin = function(name, fn, init) {
+            _this.cameraPlugins[name] = {fn:fn, init:init};
         };
 
         /* Register the default plugins */
@@ -191,7 +198,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             if (!_this.layerPlugins.hasOwnProperty(type)) {
                 throw "Can't spawn layer for unregistered layer type: " + type;
             }
-            var layer = new _this.layerPlugins[type](name, opts, _this);
+            var layer = new _this.layerPlugins[type](name, opts);
             _this.map.insertLayer(idx, layer);
             return layer;
         };
@@ -230,6 +237,9 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
             _this.now = +new Date();
             var time = _this.now - _this.lastFrameTime;
+            if (this.camera) {
+                this.camera.update(time);
+            }
             _this.updateFX(time);
             _this.map.updateLayers(time);
             update(time); /* This fn is in the game code */
@@ -284,8 +294,19 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             return _this.keyboard.actionPressed(action);
         };
 
+        /* TODO: Rename scroll methods to better reflect the fact that it sets
+         * the map position rather than animatedly scroll it. */
+
         this.scroll = function(dx,dy) {
             _this.map.scroll(dx, dy);
+        };
+
+        /** Sets the map position to centre on a given world coordinate.
+         * @param {[Number]} x World X position
+         * @param {[Number]} y World Y position
+         */
+        this.scrollTo = function(x,y) {
+            _this.map.scrollTo(x, y);
         };
 
         this.getScreenEdges = function() {
@@ -333,7 +354,24 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             if(!_this.colliders.hasOwnProperty(type)) {
                 throw "Warning: undefined collider plugin: " + type;
             }
-            return new _this.colliders[type].fn(opts, _this);
+            return new _this.colliders[type].fn(opts);
+        };
+
+        this.createCamera = function(name, type, opts) {
+            if(!_this.cameraPlugins.hasOwnProperty(type)) {
+                throw "Warning: undefined camera plugin: " + type;
+            }
+
+            if (this.cameras.hasOwnProperty(name)) {
+                throw "Camera already exists: "+name;
+            }
+
+            this.cameras[name] = new _this.cameraPlugins[type].fn(opts);
+            return this.cameras[name];
+        };
+
+        this.switchToCamera = function(name) {
+            this.camera = this.cameras[name];
         };
 
         this.nextName = 1;
@@ -357,6 +395,8 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
          * 'endCallback' A function called when the sprite naturally ends
          */
         this.spawnSprite = function(defName, stateName, stateExt, x, y, h, opts) {
+
+            /* TODO: 'createSprite' please, for consistency. */
 
             if (opts===undefined) {
                 opts = {};

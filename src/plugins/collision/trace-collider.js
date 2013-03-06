@@ -2,7 +2,9 @@ define(function() {
 
     'use strict';
 
-    function TraceCollider(opts, sn) {
+    var sn;
+
+    function TraceCollider(opts) {
         opts = opts||{};
         this.sn = sn;
 
@@ -176,7 +178,8 @@ define(function() {
         return ratio<1;
     };
 
-    return function(sn) {
+    return function(snaps) {
+        sn = snaps;
         sn.registerColliderPlugin('trace', TraceCollider, function(){});
     };
 

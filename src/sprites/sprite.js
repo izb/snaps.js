@@ -105,8 +105,8 @@ define(function() {
 
     /** Move a sprite, taking collision into account. If there is a collision,
      * the sprite will be moved to the point of collision.
-     * @param  {Number} tx Target x
-     * @param  {Number} ty Target y
+     * @param  {Number} tx Target x world position
+     * @param  {Number} ty Target y world position
      * @param  {Number} th Target height
      */
     Sprite.prototype.moveTo = function(tx,ty,th) {

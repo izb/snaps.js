@@ -5,6 +5,8 @@ define([
 
     'use strict';
 
+    var sn;
+
     /** Spawns particles in a composite sprite.
      * @param {Object} opts Options, in the following format
      * {
@@ -32,7 +34,8 @@ define([
         return false;
     };
 
-    return function(sn) {
+    return function(snaps) {
+        sn = snaps;
         sn.registerFxPlugin('particles', Particles, function(){});
     };
 

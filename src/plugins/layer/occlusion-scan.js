@@ -4,6 +4,8 @@ define(['util/js'], function(js) {
 
     var copyProps = js.copyProps;
 
+    var sn;
+
     /* A sample layer effect that performs collision traces to approximate a circular
      * occlusion scan. Just pretty, not (yet) useful. */
 
@@ -11,7 +13,7 @@ define(['util/js'], function(js) {
      * @param {Object} opts Parameters for customizing the layer. Requires these properties:
      * 'x' and 'y' The center of the scan.
      */
-    function OcclusionScan(layerName, opts, sn) {
+    function OcclusionScan(layerName, opts) {
         this.opts = opts||{};
         this.name = layerName;
         this.x = opts.x;
@@ -94,7 +96,8 @@ define(['util/js'], function(js) {
         copyProps(newconf, this);
     };
 
-    return function(sn) {
+    return function(snaps) {
+        sn = snaps;
         sn.registerLayerPlugin('occlusion-scan', OcclusionScan, function(){});
     };
 
