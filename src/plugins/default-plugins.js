@@ -2,6 +2,7 @@ define([
     'plugins/sprite/bounce',
     'plugins/sprite/follow-mouse',
     'plugins/sprite/link',
+    'plugins/sprite/animate',
     'plugins/sprite/8way',
 
     'plugins/layer/occlusion-scan',
@@ -13,7 +14,7 @@ define([
     'plugins/collision/trace-collider'
     ],
 function(
-        regBounce, regFollowMouse, regLink, reg8way,
+        regBounce, regFollowMouse, regLink, regAnimate, reg8way,
         regOcclusionScan,
         regParticles,
         regPushCam,
@@ -27,6 +28,7 @@ function(
         regBounce(sn);
         regFollowMouse(sn);
         regLink(sn);
+        regAnimate(sn);
         reg8way(sn);
 
         regOcclusionScan(sn);

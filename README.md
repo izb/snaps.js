@@ -10,3 +10,4 @@ around it.
 
 Trust me though, it's pretty good already.
 
+If you want to know more, head on over to the [wiki](https://github.com/izb/snaps.js/wiki).

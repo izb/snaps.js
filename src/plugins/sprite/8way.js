@@ -53,6 +53,8 @@ define(function() {
         return true;
     };
 
+    /** Called with the sprite as the 'this' context.
+     */
     var init = function() {
         this.direction = 'e';
     };

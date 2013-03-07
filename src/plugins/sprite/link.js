@@ -33,6 +33,8 @@ define(function() {
         return true;
     };
 
+    /** Called with the sprite as the 'this' context.
+     */
     var init = function() {
         for (var i = this.link_to.length - 1; i >= 0; i--) {
             this.link_to[i].sprite = this.sn.spriteMap[this.link_to[i].name];

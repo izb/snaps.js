@@ -10,11 +10,15 @@ define(['sprites/spritedef',
         /* Plugins */
         'plugins/default-plugins',
 
+        /* Animation */
+        'animate/tween',
+
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
 function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
-        regPlugins) {
+        regPlugins,
+        tweens) {
 
     'use strict';
 
@@ -229,14 +233,14 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             }
         }
 
-        function loop() {
+        function loop(now) {
             window.requestAnimationFrame(loop);
             if (stats!==null) {
                 stats.begin();
             }
 
-            _this.now = +new Date();
-            var time = _this.now - _this.lastFrameTime;
+            _this.now = now;
+            var time = now - _this.lastFrameTime;
             if (_this.camera) {
                 _this.camera.update(time);
             }
@@ -273,7 +277,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
                     }
 
                     /* Start the paint loop */
-                    setTimeout(loop, 0);
+                    setTimeout(function(){loop(+ new Date());}, 0);
                 },
 
                 /* Preloader progress */
