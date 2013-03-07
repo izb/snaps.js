@@ -22,7 +22,7 @@ define(function() {
     }
 
     PushCam.prototype.update = function(now) {
-        sn.scrollTo(this.follow.x, this.follow.y);
+        sn.scrollTo(this.follow.x-sn.clientWidth/2, this.follow.y-sn.clientHeight/2);
     };
 
     return function(snaps) {
