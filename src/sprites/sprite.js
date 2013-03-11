@@ -29,16 +29,31 @@ define(function() {
         }
         this.maxloops = maxloops;
         this.updates = updates;
+        for (var i = 0; i < this.updates.length; i++) {
+            this.updates[i].sprite = this;
+        }
         this.endCallback = endCallback;
     }
 
     Sprite.prototype.init = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                var init = this.updates[i].init;
-                init.call(this);
+                this.updates[i].init();
             }
         }
+    };
+
+    /** Returns the max duration of the sprite before it automatically expires.
+     * This value may change if the state changes. Does not take time already
+     * expired into account.
+     * @return {Number} The max duration of the current state, or 0 if it will not
+     * expire.
+     */
+    Sprite.prototype.maxDuration = function() {
+        if (maxloops===0) {
+            return 0;
+        }
+        return this.state.dur * this.maxloops;
     };
 
     Sprite.prototype.isActive = function(now) {
@@ -56,14 +71,18 @@ define(function() {
         if (this.stateName===state && this.stateExt===ext) {
             return;
         }
+
         this.stateName = state;
         this.stateExt = ext;
+
         if (ext!==undefined && this.def.states.hasOwnProperty(state + '_' + ext)) {
             state = state + '_' + ext;
         }
+
         if (!this.def.states.hasOwnProperty(state)) {
             throw "Bad sprite definition. Missing state: "+state;
         }
+
         this.state = this.def.states[state];
         this.epoch = this.sn.getNow();
     };
@@ -83,8 +102,7 @@ define(function() {
     Sprite.prototype.update = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                var update = this.updates[i].fn;
-                if(!update.call(this)) {
+                if(!this.updates[i].fn()) {
                     /* Return false from an update function to break the chain. */
                     break;
                 }

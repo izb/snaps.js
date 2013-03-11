@@ -5,15 +5,17 @@ define(function() {
     var pos = [0,0];
     var sn;
 
-    /** Called with the sprite as the 'this' context.
+    /** Called with the update options as the 'this' context, one of which
+     * is this.sprite, which refers to the sprite being updated.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    var followMouse = function() {
+    var followMouse = function(now) {
 
-        this.sn.mouseWorldPos(pos);
-        this.x = pos[0];
-        this.y = pos[1];
+        sn.mouseWorldPos(pos);
+        var s = this.sprite;
+        s.x = pos[0];
+        s.y = pos[1];
         return true;
     };
 

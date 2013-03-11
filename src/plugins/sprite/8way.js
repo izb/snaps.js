@@ -4,14 +4,17 @@ define(function() {
 
     var sn;
 
-    /** Called with the sprite as the 'this' context.
+    /** Called with the update options as the 'this' context, one of which
+     * is this.sprite, which refers to the sprite being updated.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    var face8way = function() {
+    var face8way = function(now) {
 
-        var dx = this.directionx - this.x;
-        var dy = 2*(this.directiony - this.y); /* Because Y is halved in isometric land */
+        var s = this.sprite;
+
+        var dx = s.directionx - s.x;
+        var dy = 2*(s.directiony - s.y); /* Because Y is halved in isometric land */
 
         var d;
 
@@ -45,15 +48,16 @@ define(function() {
 
         this.direction = d;
 
-        this.oldx = this.x;
-        this.oldy = this.y;
+        this.oldx = s.x;
+        this.oldy = s.y;
 
-        this.setState(this.stateName, this.direction);
+        s.setState(s.stateName, this.direction);
 
         return true;
     };
 
-    /** Called with the sprite as the 'this' context.
+    /** Called with the update options as the 'this' context, one of which
+     * is this.sprite, which refers to the sprite being updated.
      */
     var init = function() {
         this.direction = 'e';

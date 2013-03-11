@@ -30,7 +30,9 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
         var _this = this;
 
+        /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
+        this.tweens = tweens;
 
         var stats = null;
 
@@ -423,7 +425,8 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
-                    updates[i] = _this.spriteUpdaters[opts.updates[i]];
+                    updates[i] = _this.spriteUpdaters[opts.updates[i].name];
+                    copyProps(opts.updates[i], updates[i]);
                 }
             }
 
@@ -493,7 +496,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             for (var i = 0; i < _this.sprites.length; i++) {
                 var s = _this.sprites[i];
                 if (s.isActive(_this.now)) {
-                    s.update();
+                    s.update(_this.now);
                     keepsprites.push(s);
                 } else {
                     delete _this.spriteMap[s.name];

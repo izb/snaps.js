@@ -5,20 +5,22 @@ define([
     'plugins/sprite/animate',
     'plugins/sprite/8way',
 
+    'plugins/layer/ui-layer',
     'plugins/layer/occlusion-scan',
 
     'plugins/fx/particles',
 
     'plugins/camera/push-cam',
 
-    'plugins/collision/trace-collider'
+    'plugins/collision/trace-collider',
+    'plugins/collision/trace-collider2'
     ],
 function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,
-        regOcclusionScan,
+        regUILayer, regOcclusionScan,
         regParticles,
         regPushCam,
-        regTraceCollider) {
+        regTraceCollider, regTraceCollider2) {
 
     'use strict';
 
@@ -31,6 +33,7 @@ function(
         regAnimate(sn);
         reg8way(sn);
 
+        regUILayer(sn);
         regOcclusionScan(sn);
 
         regParticles(sn);
@@ -38,6 +41,7 @@ function(
         regPushCam(sn);
 
         regTraceCollider(sn);
+        regTraceCollider2(sn);
     };
 
 });
