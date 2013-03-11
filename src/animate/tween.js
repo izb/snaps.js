@@ -34,7 +34,7 @@ define(function() {
             return b+c*(-2*tc + 3*ts);
         },
 
-        easeInOutCubic: function(t, b, c, d) {
+        easeInOutQuintic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
             var tc=ts*t;
@@ -131,15 +131,6 @@ define(function() {
             var tc=ts*t;
             return b+c*(-2*ts*ts + 10*tc + -15*ts + 8*t);
         },
-
-        /** Bounces around the target point, then settles.
-         */
-        bounceOut: function(t, b, c, d) {
-            t=Math.min(d,t);
-            var ts=(t/=d)*t;
-            var tc=ts*t;
-            return b+c*(33*tc*ts + -106*ts*ts + 126*tc + -67*ts + 15*t);
-        }
 
         /** Bounces around the target point, then settles.
          */

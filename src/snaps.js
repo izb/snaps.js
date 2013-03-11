@@ -66,7 +66,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
         this.activeFX = [];
 
-        _this.now = +new Date();
+        _this.now = 0;
 
         var c = document.getElementById(canvasID);
         this.clientWidth = c.clientWidth;
@@ -97,7 +97,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
         this.sprites = [];
         this.spriteMap = {};
 
-        this.lastFrameTime = +new Date();
+        this.lastFrameTime = 0;
 
         this.registerSpriteUpdater = function(name, fn, init) {
             _this.spriteUpdaters[name] = {fn:fn, init:init};
@@ -277,7 +277,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
                     }
 
                     /* Start the paint loop */
-                    setTimeout(function(){loop(+ new Date());}, 0);
+                    setTimeout(function(){loop(0);}, 0);
                 },
 
                 /* Preloader progress */
