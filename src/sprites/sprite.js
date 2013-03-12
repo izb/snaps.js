@@ -29,8 +29,10 @@ define(function() {
         }
         this.maxloops = maxloops;
         this.updates = updates;
-        for (var i = 0; i < this.updates.length; i++) {
-            this.updates[i].sprite = this;
+        if (this.updates!==undefined) {
+            for (var i = 0; i < this.updates.length; i++) {
+                this.updates[i].sprite = this;
+            }
         }
         this.endCallback = endCallback;
     }
@@ -50,7 +52,7 @@ define(function() {
      * expire.
      */
     Sprite.prototype.maxDuration = function() {
-        if (maxloops===0) {
+        if (this.maxloops===0) {
             return 0;
         }
         return this.state.dur * this.maxloops;
@@ -99,10 +101,10 @@ define(function() {
         /* TODO: Make a state transition, but maintain the jog position */
     };
 
-    Sprite.prototype.update = function() {
+    Sprite.prototype.update = function(now) {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                if(!this.updates[i].fn()) {
+                if(!this.updates[i].update(now)) {
                     /* Return false from an update function to break the chain. */
                     break;
                 }
@@ -115,8 +117,6 @@ define(function() {
             /* This may have been set by prior call to update, so check here */
             return;
         }
-        var x = this.x - screenx - this.def.x;
-        var y = this.y - screeny - this.def.y - this.h;
 
         this.state.draw(ctx, screenx, screeny, this.epoch, now);
     };

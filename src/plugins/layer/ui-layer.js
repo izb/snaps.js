@@ -24,10 +24,6 @@ define(function() {
         /* TODO: Draw widgets */
     };
 
-    UILayer.prototype.set = function(newconf) {
-        copyProps(newconf, this);
-    };
-
     return function(snaps) {
         sn = snaps;
         sn.registerLayerPlugin('ui-layer', UILayer, function(){});

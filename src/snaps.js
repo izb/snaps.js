@@ -2,6 +2,7 @@
 
 define(['sprites/spritedef',
         'sprites/sprite',
+        'sprites/composite',
         'input/keyboard',
         'input/mouse',
         'util/all',
@@ -16,7 +17,7 @@ define(['sprites/spritedef',
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
-function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
+function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
         tweens) {
 
@@ -101,12 +102,11 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
 
         this.lastFrameTime = 0;
 
-        this.registerSpriteUpdater = function(name, fn, init) {
-            _this.spriteUpdaters[name] = {fn:fn, init:init};
+        this.registerSpriteUpdater = function(name, ctor) {
+            _this.spriteUpdaters[name] = ctor;
         };
 
-        this.registerFxPlugin = function(name, fn, init) {
-            init.call(this);
+        this.registerFxPlugin = function(name, fn) {
             _this.fxUpdaters[name] = fn;
         };
 
@@ -425,7 +425,7 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
-                    updates[i] = _this.spriteUpdaters[opts.updates[i].name];
+                    updates[i] = new _this.spriteUpdaters[opts.updates[i].name]();
                     copyProps(opts.updates[i], updates[i]);
                 }
             }
@@ -444,6 +444,24 @@ function(SpriteDef, Sprite, Keyboard, Mouse, util, StaggeredIsometric,
             /* TODO: error cases */
             _this.sprites.push(s);
             _this.spriteMap[name] = s;
+        };
+
+        this.createComposite = function(x,y,h,name,endCallback) {
+
+            if (name===undefined) {
+                name = "unnamed"+_this.nextName;
+                _this.nextName++;
+            } else {
+                if(_this.spriteMap.hasOwnProperty(name)) {
+                    throw "Warning: duplicate sprite (composite) name " + name;
+                }
+            }
+
+            var comp = new Composite(this, x, y, h, endCallback);
+            comp.init();
+            _this.sprites.push(comp);
+            _this.spriteMap[name] = comp;
+            return comp;
         };
 
         /** Marks a time in the future for a timer to trigger. Timers are

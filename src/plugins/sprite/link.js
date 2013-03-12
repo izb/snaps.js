@@ -4,6 +4,10 @@ define(function() {
 
     var sn;
 
+    function Link() {
+
+    }
+
     /*
      * Example options:
      *
@@ -26,8 +30,8 @@ define(function() {
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    var link = function(now) {
 
+    Link.prototype.update = function(now) {
         var s = this.sprite;
         for (var i = this.link_to.length - 1; i >= 0; i--) {
             this.link_to[i].sprite.x = s.x + this.link_to[i].x;
@@ -39,7 +43,11 @@ define(function() {
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      */
-    var init = function() {
+    Link.prototype.init = function() {
+        if (typeof this.link_to !== 'object') {
+            throw "Link plugin requires a link_to option value (array)";
+        }
+
         for (var i = this.link_to.length - 1; i >= 0; i--) {
             this.link_to[i].sprite = sn.spriteMap[this.link_to[i].name];
         }
@@ -47,7 +55,7 @@ define(function() {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerSpriteUpdater('link', link, init);
+        sn.registerSpriteUpdater('link', Link);
     };
 
 });

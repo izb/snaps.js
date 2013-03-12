@@ -1,12 +1,14 @@
-define(function() {
+define(['util/js', 'sprites/sprite'], function(js, Sprite) {
 
     'use strict';
+
+    var copyProps = js.copyProps;
 
     function Composite(sn, x, y, h, endCallback) {
         this.sn = sn;
         this.x = x;
         this.y = y;
-        this.h = h;
+        this.h = h===undefined?0:h;
         this.endCallback = endCallback;
         this.active = true;
         this.sprites = [];
@@ -14,6 +16,40 @@ define(function() {
 
     Composite.prototype.init = function() {
         /* TODO: Initialize composite plugins */
+    };
+
+    Composite.prototype.addSprite = function(defName, stateName, x, y, h, opts) {
+
+        if (opts===undefined) {
+            opts = {};
+        }
+
+        var sd = this.sn.spriteDefs[defName];
+
+        /* TODO: Some of this code is shared in snaps.js - refactor */
+        var updates = opts.updates;
+        if (updates !== undefined) {
+            updates = new Array(opts.updates.length);
+            for (var i = 0; i < opts.updates.length; i++) {
+                updates[i] = new this.sn.spriteUpdaters[opts.updates[i].name]();
+                copyProps(opts.updates[i], updates[i]);
+            }
+        }
+
+        var s = new Sprite(this.sn, sd, x, y, h, opts.maxloops, updates, opts.collider, opts.endCallback);
+        s.setState(stateName);
+
+        if (opts.opts !== undefined) {
+            for(var opt in opts.opts) {
+                s[opt]=opts.opts[opt];
+            }
+        }
+
+        s.init();
+
+        this.sprites.push(s);
+
+        return s;
     };
 
     Composite.prototype.isActive = function(now) {
@@ -26,7 +62,7 @@ define(function() {
 
         for (var i = this.sprites.length - 1; i >= 0; i--) {
             var s = this.sprites[i];
-            if (s.isActive()) {
+            if (s.isActive(now)) {
                 isactive = true;
             } else {
                 this.sprites.splice(i,1);
@@ -42,8 +78,14 @@ define(function() {
         return isactive;
     };
 
-    Composite.prototype.update = function() {
+    Composite.prototype.update = function(now, fnEach) {
         /* TODO: Call composite plugins */
+        for (var i = this.sprites.length - 1; i >= 0; i--) {
+            if (fnEach!==undefined) {
+                fnEach.call(this.sprites[i]);
+            }
+            this.sprites[i].update();
+        }
     };
 
     Composite.prototype.draw = function(ctx, screenx, screeny, now) {
@@ -53,15 +95,17 @@ define(function() {
         }
 
         /* Composite's position. */
-        var x = this.x - screenx - this.def.x;
-        var y = this.y - screeny - this.def.y - this.h;
+        var x = this.x - screenx;
+        var y = this.y - screeny - this.h;
 
         for (var i = 0; i < this.sprites.length; i++) {
             var s = this.sprites[i];
 
             /* For sprites in a composite, the x/y position is relative to the
              * composite screen position. The height is ignored. */
-            s.drawAt(ctx, x + s.x, y + s.y, now);
+            if (s.isActive(now)) {
+                s.drawAt(ctx, x+s.x-s.def.y, y+s.y-s.h-s.def.y, now);
+            }
         }
     };
 

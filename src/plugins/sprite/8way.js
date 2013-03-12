@@ -4,12 +4,15 @@ define(function() {
 
     var sn;
 
+    function Face8Way() {
+    }
+
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    var face8way = function(now) {
+    Face8Way.prototype.update = function(now) {
 
         var s = this.sprite;
 
@@ -56,16 +59,13 @@ define(function() {
         return true;
     };
 
-    /** Called with the update options as the 'this' context, one of which
-     * is this.sprite, which refers to the sprite being updated.
-     */
-    var init = function() {
+    Face8Way.prototype.init = function() {
         this.direction = 'e';
     };
 
     return function(snaps) {
         sn = snaps;
-        sn.registerSpriteUpdater('8way', face8way, init);
+        sn.registerSpriteUpdater('8way', Face8Way);
     };
 
 });

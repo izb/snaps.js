@@ -1,11 +1,14 @@
 define([
     'sprites/sprite',
-    'sprites/composite'
-], function(Sprite, Composite) {
+    'sprites/composite',
+    'util/rnd'
+], function(Sprite, Composite, utilRnd) {
 
     'use strict';
 
     var sn;
+
+    var rnd = utilRnd.rnd;
 
     /** Spawns particles in a composite sprite.
      * @param {Object} opts Options, in the following format
@@ -22,21 +25,41 @@ define([
     function Particles(opts) {
         this.opts = opts;
 
-        this.number = (typeof opts.number === "number")?opts.number:opts.number();
+        var number = (typeof opts.number === "number")?opts.number:opts.number();
 
-        /* TODO: Spawn those particles! */
+        this.comp = sn.createComposite(opts.x, opts.y, opts.h, opts.name, opts.endCallback);
+
+        while(number-->0) {
+            var so = opts.spritePos||{x:0,y:0,h:0};
+            var s = this.comp.addSprite(opts.def, opts.state, so.x||0, so.y||0, so.h||0, opts.spriteOpts);
+            s.particleData = {
+                xspeed: rnd(-10,10),
+                hspeed: rnd(-10,20)
+            };
+        }
     }
+
+    var updateSprite = function() {
+        var pd = this.particleData;
+        this.x+=pd.xspeed;
+        this.h+=pd.hspeed;
+        pd.hspeed-=1;
+        if (this.h<0) {
+            this.h=0;
+        }
+    };
 
     /** FX plugin callbacks should return true to continue, or false if complete.
      * @return {Boolean} See description
      */
     Particles.prototype.update = function(now) {
-        return false;
+        this.comp.update(now, updateSprite);
+        return this.comp.isActive();
     };
 
     return function(snaps) {
         sn = snaps;
-        sn.registerFxPlugin('particles', Particles, function(){});
+        sn.registerFxPlugin('particles', Particles);
     };
 
 });

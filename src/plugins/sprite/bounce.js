@@ -4,6 +4,10 @@ define(function() {
 
     var sn;
 
+    function Bounce() {
+
+    }
+
     /*
      * Example options:
      *
@@ -21,7 +25,7 @@ define(function() {
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    var bounce = function(now) {
+    Bounce.prototype.update = function(now) {
         var s = this.sprite;
         var b = s.state.jogPos(s.epoch, sn.getNow());
         b*=2;
@@ -32,9 +36,12 @@ define(function() {
         return true;
     };
 
+    Bounce.prototype.init = function() {
+    };
+
     return function(snaps) {
         sn = snaps;
-        sn.registerSpriteUpdater('bounce', bounce, function(){});
+        sn.registerSpriteUpdater('bounce', Bounce);
     };
 
 });
