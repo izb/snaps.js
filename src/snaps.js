@@ -388,13 +388,17 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * set up in your game's spriteDefs data.
          * @param stateName The initial state. This too is defined in the
          * sprite's definition, in your game's spriteDefs data.
-         * @param x The world x coordinate
-         * @param y The world y coordinate
-         * @param h The height off the ground.
+         * @param {Function/Number} x The world x coordinate. If a function, it should take
+         * no paremeters and return a number.
+         * @param {Function/Number} y The world y coordinate. If a function, it should take
+         * no paremeters and return a number.
+         * @param {Function/Number} h The height off the ground. If a function, it should take
+         * no paremeters and return a number.
          * @param Optional parameter object, which can contain:
          * 'name' if you want to be able to find your sprite again.
          * 'maxloops' if your sprite should remove itself from the world
-         * after it's looped around its animation a certain number of times.
+         * after it's looped around its animation a certain number of times. Can be a function, like
+         * the world position parameters.
          * Normally you'd set this to 1 for things like explosions.
          * 'update' An array of functions that are called in-order for this
          * sprite.
@@ -415,8 +419,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 _this.nextName++;
             } else {
                 if(_this.spriteMap.hasOwnProperty(name)) {
-                    throw "Warning: duplicate sprite name " + name;
+                    throw "Error: duplicate sprite name " + name;
                 }
+            }
+
+            if(!_this.spriteDefs.hasOwnProperty(defName)) {
+                throw "Error: Missing sprite definition when spawning sprite " + defName;
             }
 
             var sd = _this.spriteDefs[defName];
@@ -425,7 +433,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
-                    updates[i] = new _this.spriteUpdaters[opts.updates[i].name]();
+                    var suname = opts.updates[i].name;
+                    if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
+                        throw "Sprite plugin used but not registered: "+suname;
+                    }
+                    updates[i] = new _this.spriteUpdaters[suname]();
                     copyProps(opts.updates[i], updates[i]);
                 }
             }
@@ -441,12 +453,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             s.init();
 
-            /* TODO: error cases */
             _this.sprites.push(s);
             _this.spriteMap[name] = s;
         };
 
-        this.createComposite = function(x,y,h,name,endCallback) {
+        this.createComposite = function(x,y,name,endCallback) {
 
             if (name===undefined) {
                 name = "unnamed"+_this.nextName;
@@ -457,7 +468,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
 
-            var comp = new Composite(this, x, y, h, endCallback);
+            var comp = new Composite(this, x, y, endCallback);
             comp.init();
             _this.sprites.push(comp);
             _this.spriteMap[name] = comp;

@@ -35,7 +35,7 @@ define(['util/js'], function(js) {
             ctx.lineWidth = 1;
             ctx.strokeStyle = 'yellow';
             ctx.beginPath();
-            this.sn.mouseWorldPos(endW);
+            sn.mouseWorldPos(endW);
 
             dx = endW[0]+i - this.x;
             dy = endW[1] - this.y;
@@ -46,9 +46,9 @@ define(['util/js'], function(js) {
                     Math.floor(dy),
                     0,
                     limit);
-            this.sn.worldToScreenPos(limit[0], limit[1], limit);
+            sn.worldToScreenPos(limit[0], limit[1], limit);
 
-            this.sn.worldToScreenPos(this.x, this.y, startS);
+            sn.worldToScreenPos(this.x, this.y, startS);
             ctx.moveTo(startS[0], startS[1]);
             ctx.lineTo(limit[0], limit[1]);
             ctx.stroke();
@@ -63,7 +63,7 @@ define(['util/js'], function(js) {
             ctx.lineWidth = 1;
             ctx.strokeStyle = 'yellow';
             ctx.beginPath();
-            this.sn.mouseWorldPos(endW);
+            sn.mouseWorldPos(endW);
 
             dx = endW[0] - this.x;
             dy = endW[1]+i - this.y;
@@ -74,9 +74,9 @@ define(['util/js'], function(js) {
                     Math.floor(dy),
                     0,
                     limit);
-            this.sn.worldToScreenPos(limit[0], limit[1], limit);
+            sn.worldToScreenPos(limit[0], limit[1], limit);
 
-            this.sn.worldToScreenPos(this.x, this.y, startS);
+            sn.worldToScreenPos(this.x, this.y, startS);
             ctx.moveTo(startS[0], startS[1]);
             ctx.lineTo(limit[0], limit[1]);
             ctx.stroke();

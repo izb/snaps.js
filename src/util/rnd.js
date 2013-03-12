@@ -2,8 +2,6 @@ define(function() {
 
     'use strict';
 
-    /* TODO: Speed test this file to see if it's bollocks. */
-
     /** Return a random integer.
      * @param min Lowest possible value
      * @param max Highest possible value
@@ -17,16 +15,23 @@ define(function() {
         rnd: rnd,
 
         /** Generates a function that returns a faster random number
-         * generator, but which has a setup cost.
+         * generator, but which has a setup cost. If you're using a very large
+         * number of random numbers, this is significantly faster.
+         *
+         * http://jsperf.com/precalc-random-numbers
+         *
          * e.g.
          * var nextRand = rnd.fastRand(1, 10); // The slow bit
          * var n = nextRand(); // The fast bit
          * @param min Lowest possible value
          * @param max Highest possible value
+         * @param {Number} setsize Optional. The number of values to
+         * precalculate.
          */
-        fastRand: function(min, max) {
+        fastRand: function(min, max,setsize) {
             var lut = [];
-            for (var i=10000; i>0; i--) {
+            setsize = setsize||10000;
+            for (var i=setsize; i>0; i--) {
                 lut.push(rnd(min, max));
             }
 

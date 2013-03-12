@@ -22,7 +22,7 @@ define(function() {
      * }]
      *
      * Means the x and y properties of the sprite will adjusted by 20,30
-     * over 1000ms with the specified easing.
+     * over 1000ms with the easing in and out.
      *
      * If duration is omited, it will be calculated automatically from the
      * maxloops lifespan of the sprite

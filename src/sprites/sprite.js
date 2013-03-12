@@ -5,29 +5,45 @@ define(function() {
     /** Creates a new sprite object.
      * @param {Object} sn Snaps engine ref
      * @param {Object} def The sprite definition to use
-     * @param {Number} x X world position
-     * @param {Number} y Y world position
-     * @param {Number} h Height from the ground
-     * @param {Number} maxloops How many times should the initial state loop
+     * @param {Function/Number} x X world position
+     * @param {Function/Number} y Y world position
+     * @param {Function/Number} h Height from the ground
+     * @param {Function/Number} maxloops How many times should the initial state loop
      * before the sprite is automatically destroyed? Set to 0 or undefined
      * if it does not automatically expire.
      * @param {Array} updates An array of functions to call to update this sprite.
      * @param {Object} collider A collider to test for collisions during movement
      * @param {Function} endCallback An optional function to call when the sprite is
      * destroyed.
+     *
+     * An example of how to pass a random range into any Function/Number parameters would be to bind
+     * the rnd function in util/rnd. E.g.
+     *
+     * var posRange = rnd.bind(rnd,-20,20); // Random range between -20 and 20
+     * var fastRand = rnd.fastRand(10,20); // Fast cached random number set
+     *
+     * new Sprite(sn,def,posRange,posRange,0,fastRand);
+     *
+     * Alternatively of course, you could provide your own custom parameterless number
+     * generator and pass it in.
      */
     function Sprite(sn, def, x, y, h, maxloops, updates, collider, endCallback) {
+
+        var cx = typeof opts.x === 'function'?opts.x():opts.x;
+
+
         this.def = def;
         this.sn = sn;
-        this.x = x;
-        this.y = y;
-        this.h = h;
+        this.x = typeof x === 'function'?x():x;
+        this.y = typeof y === 'function'?y():y;
+        this.h = typeof h === 'function'?h():h;
         this.state = null;
         this.active = true;
         if (maxloops === undefined) {
-            maxloops = 0;
+            this.maxloops = 0;
+        } else {
+            this.maxloops = typeof maxloops === 'function'?maxloops():maxloops;
         }
-        this.maxloops = maxloops;
         this.updates = updates;
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
@@ -35,6 +51,7 @@ define(function() {
             }
         }
         this.endCallback = endCallback;
+        this.collider = collider; /* TODO: use this. */
     }
 
     Sprite.prototype.init = function() {

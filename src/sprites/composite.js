@@ -4,11 +4,10 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
 
     var copyProps = js.copyProps;
 
-    function Composite(sn, x, y, h, endCallback) {
+    function Composite(sn, x, y, endCallback) {
         this.sn = sn;
         this.x = x;
         this.y = y;
-        this.h = h===undefined?0:h;
         this.endCallback = endCallback;
         this.active = true;
         this.sprites = [];
@@ -96,7 +95,7 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
 
         /* Composite's position. */
         var x = this.x - screenx;
-        var y = this.y - screeny - this.h;
+        var y = this.y - screeny;
 
         for (var i = 0; i < this.sprites.length; i++) {
             var s = this.sprites[i];

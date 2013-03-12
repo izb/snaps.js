@@ -2,7 +2,7 @@ define(function() {
 
     'use strict';
 
-    /* http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm */
+    /* Via http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm */
 
     /*
      * In all tween functions:
@@ -17,14 +17,10 @@ define(function() {
      * which is softer than cubic.
      */
 
-     /* TODO: In many of these functions, the arithmetic can be rearranged to be simpler.
-      * You should totally fix that. */
-
     return {
         linear: function(t, b, c, d)
         {
-            t/=d;
-            return b+c*Math.min(1,t);
+            return b+c*Math.min(1,t/d);
         },
 
         easeInOutCubic: function(t, b, c, d) {

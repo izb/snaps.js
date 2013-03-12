@@ -24,8 +24,6 @@ function(
 
     'use strict';
 
-    /*TODO : error on loading unregistered plugin*/
-
     return function(sn) {
         regBounce(sn);
         regFollowMouse(sn);
