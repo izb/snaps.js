@@ -1,6 +1,8 @@
 Snaps.js
 ========
 
+[![Build Status](https://travis-ci.org/izb/snaps.js.png?branch=master)](https://travis-ci.org/izb/snaps.js)
+
 The JavaScript isometric game engine
 ------------------------------------
 
