@@ -29,9 +29,6 @@ define(function() {
      */
     function Sprite(sn, def, x, y, h, maxloops, updates, collider, endCallback) {
 
-        var cx = typeof opts.x === 'function'?opts.x():opts.x;
-
-
         this.def = def;
         this.sn = sn;
         this.x = typeof x === 'function'?x():x;

@@ -209,6 +209,19 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return layer;
         };
 
+        this.spriteCount = function() {
+            var c = 0;
+            for (var i = 0; i < _this.sprites.length; i++) {
+                var s = _this.sprites[i];
+                if (s instanceof Composite) {
+                    c+=s.sprites.length;
+                } else {
+                    c++;
+                }
+            }
+            return c;
+        };
+
         function drawDebug() {
 
             if (_this.dbgShowMouse) {
@@ -222,7 +235,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             if (_this.dbgShowCounts) {
                 debugText(_this.ctx,
-                        "Sprites: "+_this.sprites.length,5, _this.clientHeight-15);
+                        "Sprites: "+_this.spriteCount(),5, _this.clientHeight-15);
             }
 
             if (_this.dbgShowMouseTile && _this.map!==undefined) {
