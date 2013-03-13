@@ -65,4 +65,5 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('default', 'lint:build requirejs:snaps copy:lib closureCompiler');
+    grunt.registerTask('test', 'default'); /* TODO: Testing. */
 };

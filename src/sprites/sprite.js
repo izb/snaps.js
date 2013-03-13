@@ -156,21 +156,43 @@ define(function() {
         this.state.draw(ctx, screenx, screeny, this.epoch, now, (!this.active && !this.autoRemove));
     };
 
-    /** Move a sprite, taking collision into account. If there is a collision,
-     * the sprite will be moved to the point of collision.
+    /** Move a sprite to a point, taking collision into account.
+     * If there is a collision, the sprite will be moved to the point of collision.
      * @param  {Number} tx Target x world position
      * @param  {Number} ty Target y world position
-     * @param  {Number} th Target height
+     * @param  {Number} th Optional; Target height
      */
     Sprite.prototype.moveTo = function(tx,ty,th) {
         var dx = tx-this.x;
         var dy = ty-this.y;
+        if (!(dx||dy||th)) {
+            return;
+        }
         this.x=tx;
         this.y=ty;
         this.directionx = this.x + dx;
         this.directiony = this.y + dy;
         if (th!==undefined) {
             this.h=th;
+        }
+    };
+
+    /** Move a sprite by a given amount, taking collision into account.
+     * If there is a collision, the sprite will be moved to the point of collision.
+     * @param  {Number} dx Amount to alter x position
+     * @param  {Number} dy Amount to alter y position
+     * @param  {Number} dh Optional; Amount to alter height
+     */
+    Sprite.prototype.move = function(dx,dy,dh) {
+        if (!(dx||dy||dh)) {
+            return;
+        }
+        this.x+=dx;
+        this.y+=dy;
+        this.directionx = this.x + dx;
+        this.directiony = this.y + dy;
+        if (dh!==undefined) {
+            this.h+=dh;
         }
     };
 
