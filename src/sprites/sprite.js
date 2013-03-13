@@ -8,13 +8,20 @@ define(function() {
      * @param {Function/Number} x X world position
      * @param {Function/Number} y Y world position
      * @param {Function/Number} h Height from the ground
-     * @param {Function/Number} maxloops How many times should the initial state loop
-     * before the sprite is automatically destroyed? Set to 0 or undefined
-     * if it does not automatically expire.
-     * @param {Array} updates An array of functions to call to update this sprite.
-     * @param {Object} collider A collider to test for collisions during movement
-     * @param {Function} endCallback An optional function to call when the sprite is
-     * destroyed.
+     * @param {Object} opts Optional configuration options. All properties are optional
+     * and is in the following form:
+     * {
+     *     maxloops: {Function/Number} How many times should the initial state loop
+     *               before the sprite is automatically destroyed? Set to 0 or undefined
+     *               if it does not automatically expire.
+     *     updates: {Array} An array of sprite update plugin instances that will be called
+     *              with each update of this sprite.
+     *     collider: {object} A collider to test for collisions during movement
+     *     endCallback: {Function}An optional function to call when the sprite is destroyed.
+     *     autoRemove: {bool} Optional (defaults to true). If set, the sprite will be removed
+     *                 from the scene once it expires. If maxloops is set and it is not
+     *                 removed, it will remain on the final frame.
+     * }
      *
      * An example of how to pass a random range into any Function/Number parameters would be to bind
      * the rnd function in util/rnd. E.g.
@@ -22,12 +29,13 @@ define(function() {
      * var posRange = rnd.bind(rnd,-20,20); // Random range between -20 and 20
      * var fastRand = rnd.fastRand(10,20); // Fast cached random number set
      *
-     * new Sprite(sn,def,posRange,posRange,0,fastRand);
+     * new Sprite(sn,def,posRange,posRange,0,{maxloops:fastRand});
      *
      * Alternatively of course, you could provide your own custom parameterless number
      * generator and pass it in.
      */
-    function Sprite(sn, def, x, y, h, maxloops, updates, collider, endCallback) {
+    function Sprite(sn, def, x, y, h, opts) {
+        opts = opts||{};
 
         this.def = def;
         this.sn = sn;
@@ -36,19 +44,23 @@ define(function() {
         this.h = typeof h === 'function'?h():h;
         this.state = null;
         this.active = true;
-        if (maxloops === undefined) {
+        if (opts.maxloops === undefined) {
             this.maxloops = 0;
         } else {
-            this.maxloops = typeof maxloops === 'function'?maxloops():maxloops;
+            this.maxloops = typeof opts.maxloops === 'function'?opts.maxloops():opts.maxloops;
         }
-        this.updates = updates;
+        this.updates = opts.updates;
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 this.updates[i].sprite = this;
             }
         }
-        this.endCallback = endCallback;
-        this.collider = collider; /* TODO: use this. */
+        this.endCallback = opts.endCallback;
+        this.collider = opts.collider; /* TODO: use this. */
+        this.autoRemove = opts.autoRemove;
+        if (this.autoRemove===undefined) {
+            this.autoRemove = true;
+        }
     }
 
     Sprite.prototype.init = function() {
@@ -73,6 +85,10 @@ define(function() {
     };
 
     Sprite.prototype.isActive = function(now) {
+        if (!this.autoRemove) {
+            return false;
+        }
+
         if (this.active && this.maxloops>0 && this.state.dur * this.maxloops <= (now - this.epoch)) {
             this.active = false;
 
@@ -84,6 +100,9 @@ define(function() {
     };
 
     Sprite.prototype.setState = function(state, ext) {
+
+        this.active = true;
+
         if (this.stateName===state && this.stateExt===ext) {
             return;
         }
@@ -112,7 +131,9 @@ define(function() {
     };
 
     Sprite.prototype.morphState = function(state) {
-        /* TODO: Make a state transition, but maintain the jog position */
+        /* TODO: Make a state transition, but maintain the jog position. Note that the jog position
+         * may be clamped to the last frame if autoRemove is false and the internal active flag is set.
+         */
     };
 
     Sprite.prototype.update = function(now) {
@@ -127,12 +148,12 @@ define(function() {
     };
 
     Sprite.prototype.drawAt = function(ctx, screenx, screeny, now) {
-        if (!this.active) {
+        if (!this.active && this.autoRemove) {
             /* This may have been set by prior call to update, so check here */
             return;
         }
 
-        this.state.draw(ctx, screenx, screeny, this.epoch, now);
+        this.state.draw(ctx, screenx, screeny, this.epoch, now, (!this.active && !this.autoRemove));
     };
 
     /** Move a sprite, taking collision into account. If there is a collision,

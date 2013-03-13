@@ -455,7 +455,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
 
-            var s = new Sprite(_this, sd, x, y, h, opts.maxloops, updates, opts.collider, opts.endCallback);
+            opts = copyProps(opts, {updates:updates}); /* Clone and alter */
+
+            var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);
 
             if (opts.opts !== undefined) {

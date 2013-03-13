@@ -35,7 +35,9 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
             }
         }
 
-        var s = new Sprite(this.sn, sd, x, y, h, opts.maxloops, updates, opts.collider, opts.endCallback);
+        opts = copyProps(opts, {updates:updates}); /* Clone and alter */
+
+        var s = new Sprite(this.sn, sd, x, y, h, opts);
         s.setState(stateName);
 
         if (opts.opts !== undefined) {

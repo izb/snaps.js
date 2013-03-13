@@ -2,6 +2,10 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @param {Array} seq Image offset sequence in the form
+     * [[x0,y0],[x1,y1],[x2,y2]...]
+     */
     function State(seq, dur, def) {
         this.seq = seq;
         this.dur = dur;
@@ -14,9 +18,12 @@ define(function() {
         return dt / this.dur;
     };
 
-    State.prototype.draw = function(ctx, x, y, epoch, now) {
+    State.prototype.draw = function(ctx, x, y, epoch, now, forceFinal) {
         var def = this.def;
-        var pos = this.seq[Math.floor(this.seq.length * this.jogPos(epoch, now))];
+        var pos = this.seq[
+            forceFinal?
+                this.seq.length-1
+              : Math.floor(this.seq.length * this.jogPos(epoch, now))];
 
         ctx.drawImage(
                 /* src */
