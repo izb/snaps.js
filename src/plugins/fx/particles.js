@@ -61,19 +61,25 @@ define([
             var so = opts.spritePos||{x:0,y:0,h:0};
             var s = this.comp.addSprite(opts.def, opts.state, so.x||0, so.y||0, so.h||0, opts.spriteOpts);
             s.particleData = {
-                xspeed: rnd(-10,10),
-                hspeed: rnd(-10,20)
+                xspeed: rnd(-400,400)/1000,
+                hspeed: rnd(-600,50)/1000,
+                xaccell: 0,
+                haccell: 0.001,
+                startx: so.x||0,
+                starth: so.h||0,
+                epoch: this.epoch
             };
         }
     }
 
-    var updateSprite = function() {
-        var pd = this.particleData;
-        this.x+=pd.xspeed;
-        this.h+=pd.hspeed;
-        pd.hspeed-=1;
-        if (this.h<0) {
-            this.h=0;
+    var updateSprite = function(s, now) {
+        var pd = s.particleData;
+        var t = now - pd.epoch;
+        var ts=t*t;
+        s.x=Math.floor(pd.startx+(pd.xspeed*t+(pd.xaccell*ts)/2));
+        s.h=Math.floor(pd.starth-(pd.hspeed*t+(pd.haccell*ts)/2));
+        if (s.h<0) {
+            s.h=0;
         }
     };
 
@@ -81,7 +87,7 @@ define([
      * @return {Boolean} See description
      */
     Particles.prototype.update = function(now) {
-        this.comp.update(now, updateSprite);
+        this.comp.update(now, updateSprite.bind(this));
         if (this.duration!==undefined) {
             if ((now - this.epoch)>this.duration) {
                 /* The particle effect will no longer manipulate the composite sprites and they will be

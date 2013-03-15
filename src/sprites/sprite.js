@@ -61,6 +61,8 @@ define(function() {
         if (this.autoRemove===undefined) {
             this.autoRemove = true;
         }
+
+        this.collisionPoint = [0,0];
     }
 
     Sprite.prototype.init = function() {
@@ -85,18 +87,14 @@ define(function() {
     };
 
     Sprite.prototype.isActive = function(now) {
-        if (!this.autoRemove) {
-            return false;
-        }
-
         if (this.active && this.maxloops>0 && this.state.dur * this.maxloops <= (now - this.epoch)) {
             this.active = false;
 
-            if (this.endCallback!==undefined) {
+            if (this.endCallback!==undefined&&this.autoRemove) {
                 this.endCallback();
             }
         }
-        return this.active;
+        return this.active||!this.autoRemove;
     };
 
     Sprite.prototype.setState = function(state, ext) {
@@ -168,6 +166,16 @@ define(function() {
         if (!(dx||dy||th)) {
             return;
         }
+
+        if (this.collider!==undefined) {
+            if(this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint)) {
+                tx = this.collisionPoint[0];
+                ty = this.collisionPoint[1];
+                dx=tx-this.x;
+                dy=ty-this.y;
+            }
+        }
+
         this.x=tx;
         this.y=ty;
         this.directionx = this.x + dx;
@@ -187,6 +195,21 @@ define(function() {
         if (!(dx||dy||dh)) {
             return;
         }
+
+        if (this.collider!==undefined) {
+            if(this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint)) {
+                dx=(this.x-this.collisionPoint[0])|0;
+                dy=(this.y-this.collisionPoint[1])|0;
+                this.x = this.collisionPoint[0];
+                this.y = this.collisionPoint[1];
+                this.directionx = this.x + dx;
+                this.directiony = this.y + dy;
+                var hh = this.sn.getTilePropAtWorldPos('height',this.collisionPoint[0],this.collisionPoint[1]);
+                //console.log(this.x,this.y,'hh',hh);
+                return;
+            }
+        }
+
         this.x+=dx;
         this.y+=dy;
         this.directionx = this.x + dx;
@@ -211,8 +234,8 @@ define(function() {
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
         this.drawAt(
                 ctx,
-                this.x - offsetx - this.def.x,
-                this.y - offsety - this.def.y - this.h,
+                (this.x - offsetx - this.def.x)|0,
+                (this.y - offsety - this.def.y - this.h)|0,
                 now);
     };
 

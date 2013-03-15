@@ -25,6 +25,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
     var debugText = util.debug.debugText;
     var copyProps = util.js.copyProps;
+    var clone = util.js.clone;
     var Preloader = util.Preloader;
 
     function Snaps(game, canvasID, settings) {
@@ -170,8 +171,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             _this.ctx.drawImage(_this.imageCache[im],x,y);
         };
 
-        this.cls = function() {
-            _this.ctx.fillStyle = '#000';
+        this.cls = function(col) {
+            _this.ctx.fillStyle = col||'#000';
             _this.ctx.fillRect (0,0,_this.clientWidth,_this.clientHeight);
         };
 
@@ -256,12 +257,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             _this.now = now;
             var time = now - _this.lastFrameTime;
+            _this.updateFX(now);
+            _this.map.updateLayers(time);
+            update(time); /* This fn is in the game code */
             if (_this.camera) {
                 _this.camera.update(time);
             }
-            _this.updateFX(time);
-            _this.map.updateLayers(time);
-            update(time); /* This fn is in the game code */
             draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {
                 _this.map.drawDebugRegions(_this.ctx);
@@ -278,35 +279,35 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         preloader.load(
 
-                /* Preloading complete */
-                function() {
+            /* Preloading complete */
+            function() {
 
-                    /* Resolve the layers into handy image references */
-                    if (_this.map!==undefined) {
-                        _this.map.resolveTiles();
-                    }
-
-                    /* Tell the game where we're at */
-                    if (typeof _this.game.onResourcesLoaded === 'function') {
-                        _this.game.onResourcesLoaded();
-                    }
-
-                    /* Start the paint loop */
-                    setTimeout(function(){loop(0);}, 0);
-                },
-
-                /* Preloader progress */
-                function(progress) {
-                    if (typeof _this.game.onProgress === 'function') {
-                        _this.game.onProgress(progress, _this.ctx);
-                    }
-                },
-
-                /* Preloading failed */
-                function() {
-                    _this.game.onLoadError();
+                /* Resolve the layers into handy image references */
+                if (_this.map!==undefined) {
+                    _this.map.resolveTiles();
                 }
-            );
+
+                /* Tell the game where we're at */
+                if (typeof _this.game.onResourcesLoaded === 'function') {
+                    _this.game.onResourcesLoaded();
+                }
+
+                /* Start the paint loop */
+                setTimeout(function(){loop(0);}, 0);
+            },
+
+            /* Preloader progress */
+            function(progress) {
+                if (typeof _this.game.onProgress === 'function') {
+                    _this.game.onProgress(progress, _this.ctx);
+                }
+            },
+
+            /* Preloading failed */
+            function() {
+                _this.game.onLoadError();
+            }
+        );
 
 
         this.actioning = function(action) {
@@ -455,7 +456,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
 
-            opts = copyProps(opts, {updates:updates}); /* Clone and alter */
+            opts = clone(opts);
+            opts.updates = updates;
 
             var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);

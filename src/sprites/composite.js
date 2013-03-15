@@ -3,6 +3,7 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
     'use strict';
 
     var copyProps = js.copyProps;
+    var clone = js.clone;
 
     function Composite(sn, x, y, endCallback) {
         this.sn = sn;
@@ -35,7 +36,8 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
             }
         }
 
-        opts = copyProps(opts, {updates:updates}); /* Clone and alter */
+        opts = clone(opts);
+        opts.updates = updates;
 
         var s = new Sprite(this.sn, sd, x, y, h, opts);
         s.setState(stateName);
@@ -83,7 +85,7 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
         /* TODO: Call composite plugins */
         for (var i = this.sprites.length - 1; i >= 0; i--) {
             if (fnEach!==undefined) {
-                fnEach.call(this.sprites[i]);
+                fnEach(this.sprites[i], now);
             }
             this.sprites[i].update();
         }

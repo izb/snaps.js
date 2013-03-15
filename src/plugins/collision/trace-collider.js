@@ -11,6 +11,7 @@ define(function() {
         if (opts.whisker>0) {
             this.whisker = opts.whisker;
             this.sampleCount = opts.samples?opts.samples:7;
+            this.samples = new Array(2*this.sampleCount);
             if (this.sampleCount<3||(this.sampleCount&1)===0) {
                 throw "Trace collider sample count must be an odd number 3 or higher";
             }
@@ -25,7 +26,9 @@ define(function() {
         this.bottomEdge = edges.be;
     }
 
-    var doTrace = function(x0, y0, dx, dy, h, out) {
+    var doTrace = function(x0, y0, dx, dy, h, out){
+
+        this.sampled = [];
 
         var i;
 
@@ -35,43 +38,45 @@ define(function() {
         var oy0 = y0;
         var odx = dx;
         var ody = dy;
+        var leadx,leady;
 
-        var result;
+        var sampleHeight;
+
         if (dx === 0 && dy === 0) {
             out[0] = x0;
             out[1] = y0;
-            result = this.sn.getTilePropAtWorldPos('height',x0,y0);
-            return (result>h);
+            sampleHeight = this.sn.getTilePropAtWorldPos('height',x0,y0);
+            return (sampleHeight>h);
         }
 
-        var nwx,nwy,samples;
+        var nwx,nwy;
         if (w>0) {
             var dy2 = dy*2;
             var len = Math.sqrt((dx*dx) + (dy2*dy2));
             nwx = dx/len;
             nwy = dy/len;
-            dx = Math.floor(dx+w*nwx);
-            dy = Math.floor(dy+w*nwy);
-            samples = new Array(2*this.sampleCount);
+            dx = (dx+w*nwx)|0;
+            dy = (dy+w*nwy)|0;
             var a = Math.atan2(dy*2, dx) - Math.PI/2;
             var astep = Math.PI/(this.sampleCount-1);
             var mid = Math.floor(this.sampleCount/2)*2;
-            var leadx,leady;
             for (i = 0; i < this.sampleCount*2; i+=2) {
                 var cs = Math.cos(a);
                 var sn = Math.sin(a);
 
-                samples[i] = w* cs;
-                samples[i+1] = w*sn/2;
+                this.samples[i] = (w* cs)|0;
+                this.samples[i+1] = (w*sn/2)|0;
+
                 if (i===mid) {
-                    leadx=samples[i];
-                    leady=samples[i+1];
+                    leadx=this.samples[i];
+                    leady=this.samples[i+1];
                 }
+
                 a+=astep;
             }
             for (i = 0; i < this.sampleCount*2; i+=2) {
-                samples[i] = samples[i]-leadx;
-                samples[i+1] = samples[i+1]-leady;
+                this.samples[i] = this.samples[i]-leadx;
+                this.samples[i+1] = this.samples[i+1]-leady;
             }
         }
 
@@ -85,39 +90,81 @@ define(function() {
         var sy = (y0 < y1) ? 1 : -1;
         var err = dx-dy;
 
-        var found, collided = false;
+        var found = false;
+        var collided = false;
+        var x0clear = x0;
+        var y0clear = y0;
+
+        var absleadx = Math.abs(leadx);
+        var absleady = Math.abs(leady);
+
+        var e2;
+
+        if (w===0) {
+            /* Skip the first pixel, we can assume it's good. */
+            e2 = 2*err;
+            if (e2 >-dy){
+                err -= dy;
+                x0  += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y0  += sy;
+            }
+        }
+
         while(true){
-            if (w===0) {
-                if (x0<this.leftEdge || x0>this.rightEdge || y0<this.topEdge || y0> this.bottomEdge) {
-                    collided = true;
-                    break;
-                }
-                result = this.sn.getTilePropAtWorldPos('height',x0,y0);
+            if (w===0||(Math.abs(x0-ox0)>=absleadx && Math.abs(y0-oy0)>=absleady)) {
 
-                if(result>h) {
-                    collided = true;
-                    break;
-                }
-            } else {
-                found = false;
-                for (i = 0; i < samples.length; i+=2) {
-                    var sx0 = x0+samples[i];
-                    var sy0 = y0+samples[i+1];
-
-                    if (sx0<this.leftEdge || sx0>this.rightEdge || sy0<this.topEdge || sy0> this.bottomEdge) {
+                if (w===0) {
+                    if (x0<this.leftEdge || x0>this.rightEdge || y0<this.topEdge || y0> this.bottomEdge) {
                         collided = true;
-                        found = true;
                         break;
                     }
 
-                    result = this.sn.getTilePropAtWorldPos('height',sx0,sy0);
+                    sampleHeight = this.sn.getTilePropAtWorldPos('height',x0,y0);
 
-                    if(result>h||result===undefined) {
+                    if(sampleHeight>h) {
                         collided = true;
-                        found = true;
                         break;
                     }
+
+                    x0clear = x0;
+                    y0clear = y0;
+
+                } else {
+                    found = false;
+                    for (i = 0; i < this.samples.length; i+=2) {
+                        var sx0 = x0+this.samples[i];
+                        var sy0 = y0+this.samples[i+1];
+
+                        if (sx0<this.leftEdge || sx0>this.rightEdge || sy0<this.topEdge || sy0> this.bottomEdge) {
+                            collided = true;
+                            found = true;
+                            break;
+                        }
+
+                        sampleHeight = this.sn.getTilePropAtWorldPos('height',sx0,sy0);
+
+                        this.sampled.push(sx0);
+                        this.sampled.push(sy0);
+
+                        if(sampleHeight>h||sampleHeight===undefined) {
+                            // console.log("hit", this.samples[i], this.samples[i+1]);
+                            // console.log("from ", this.samples);
+                            // console.log("during", ox0,oy0);
+                            collided = true;
+                            found = true;
+                            break;
+                        }
+
+                    }
+                    if (!found) {
+                        x0clear = x0;
+                        y0clear = y0;
+                    }
                 }
+
             }
 
             if (found) {
@@ -128,7 +175,7 @@ define(function() {
                 break;
             }
 
-            var e2 = 2*err;
+            e2 = 2*err;
 
             if (e2 >-dy){
                 err -= dy;
@@ -143,27 +190,25 @@ define(function() {
 
         if (w>0 && collided) {
             /* Move the limit point to the centre, not the whisker tip. */
-            x0-=(nwx*w);
-            y0-=(nwy*w);
+
+
+            x0clear-=leadx;
+            y0clear-=leady;
         }
 
-        if (collided && out !==undefined) {
+        if (collided) {
             if (out!==undefined) {
-                out[0] = x0;
-                out[1] = y0;
-            }
-
-            if (dx>dy) {
-                return (ox0-x0)/(-odx);
-            } else {
-                return (oy0-y0)/(-ody);
+                //console.log(ox0,oy0,x0,y0,x0clear,y0clear,"lead",leadx,leady,"od",odx,ody);
+                out[0] = x0clear;
+                out[1] = y0clear;
             }
         } else if (out!==undefined) {
             out[0] = ox0+odx;
             out[1] = oy0+ody;
         }
-        return 1;
+        return collided;
     };
+
 
     /** Perform a trace to test for collision along a line.
      * @param  {Array} out An optional 2-length array which will recieve the
@@ -174,8 +219,14 @@ define(function() {
      * @return {Boolean} True if there was a collision.
      */
     TraceCollider.prototype.test = function(x0, y0, dx, dy, h, out){
-        var ratio = doTrace.call(this, x0, y0, dx, dy, h, out);
-        return ratio<1;
+        /* Ensuring integers always go in via this wrapper ensures that
+         * V8 won't back out runtime optimisations of the code. */
+        return doTrace.call(this,
+            (x0)|0,
+            (y0)|0,
+            (dx)|0,
+            (dy)|0,
+            h, out);
     };
 
     return function(snaps) {

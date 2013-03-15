@@ -12,15 +12,14 @@ define([
 
     'plugins/camera/push-cam',
 
-    'plugins/collision/trace-collider',
-    'plugins/collision/trace-collider2'
+    'plugins/collision/trace-collider'
     ],
 function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,
         regUILayer, regOcclusionScan,
         regParticles,
         regPushCam,
-        regTraceCollider, regTraceCollider2) {
+        regTraceCollider) {
 
     'use strict';
 
@@ -39,7 +38,6 @@ function(
         regPushCam(sn);
 
         regTraceCollider(sn);
-        regTraceCollider2(sn);
     };
 
 });

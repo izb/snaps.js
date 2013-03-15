@@ -22,6 +22,16 @@ define(function() {
                 }
             }
             return d;
+        },
+
+        clone: function(s) {
+            var d = {};
+            for (var prop in s) {
+                if (s.hasOwnProperty(prop)) {
+                    d[prop] = s[prop];
+                }
+            }
+            return d;
         }
 
     };

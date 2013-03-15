@@ -18,7 +18,7 @@ define(['util/js'], function(js) {
         this.name = layerName;
         this.x = opts.x;
         this.y = opts.y;
-        this.collider = sn.createCollider('trace2', {whisker:opts.whisker});
+        this.collider = sn.createCollider('trace', {whisker:opts.whisker});
     }
 
     OcclusionScan.prototype.update = function(now) {
