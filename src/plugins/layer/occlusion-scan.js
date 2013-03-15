@@ -18,7 +18,8 @@ define(['util/js'], function(js) {
         this.name = layerName;
         this.x = opts.x;
         this.y = opts.y;
-        this.collider = sn.createCollider('trace', {whisker:opts.whisker});
+        /* TODO: Circle trace for now because I'm testing that. */
+        this.collider = sn.createCollider('circle-trace', {radius:opts.radius});
     }
 
     OcclusionScan.prototype.update = function(now) {
