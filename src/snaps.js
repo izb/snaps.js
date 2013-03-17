@@ -1,5 +1,3 @@
-/*global late_require:true*/
-
 define(['sprites/spritedef',
         'sprites/sprite',
         'sprites/composite',
@@ -35,21 +33,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
         this.tweens = tweens;
-
-        var stats = null;
-
-        if (settings.showFps) {
-            late_require(['stats'], function(Stats) {
-                stats = new Stats();
-                var statEle = stats.domElement;
-
-                statEle.style.position = 'absolute';
-                statEle.style.left = '0px';
-                statEle.style.top = '0px';
-
-                document.body.appendChild(statEle);
-            });
-        }
 
         this.dbgShowMouse = !!settings.showMouse;
         this.dbgShowCounts = !!settings.showCounts;
@@ -251,9 +234,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         function loop(now) {
             window.requestAnimationFrame(loop);
-            if (stats!==null) {
-                stats.begin();
-            }
 
             _this.now = now;
             var time = now - _this.lastFrameTime;
@@ -271,10 +251,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             drawDebug();
 
             _this.lastFrameTime = _this.now;
-
-            if (stats!==null) {
-                stats.end();
-            }
         }
 
         preloader.load(

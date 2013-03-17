@@ -30,7 +30,7 @@ define(['util/js'], function(js) {
         var endW = [0,0];
         var startS = [0,0];
         var limit = [0,0];
-        var i,dx,dy,collided;
+        var i,dx,dy,collisionRatio;
 
         for (i = -200; i < 200; i+=8) {
             ctx.lineWidth = 1;
@@ -40,7 +40,7 @@ define(['util/js'], function(js) {
 
             dx = endW[0]+i - this.x;
             dy = endW[1] - this.y;
-            collided = this.collider.test(
+            collisionRatio = this.collider.test(
                     Math.floor(this.x),
                     Math.floor(this.y),
                     Math.floor(dx),
@@ -55,7 +55,7 @@ define(['util/js'], function(js) {
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.strokeStyle = collided?'red':'green';
+            ctx.strokeStyle = collisionRatio<1?'red':'green';
             ctx.arc(limit[0],limit[1],2.5,0,2*Math.PI);
             ctx.stroke();
         }
@@ -68,7 +68,7 @@ define(['util/js'], function(js) {
 
             dx = endW[0] - this.x;
             dy = endW[1]+i - this.y;
-            collided = this.collider.test(
+            collisionRatio = this.collider.test(
                     Math.floor(this.x),
                     Math.floor(this.y),
                     Math.floor(dx),
@@ -83,7 +83,7 @@ define(['util/js'], function(js) {
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.strokeStyle = collided?'red':'green';
+            ctx.strokeStyle = collisionRatio<1?'red':'green';
             ctx.arc(limit[0],limit[1],2.5,0,2*Math.PI);
             ctx.stroke();
         }

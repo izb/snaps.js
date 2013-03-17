@@ -13,15 +13,14 @@ define([
     'plugins/camera/push-cam',
 
     'plugins/collision/sprite-with-map/line-trace',
-    'plugins/collision/sprite-with-map/circle-trace',
-    'plugins/collision/sprite-with-map/wide-trace'
+    'plugins/collision/sprite-with-map/circle-trace'
     ],
 function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,
         regUILayer, regOcclusionScan,
         regParticles,
         regPushCam,
-        regLineTrace, regCircleTrace, regWideTrace) {
+        regLineTrace, regCircleTrace) {
 
     'use strict';
 
@@ -41,7 +40,6 @@ function(
 
         regLineTrace(sn);
         regCircleTrace(sn);
-        regWideTrace(sn);
     };
 
 });

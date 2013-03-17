@@ -6,7 +6,6 @@ define(function() {
 
         var i;
 
-
         var ox0 = x0;
         var oy0 = y0;
         var odx = dx;
@@ -26,7 +25,7 @@ define(function() {
             out[0] = x0;
             out[1] = y0;
             sampleHeight = sn.getTilePropAtWorldPos(prop,x0,y0);
-            return (sampleHeight>h);
+            return 1;
         }
 
         /* The mighty Bresenham's line algorithm */
@@ -48,7 +47,6 @@ define(function() {
             err += dx;
             y0  += sy;
         }
-
 
         while(true){
             if (x0<edges.le || x0>edges.re || y0<edges.te || y0> edges.be) {
@@ -83,6 +81,7 @@ define(function() {
             }
         }
 
+        /* Populate the output final point for the caller */
         if (collided) {
             if (out!==undefined) {
                 out[0] = x0clear;
@@ -92,7 +91,19 @@ define(function() {
             out[0] = ox0+odx;
             out[1] = oy0+ody;
         }
-        return collided;
+
+        /* No collision indicated by 1 in returned collision ratio */
+        if (!collided) {
+            return 1;
+        }
+
+        /* Return a ratio of path completed, e.g. 0.5 means half of the path
+         * was traversed before being stopped by collision. */
+        if (dx>dy) {
+            return (out[0]-ox0)/odx;
+        } else {
+            return (out[1]-oy0)/ody;
+        }
     };
 
     return traceProp;

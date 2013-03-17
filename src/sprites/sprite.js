@@ -21,6 +21,10 @@ define(['plugins/collision/lib/local-scanner'], function(localScan) {
      *     autoRemove: {bool} Optional (defaults to true). If set, the sprite will be removed
      *                 from the scene once it expires. If maxloops is set and it is not
      *                 removed, it will remain on the final frame.
+     *     quantizedHeight: {bool} Optional (defaults to false). If you move x,y, and h at the
+     *                 same time and the movement collides, then h will by default be altered
+     *                 by the proportion of the path travelled. If this flag is true, then h will
+     *                 be altered entirely, regardless of the collision.
      * }
      *
      * An example of how to pass a random range into any Function/Number parameters would be to bind
@@ -63,6 +67,8 @@ define(['plugins/collision/lib/local-scanner'], function(localScan) {
         }
 
         this.collisionPoint = [0,0];
+
+        this.quantizedHeight = !!opts.quantizedHeight;
     }
 
     Sprite.prototype.init = function() {
@@ -180,28 +186,52 @@ define(['plugins/collision/lib/local-scanner'], function(localScan) {
             return;
         }
 
+        var collisionRatio;
+
         if (this.collider!==undefined) {
-            this.collider.setup(this,dx,dy);
-
-            if(this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint)) {
-                this.x = this.collisionPoint[0];
-                this.y = this.collisionPoint[1];
-
-                this.directionx = this.x + dx;
-                this.directiony = this.y + dy;
-                /* TODO: Move dh by a proportion of the path travelled? */
-                return;
-            }
+            collisionRatio = this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint);
+            this.x = this.collisionPoint[0];
+            this.y = this.collisionPoint[1];
+        } else {
+            this.x=this.x+dx;
+            this.y=this.y+dy;
         }
-
-        this.x=this.x+dx;
-        this.y=this.y+dy;
 
         this.directionx = this.x + dx;
         this.directiony = this.y + dy;
+
         if (dh!==undefined) {
-            this.h+=dh;
+            if (collisionRatio<1 && !this.quantizedHeight) {
+                /* If collided, we adjust the height be a proportion of the
+                 * requested amount. */
+                this.h+=dh*collisionRatio;
+            } else {
+                this.h+=dh;
+            }
         }
+
+        /* TODO: Technically, if the height is adjusted upwards and we're not quantizing
+         * height, then the path should be retraced at the new height to see if it got further,
+         * since technically it may have cleared the obstruction at that point.
+         *
+         * A retrace opportunity can be detected if the height at the collision point is lower than the
+         * new height after the collision. Repeat until this is not true, or there is no collision.
+         *
+         * The collider would need to be rewritten to emit the height at the collision point.
+         *
+         * do
+         * {
+         *     trace
+         *     adjust height
+         *     retrace op?
+         * }
+         * while(retrace op)
+         *
+         * finally assign new values to sprite.
+         *
+         * Not implementing now, because it may be prefered to implement sampling predecates first, which
+         * may render this task more difficult.
+         */
     };
 
     /** Sets the direction of the sprite. This is expressed as a world
