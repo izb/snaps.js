@@ -161,28 +161,11 @@ define(function() {
      * @param  {Number} th Optional; Target height
      */
     Sprite.prototype.moveTo = function(tx,ty,th) {
-        var dx = tx-this.x;
-        var dy = ty-this.y;
-        if (!(dx||dy||th)) {
-            return;
-        }
-
-        if (this.collider!==undefined) {
-            if(this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint)) {
-                tx = this.collisionPoint[0];
-                ty = this.collisionPoint[1];
-                dx=tx-this.x;
-                dy=ty-this.y;
-            }
-        }
-
-        this.x=tx;
-        this.y=ty;
-        this.directionx = this.x + dx;
-        this.directiony = this.y + dy;
         if (th!==undefined) {
-            this.h=th;
+            th=th-this.h;
         }
+
+        this.move(tx-this.x,ty-this.y,th);
     };
 
     /** Move a sprite by a given amount, taking collision into account.
@@ -192,26 +175,26 @@ define(function() {
      * @param  {Number} dh Optional; Amount to alter height
      */
     Sprite.prototype.move = function(dx,dy,dh) {
+
         if (!(dx||dy||dh)) {
             return;
         }
 
         if (this.collider!==undefined) {
             if(this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint)) {
-                dx=(this.x-this.collisionPoint[0])|0;
-                dy=(this.y-this.collisionPoint[1])|0;
                 this.x = this.collisionPoint[0];
                 this.y = this.collisionPoint[1];
+
                 this.directionx = this.x + dx;
                 this.directiony = this.y + dy;
-                var hh = this.sn.getTilePropAtWorldPos('height',this.collisionPoint[0],this.collisionPoint[1]);
-                //console.log(this.x,this.y,'hh',hh);
+                /* TODO: Move dh by a proportion of the path travelled? */
                 return;
             }
         }
 
-        this.x+=dx;
-        this.y+=dy;
+        this.x=this.x+dx;
+        this.y=this.y+dy;
+
         this.directionx = this.x + dx;
         this.directiony = this.y + dy;
         if (dh!==undefined) {

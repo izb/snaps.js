@@ -256,14 +256,14 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         if (this.hitTest[eventilex + eventiley * tw] !== 255) {
             /* On even tile */
 
-            out[0] = Math.floor((x + tw) / tw) - 1;
-            out[1] = 2 * (Math.floor((y + th) / th) - 1);
+            out[0] = (((x + tw) / tw)|0) - 1;
+            out[1] = 2 * ((((y + th) / th)|0) - 1);
 
         } else {
             /* On odd tile */
 
-            out[0] = Math.floor((x + tw / 2) / tw) - 1;
-            out[1] = 2 * (Math.floor((y + th / 2) / th)) - 1;
+            out[0] = (((x + tw / 2) / tw)|0) - 1;
+            out[1] = 2 * (((y + th / 2) / th)|0) - 1;
         }
     };
 

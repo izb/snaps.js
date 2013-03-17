@@ -1,4 +1,4 @@
-define(['plugins/collision/line-trace'], function(LineTrace) {
+define(['plugins/collision/lib/prop-scanner'], function(traceProp) {
 
     'use strict';
 
@@ -19,20 +19,24 @@ define(['plugins/collision/line-trace'], function(LineTrace) {
             throw "Trace collider sample count must be an odd number 3 or higher";
         }
 
-        var edges = sn.getScreenEdges();
-        this.leftEdge = edges.le;
-        this.rightEdge = edges.re;
-        this.topEdge = edges.te;
-        this.bottomEdge = edges.be;
+        this.edges = sn.getScreenEdges();
 
         this.lineHit = [0,0];
     }
 
-    CircleTrace.prototype.lineTrace = new LineTrace();
 
     var doTrace = function(x0, y0, dx, dy, h, out){
 
-        var collided = this.lineTrace.test(x0, y0, dx, dy, h, this.lineHit);
+        /* Ensuring integers always go in via this wrapper ensures that
+         * V8 won't back out runtime optimisations of the code. */
+        var collided = traceProp(sn,
+            'height',
+            this.edges,
+            (x0)|0,
+            (y0)|0,
+            (dx)|0,
+            (dy)|0,
+            h, 0, out);
 
         if (collided) {
             /* TODO: Trace backwards with the circle to find the rest point. */
