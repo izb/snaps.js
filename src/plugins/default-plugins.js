@@ -12,9 +12,9 @@ define([
 
     'plugins/camera/push-cam',
 
-    'plugins/collision/line-trace',
-    'plugins/collision/circle-trace',
-    'plugins/collision/wide-trace'
+    'plugins/collision/sprite-with-map/line-trace',
+    'plugins/collision/sprite-with-map/circle-trace',
+    'plugins/collision/sprite-with-map/wide-trace'
     ],
 function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,

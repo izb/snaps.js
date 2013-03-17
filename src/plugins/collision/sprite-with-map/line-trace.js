@@ -20,6 +20,38 @@ function(traceProp, localScan) {
         }
     }
 
+    LineTrace.prototype.setup = function(s, dx, dy){
+
+        if (!this.autoSlip) {
+            return;
+        }
+
+        var localmask;
+        var r = dx/dy;
+
+        /* First, distance ourself from key jaggies shapes in key directions,
+         * to ensure the player can slip past isometric lines without getting
+         * caught on pixels. */
+        if (r>=2&&r<=3) {
+            /* nw/se */
+            localmask = localScan(sn, s.x, s.y, 'height',s.h);
+            if (localmask===23) {
+                s.y=s.y+1;
+            } else if (localmask===232) {
+                s.y=s.y-1;
+            }
+        } else if (r<=-2&&r>=-3) {
+            /* sw/ne */
+            localmask = localScan(sn, s.x, s.y, 'height',s.h);
+            if (localmask===240) {
+                s.y=s.y-1;
+            } else if (localmask===15) {
+                s.y=s.y+1;
+            }
+        }
+        /* TODO: Crap, how will this work on circle scan? :( */
+
+    };
 
     /** Perform a trace to test for collision along a line.
      * @param  {Array} out An optional 2-length array which will recieve the
@@ -31,38 +63,6 @@ function(traceProp, localScan) {
      */
     LineTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 
-        var xslip = 0;
-
-        if (this.autoSlip) {
-
-            /* In isometric maps, we want to ensure that the player
-             * can slip more easily along walls without getting
-             * caught on pixel jaggies. To do this, we watch for certain
-             * pixel patterns and make subtle adjustments to the
-             * lines traced. */
-
-            var localmask;
-            var r = dx/dy;
-
-            if (r>=2&&r<=3) {
-                /* nw/se */
-                localmask = localScan(sn, x0, y0, 'height',h);
-                if (localmask===23) {
-                    xslip = -1;
-                } else if (localmask===232) {
-                    xslip = 1;
-                }
-            } else if (r<=-2&&r>=-3) {
-                /* sw/ne */
-                localmask = localScan(sn, x0, y0, 'height',h);
-                if (localmask===240) {
-                    xslip = -1;
-                } else if (localmask===15) {
-                    xslip = 1;
-                }
-            }
-        }
-
         return traceProp(sn,
             'height',
             this.edges,
@@ -70,7 +70,7 @@ function(traceProp, localScan) {
             y0,
             dx,
             dy,
-            h, xslip, out);
+            h, out);
     };
 
     return function(snaps) {

@@ -250,6 +250,9 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var tw = map.tilewidth;
         var th = map.tileheight;
 
+        x=x|0;
+        y=y|0;
+
         var eventilex = Math.floor(x%tw);
         var eventiley = Math.floor(y%th);
 

@@ -1,4 +1,4 @@
-define(function() {
+define(['plugins/collision/lib/local-scanner'], function(localScan) {
 
     'use strict';
 
@@ -181,6 +181,8 @@ define(function() {
         }
 
         if (this.collider!==undefined) {
+            this.collider.setup(this,dx,dy);
+
             if(this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint)) {
                 this.x = this.collisionPoint[0];
                 this.y = this.collisionPoint[1];

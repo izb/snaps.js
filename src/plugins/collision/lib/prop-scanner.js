@@ -2,12 +2,10 @@ define(function() {
 
     'use strict';
 
-    var traceProp = function(sn, prop, edges, x0, y0, dx, dy, h, xslip, out){
+    var traceProp = function(sn, prop, edges, x0, y0, dx, dy, h, out){
 
         var i;
 
-        x0+=xslip;
-        dx-=xslip;
 
         var ox0 = x0;
         var oy0 = y0;
@@ -18,6 +16,7 @@ define(function() {
 
         var x1 = (x0 + dx)|0;
         var y1 = (y0 + dy)|0;
+
         x0=x0|0;
         y0=y0|0;
         dx = Math.abs(x1-x0);
