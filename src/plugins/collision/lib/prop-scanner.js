@@ -2,7 +2,7 @@ define(function() {
 
     'use strict';
 
-    var traceProp = function(sn, prop, edges, x0, y0, dx, dy, h, out){
+    var traceProp = function(sn, prop, edges, x0, y0, dx, dy, h, out, route){
 
         var i;
 
@@ -21,6 +21,12 @@ define(function() {
         dx = Math.abs(x1-x0);
         dy = Math.abs(y1-y0);
 
+        var routeidx = 0;
+        if (route!==undefined) {
+            route.length = 0;
+            route.length = 2*(Math.max(dx, dy)+1);
+        }
+
         if (dx === 0 && dy === 0) {
             out[0] = x0;
             out[1] = y0;
@@ -38,14 +44,19 @@ define(function() {
         var y0clear = y0;
 
         /* Skip the first pixel, we can assume it's good. */
+        if (route!==undefined) {
+            route[routeidx++] = x0;
+            route[routeidx++] = y0;
+        }
+
         var e2 = 2*err;
         if (e2 >-dy){
             err -= dy;
-            x0  += sx;
+            x0  += sx; /* Skippity */
         }
         if (e2 < dx) {
             err += dx;
-            y0  += sy;
+            y0  += sy; /* Skip */
         }
 
         while(true){
@@ -63,6 +74,11 @@ define(function() {
 
             x0clear = x0;
             y0clear = y0;
+
+            if (route!==undefined) {
+                route[routeidx++] = x0;
+                route[routeidx++] = y0;
+            }
 
             if ((x0===x1) && (y0===y1)) {
                 break;
@@ -90,6 +106,10 @@ define(function() {
         } else if (out!==undefined) {
             out[0] = ox0+odx;
             out[1] = oy0+ody;
+        }
+
+        if (route!==undefined) {
+            route.length = routeidx;
         }
 
         /* No collision indicated by 1 in returned collision ratio */

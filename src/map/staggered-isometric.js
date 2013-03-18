@@ -19,28 +19,14 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
        this.minxoffset = this.data.tilewidth/2;
        this.minyoffset = this.data.tileheight/2;
 
-       this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth;
-       this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight;
+       this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+       this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
 
         /* Start in SW-corner by default */
         this.xoffset = this.minxoffset;
         this.yoffset = this.maxyoffset;
 
     }
-
-    /** Values returned from this function should be cached.
-     */
-    StaggeredIsometric.prototype.minOffsets = function() {
-
-        return {
-            minxoffset: this.data.tilewidth/2,
-            minyoffset: this.data.tileheight/2,
-
-            maxxoffset: this.data.width * this.data.tilewidth - this.clientWidth,
-            maxyoffset: this.data.height * (this.data.tileheight/2) - this.clientHeight
-        };
-
-    };
 
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
 
