@@ -18,8 +18,8 @@
     "jam": {
         "dependencies": {
         },
-        "main": "lib/snaps-0.1.12.min.js",
-        "include": ["lib/snaps-*.js"]
+        "main": "dist/snaps-0.1.12.min.js",
+        "include": ["dist/snaps-*.js"]
     },
     "dependencies": {
         "grunt": "0.4.1",

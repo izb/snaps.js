@@ -1,5 +1,4 @@
-Snaps.js
-========
+![Snaps logo](https://raw.github.com/izb/snaps.js/master/resources/logo/snaps-logo.png)
 
 [![Build Status](https://travis-ci.org/izb/snaps.js.png?branch=master)](https://travis-ci.org/izb/snaps.js)
 

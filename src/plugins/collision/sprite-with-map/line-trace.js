@@ -7,6 +7,8 @@ function(traceProp, localScan) {
 
     var sn;
 
+    var ySlip = localScan.ySlip;
+
     function LineTrace(opts) {
         opts = opts || {};
         this.sn = sn;
@@ -32,29 +34,10 @@ function(traceProp, localScan) {
     LineTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 
         if (this.autoSlip) {
-            var localmask;
-            var r = dx/dy;
-
-            /* First, distance ourself from key jaggies shapes in key directions,
+            /* First, distance ourself from key jagged shapes in key directions,
              * to ensure the player can slip past isometric lines without getting
              * caught on pixels. */
-            if (r>=2&&r<=3) {
-                /* nw/se */
-                localmask = localScan(sn, x0, y0, 'height',h);
-                if (localmask===23) {
-                    y0=y0+1;
-                } else if (localmask===232) {
-                    y0=y0-1;
-                }
-            } else if (r<=-2&&r>=-3) {
-                /* sw/ne */
-                localmask = localScan(sn, x0, y0, 'height',h);
-                if (localmask===240) {
-                    y0=y0-1;
-                } else if (localmask===15) {
-                    y0=y0+1;
-                }
-            }
+            y0 += ySlip(sn, x0, y0, h, dx, dy);
         }
 
         return traceProp(sn,

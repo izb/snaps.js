@@ -1,4 +1,4 @@
-define(['plugins/collision/lib/local-scanner'], function(localScan) {
+define(function() {
 
     'use strict';
 

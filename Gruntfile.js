@@ -26,9 +26,9 @@ module.exports = function(grunt) {
             }
         },
         copy: {
-            lib: {
+            dist: {
                 files: {
-                    "lib/snaps-<%= pkg.version %>.js": "tmp/snaps.js"
+                    "dist/snaps-<%= pkg.version %>.js": "tmp/snaps.js"
                 }
             }
         },
@@ -44,9 +44,9 @@ module.exports = function(grunt) {
                     externs: ['externs.js']
                 }
             },
-            lib: {
+            dist: {
                 src: 'tmp/snaps.js',
-                dest: 'lib/snaps-<%= pkg.version %>.min.js'
+                dest: 'dist/snaps-<%= pkg.version %>.min.js'
             }
         },
         watch: {
@@ -57,7 +57,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('fast', ['jshint:build','requirejs:snaps','copy:lib']);
-    grunt.registerTask('default', ['fast','closureCompiler:lib']);
+    grunt.registerTask('fast', ['jshint:build','requirejs:snaps','copy:dist']);
+    grunt.registerTask('default', ['fast','closureCompiler:dist']);
     grunt.registerTask('test', ['default']); /* TODO: Testing. */
 };

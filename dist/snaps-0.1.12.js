@@ -65,41 +65,7 @@ define('sprites/spritedef',[],function() {
 
 });
 
-define('plugins/collision/lib/local-scanner',[],function() {
-
-    
-
-    /** Returns a bitmask representing the local pixels around a point, and how
-     * solid they are.
-     *
-     * +-----------------+
-     * |  1  |  2  |  4  |
-     * +-----------------+
-     * |  8  |  Pt |  16 |
-     * +-----------------+
-     * |  32 |  64 | 128 |
-     * +-----------------+
-     *
-     * Where Pt is the sampled point
-     */
-    var localScan = function(sn, x, y, prop,limit){
-
-        var scanmask = sn.getTilePropAtWorldPos(prop,x+1,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y-1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y-1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y-1)>limit;
-
-        return scanmask;
-    };
-
-    return localScan;
-});
-
-define('sprites/sprite',['plugins/collision/lib/local-scanner'], function(localScan) {
+define('sprites/sprite',[],function() {
 
     
 
@@ -2035,6 +2001,68 @@ define('plugins/collision/lib/prop-scanner',[],function() {
     return traceProp;
 });
 
+define('plugins/collision/lib/local-scanner',[],function() {
+
+    
+
+    /** Returns a bitmask representing the local pixels around a point, and how
+     * solid they are.
+     *
+     * +-----------------+
+     * |  1  |  2  |  4  |
+     * +-----------------+
+     * |  8  |  Pt |  16 |
+     * +-----------------+
+     * |  32 |  64 | 128 |
+     * +-----------------+
+     *
+     * Where Pt is the sampled point
+     */
+    var localScan = function(sn, x, y, prop,limit){
+
+        var scanmask = sn.getTilePropAtWorldPos(prop,x+1,y+1)>limit;
+        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y+1)>limit;
+        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y+1)>limit;
+        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y)>limit;
+        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y)>limit;
+        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y-1)>limit;
+        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y-1)>limit;
+        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y-1)>limit;
+
+        return scanmask;
+    };
+
+    var ySlip = function(sn, x0, y0, h, dx, dy) {
+        var localmask;
+        var r = dx/dy;
+
+        if (r>=2&&r<=3) {
+            /* nw/se */
+            localmask = localScan(sn, x0, y0, 'height',h);
+            if (localmask===23) {
+                return 1;
+            } else if (localmask===232) {
+                return -1;
+            }
+        } else if (r<=-2&&r>=-3) {
+            /* sw/ne */
+            localmask = localScan(sn, x0, y0, 'height',h);
+            if (localmask===240) {
+                return -1;
+            } else if (localmask===15) {
+                return 1;
+            }
+        }
+
+        return 0;
+    };
+
+    return {
+        localScan:localScan,
+        ySlip:ySlip
+    };
+});
+
 define('plugins/collision/sprite-with-map/line-trace',[
     'plugins/collision/lib/prop-scanner',
     'plugins/collision/lib/local-scanner'],
@@ -2043,6 +2071,8 @@ function(traceProp, localScan) {
     
 
     var sn;
+
+    var ySlip = localScan.ySlip;
 
     function LineTrace(opts) {
         opts = opts || {};
@@ -2069,29 +2099,10 @@ function(traceProp, localScan) {
     LineTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 
         if (this.autoSlip) {
-            var localmask;
-            var r = dx/dy;
-
-            /* First, distance ourself from key jaggies shapes in key directions,
+            /* First, distance ourself from key jagged shapes in key directions,
              * to ensure the player can slip past isometric lines without getting
              * caught on pixels. */
-            if (r>=2&&r<=3) {
-                /* nw/se */
-                localmask = localScan(sn, x0, y0, 'height',h);
-                if (localmask===23) {
-                    y0=y0+1;
-                } else if (localmask===232) {
-                    y0=y0-1;
-                }
-            } else if (r<=-2&&r>=-3) {
-                /* sw/ne */
-                localmask = localScan(sn, x0, y0, 'height',h);
-                if (localmask===240) {
-                    y0=y0-1;
-                } else if (localmask===15) {
-                    y0=y0+1;
-                }
-            }
+            y0 += ySlip(sn, x0, y0, h, dx, dy);
         }
 
         return traceProp(sn,
@@ -2111,13 +2122,59 @@ function(traceProp, localScan) {
 
 });
 
-define('plugins/collision/sprite-with-map/circle-trace',['plugins/collision/lib/prop-scanner'], function(traceProp) {
+define('plugins/collision/lib/circle',[],function() {
+
+    /**
+     * Returns an array of 0-centered sample points for a circle
+     * using the midpoint circle algorithm.
+     * @param  {Number} r The radius. Pass an integer please.
+     * @return {Array} In the form [x0,y0,x1,y1...]. The points do
+     * not describe a continuous path, but is complete.
+     */
+    return function(r) {
+        var x = 0;
+        var y = r;
+        var p = 3 - 2 * r;
+
+        var s = [];
+
+        while (y >= x)
+        {
+            s.push(
+                -x, -y,
+                -y, -x,
+                 y, -x,
+                 x, -y,
+                -x,  y,
+                -y,  x,
+                 y,  x,
+                 x,  y);
+
+            if (p < 0) {
+                p += 4*x++ + 6;
+            } else {
+                p += 4*(x++ - y--) + 10;
+            }
+         }
+
+         return s;
+    };
+});
+
+define('plugins/collision/sprite-with-map/circle-trace',[
+    'plugins/collision/lib/prop-scanner',
+    'plugins/collision/lib/circle',
+    'plugins/collision/lib/local-scanner'],
+function(traceProp, midPtCircle, localScan) {
 
     
 
     var sn;
 
+    var ySlip = localScan.ySlip;
+
     function CircleTrace(opts) {
+
         opts = opts||{};
         this.sn = sn;
 
@@ -2125,46 +2182,27 @@ define('plugins/collision/sprite-with-map/circle-trace',['plugins/collision/lib/
             throw "Circle trace requires a radius >0 in its options.";
         }
 
-        this.radius = opts.radius;
-        this.sampleCount = opts.samples?opts.samples:7;
-        this.samples = new Array(2*this.sampleCount);
-        if (this.sampleCount<3||(this.sampleCount&1)===0) {
-            throw "Trace collider sample count must be an odd number 3 or higher";
-        }
-
         this.edges = sn.getScreenEdges();
 
+        this.samples = midPtCircle(opts.radius|0);
+
+        console.log("Circle has "+this.samples.length/2+" samples");
+
         this.lineHit = [0,0];
+
+        if (opts.autoSlip===undefined) {
+            this.autoSlip = true;
+            /* TODO: This should default to true ONLY for isometric maps. */
+        } else {
+            this.autoSlip = opts.autoSlip;
+        }
     }
 
 
-    var doTrace = function(x0, y0, dx, dy, h, out){
 
-        /* Ensuring integers always go in via this wrapper ensures that
-         * V8 won't back out runtime optimisations of the code. */
-        var collided = traceProp(sn,
-            'height',
-            this.edges,
-            (x0)|0,
-            (y0)|0,
-            (dx)|0,
-            (dy)|0,
-            h, 0, out);
-
-        if (collided) {
-            /* TODO: Trace backwards with the circle to find the rest point. */
-            out[0] = this.lineHit[0];
-            out[0] = this.lineHit[0];
-        } else {
-            out[0] = this.lineHit[0];
-            out[0] = this.lineHit[0];
-        }
-
-        return collided;
-    };
-
-
-    /** Perform a trace to test for collision along a line.
+    /** Perform a trace to test for collision along a line with radius.
+     * Effectively traces an ellipse  from one point to another, with some
+     * important performance compromises in accuracy.
      * @param  {Array} out An optional 2-length array which will recieve the
      * point of contact. You can interpret this as the position to which the
      * character can go along its path at which it will be touching a solid
@@ -2173,14 +2211,35 @@ define('plugins/collision/sprite-with-map/circle-trace',['plugins/collision/lib/
      * @return {Boolean} True if there was a collision.
      */
     CircleTrace.prototype.test = function(x0, y0, dx, dy, h, out){
-        /* Ensuring integers always go in via this wrapper ensures that
-         * V8 won't back out runtime optimisations of the code. */
-        return doTrace.call(this,
-            (x0)|0,
-            (y0)|0,
-            (dx)|0,
-            (dy)|0,
-            h, out);
+
+
+        if (this.autoSlip) {
+            /* First, distance ourself from key jagged shapes in key directions,
+             * to ensure the player can slip past isometric lines without getting
+             * caught on pixels. */
+            y0 += ySlip(sn, x0, y0, h, dx, dy);
+        }
+
+        var collisionRatio = traceProp(sn,
+            'height',
+            this.edges,
+            x0,
+            y0,
+            dx,
+            dy,
+            h, this.lineHit);
+
+
+        if (collisionRatio<1) {
+            /* TODO: Trace backwards with the circle to find the rest point. */
+            out[0] = this.lineHit[0];
+            out[1] = this.lineHit[1];
+        } else {
+            out[0] = this.lineHit[0];
+            out[1] = this.lineHit[1];
+        }
+
+        return collisionRatio;
     };
 
     return function(snaps) {
