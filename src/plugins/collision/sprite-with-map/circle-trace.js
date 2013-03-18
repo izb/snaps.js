@@ -1,8 +1,8 @@
 define([
     'plugins/collision/lib/prop-scanner',
-    'plugins/collision/lib/circle',
+    'plugins/collision/lib/ellipse',
     'plugins/collision/lib/local-scanner'],
-function(traceProp, midPtCircle, localScan) {
+function(traceProp, midPtEllipse, localScan) {
 
     'use strict';
 
@@ -21,7 +21,10 @@ function(traceProp, midPtCircle, localScan) {
 
         this.edges = sn.getScreenEdges();
 
-        this.samples = midPtCircle(opts.radius|0);
+        /* We call this a circle trace, but we use a half-height ellipse
+         * to represent the perspective distortion of the isometric
+         * map. */
+        this.samples = midPtEllipse(opts.radius|0, opts.radius/2|0);
 
         this.lineHit = [0,0];
 

@@ -2128,50 +2128,71 @@ function(traceProp, localScan) {
 
 });
 
-define('plugins/collision/lib/circle',[],function() {
+define('plugins/collision/lib/ellipse',[],function() {
 
     /**
-     * Returns an array of 0-centered sample points for a circle
-     * using the midpoint circle algorithm.
-     * @param  {Number} r The radius. Pass an integer please.
+     * Returns an array of 0-centered sample points for an ellipse
+     * using a variant of the midpoint circle algorithm.
+     * HT http://geofhagopian.net/sablog/Slog-october/slog-10-25-05.htm
+     * @param  {Number} rx The x radius. Pass an integer please.
+     * @param  {Number} ry The y radius. Pass an integer please.
      * @return {Array} In the form [x0,y0,x1,y1...]. The points do
      * not describe a continuous path, but is complete.
      */
-    return function(r) {
+    return function(rx,ry) {
+        var rx2 = rx * rx;
+        var ry2 = ry * ry;
+        var twoa2 = 2 * rx2;
+        var twob2 = 2 * ry2;
+        var p;
         var x = 0;
-        var y = r;
-        var p = 3 - 2 * r;
+        var y = ry;
+        var px = 0;
+        var py = twoa2 * y;
 
         var s = [];
 
-        while (y >= x)
-        {
-            s.push(
-                -x, -y,
-                -y, -x,
-                 y, -x,
-                 x, -y,
-                -x,  y,
-                -y,  x,
-                 y,  x,
-                 x,  y);
+        /* Initial point in each quadrant. */
+        s.push(x,y,-x,y,x,-y,-x,-y);
 
-            if (p < 0) {
-                p += 4*x++ + 6;
-            } else {
-                p += 4*(x++ - y--) + 10;
+        /* Region 1 */
+        p = Math.round (ry2 - (rx2 * ry) + (0.25 * rx2));
+        while (px < py) {
+            x++;
+            px += twob2;
+            if (p < 0)
+                p += ry2 + px;
+            else {
+                y--;
+                py -= twoa2;
+                p += ry2 + px - py;
             }
-         }
+            s.push(x,y,-x,y,x,-y,-x,-y);
+        }
 
-         return s;
+        /* Region 2 */
+        p = Math.round (ry2 * (x+0.5) * (x+0.5) + rx2 * (y-1) * (y-1) - rx2 * ry2);
+        while (y > 0) {
+            y--;
+            py -= twoa2;
+            if (p > 0)
+                p += rx2 - py;
+            else {
+                x++;
+                px += twob2;
+                p += rx2 - py + px;
+            }
+            s.push(x,y,-x,y,x,-y,-x,-y);
+        }
+        return s;
     };
 });
 
 define('plugins/collision/sprite-with-map/circle-trace',[
     'plugins/collision/lib/prop-scanner',
-    'plugins/collision/lib/circle',
+    'plugins/collision/lib/ellipse',
     'plugins/collision/lib/local-scanner'],
-function(traceProp, midPtCircle, localScan) {
+function(traceProp, midPtEllipse, localScan) {
 
     
 
@@ -2190,7 +2211,10 @@ function(traceProp, midPtCircle, localScan) {
 
         this.edges = sn.getScreenEdges();
 
-        this.samples = midPtCircle(opts.radius|0);
+        /* We call this a circle trace, but we use a half-height ellipse
+         * to represent the perspective distortion of the isometric
+         * map. */
+        this.samples = midPtEllipse(opts.radius|0, opts.radius/2|0);
 
         this.lineHit = [0,0];
 
