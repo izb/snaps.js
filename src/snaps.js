@@ -178,7 +178,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 var id = _this.phasers[i].id;
                 for (var j = _this.sprites.length - 1; j >= 0; j--) {
                     var s = _this.sprites[j];
-                    if (s.phaserData!==undefined && s.phaserData.hasOwnProperty[id]) {
+                    if (s.phaserData!==undefined && s.phaserData.hasOwnProperty(id)) {
                         phased.push(s);
                     }
                 }
@@ -445,21 +445,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
-                    var suname = opts.updates[i].name;
+                    var optUpdate = opts.updates[i];
+                    var suname = optUpdate.name;
                     if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
                         throw "Sprite plugin used but not registered: "+suname;
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
-                    if (updates[i].hasOwnProperty('phaser')) {
+                    if (optUpdate.hasOwnProperty('phaser')) {
                         if (phaserData === undefined) {
                             phaserData = {};
                         }
 
-                        phaserData[updates[i].phaser.id] = {
-                            phase:updates[i].phaser.phases-1 /* TODO: Wonder if this should be set up by the phaser. */
+                        phaserData[optUpdate.phaser.id] = {
+                            phase:optUpdate.phaser.phases-1 /* TODO: This should be set up by the phaser. */
                         };
                     }
-                    copyProps(opts.updates[i], updates[i]);
+                    copyProps(optUpdate, updates[i]);
                 }
             }
 

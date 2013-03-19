@@ -171,12 +171,12 @@ define(function() {
      * @param  {Number} ty Target y world position
      * @param  {Number} th Optional; Target height
      */
-    Sprite.prototype.moveTo = function(tx,ty,th) {
+    Sprite.prototype.moveTo = function(tx,ty,th,collide) {
         if (th!==undefined) {
             th=th-this.h;
         }
 
-        this.move(tx-this.x,ty-this.y,th);
+        this.move(tx-this.x,ty-this.y,th, collide);
     };
 
     /** Move a sprite by a given amount, taking collision into account.
@@ -185,15 +185,17 @@ define(function() {
      * @param  {Number} dy Amount to alter y position
      * @param  {Number} dh Optional; Amount to alter height
      */
-    Sprite.prototype.move = function(dx,dy,dh) {
+    Sprite.prototype.move = function(dx,dy,dh, collide) {
 
         if (!(dx||dy||dh)) {
             return;
         }
 
+        collide = collide===undefined?true:collide;
+
         var collisionRatio;
 
-        if (this.collider!==undefined) {
+        if (collide && this.collider!==undefined) {
             collisionRatio = this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint);
             this.x = this.collisionPoint[0];
             this.y = this.collisionPoint[1];
@@ -206,7 +208,7 @@ define(function() {
         this.directiony = this.y + dy;
 
         if (dh!==undefined) {
-            if (collisionRatio<1 && !this.quantizedHeight) {
+            if (collide && collisionRatio<1 && !this.quantizedHeight) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;

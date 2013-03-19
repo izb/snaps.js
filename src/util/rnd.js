@@ -10,9 +10,33 @@ define(function() {
         return min+Math.random()*(max-min+1)|0;
     };
 
+    var rndFloat = function(min,max) {
+        return min+Math.random()*(max-min+1);
+    };
+
+    var genRands = function(min, max, setsize, fn) {
+        var lut = [];
+        setsize = setsize||10000;
+        for (var i=setsize; i>0; i--) {
+            lut.push(fn(min, max));
+        }
+
+        var pos = 0;
+
+        return function() {
+            pos++;
+            if (pos===lut.length) {
+                pos = 0;
+            }
+            return lut[pos];
+        };
+    };
+
     return {
 
         rnd: rnd,
+
+        rndFloat: rndFloat,
 
         /** Generates a function that returns a faster random number
          * generator, but which has a setup cost. If you're using a very large
@@ -29,21 +53,11 @@ define(function() {
          * precalculate.
          */
         fastRand: function(min, max,setsize) {
-            var lut = [];
-            setsize = setsize||10000;
-            for (var i=setsize; i>0; i--) {
-                lut.push(rnd(min, max));
-            }
+            return genRands(min, max, setsize, rnd);
+        },
 
-            var pos = 0;
-
-            return function() {
-                pos++;
-                if (pos===lut.length) {
-                    pos = 0;
-                }
-                return lut[pos];
-            };
+        fastRandFloat: function(min, max,setsize) {
+            return genRands(min, max, setsize, rndFloat);
         }
 
     };

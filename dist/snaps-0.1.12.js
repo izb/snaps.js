@@ -133,9 +133,9 @@ define('sprites/sprite',[],function() {
             this.autoRemove = true;
         }
 
-        this.collisionPoint = [0,0];
+        this.phaserData = opts.phaserData;
 
-        this.phaser = opts.phaser;
+        this.collisionPoint = [0,0];
 
         this.quantizedHeight = !!opts.quantizedHeight;
     }
@@ -211,11 +211,11 @@ define('sprites/sprite',[],function() {
 
     Sprite.prototype.update = function(now) {
 
-        var phaseOn = this.phaser?this.phaser.phase(now):true;
-
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                if(!this.updates[i].update(now, phaseOn)) {
+                var update = this.updates[i];
+                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this);
+                if(!update.update(now, phaseOn)) {
                     /* Return false from an update function to break the chain. */
                     break;
                 }
@@ -238,12 +238,12 @@ define('sprites/sprite',[],function() {
      * @param  {Number} ty Target y world position
      * @param  {Number} th Optional; Target height
      */
-    Sprite.prototype.moveTo = function(tx,ty,th) {
+    Sprite.prototype.moveTo = function(tx,ty,th,collide) {
         if (th!==undefined) {
             th=th-this.h;
         }
 
-        this.move(tx-this.x,ty-this.y,th);
+        this.move(tx-this.x,ty-this.y,th, collide);
     };
 
     /** Move a sprite by a given amount, taking collision into account.
@@ -252,15 +252,17 @@ define('sprites/sprite',[],function() {
      * @param  {Number} dy Amount to alter y position
      * @param  {Number} dh Optional; Amount to alter height
      */
-    Sprite.prototype.move = function(dx,dy,dh) {
+    Sprite.prototype.move = function(dx,dy,dh, collide) {
 
         if (!(dx||dy||dh)) {
             return;
         }
 
+        collide = collide===undefined?true:collide;
+
         var collisionRatio;
 
-        if (this.collider!==undefined) {
+        if (collide && this.collider!==undefined) {
             collisionRatio = this.collider.test(this.x, this.y, dx,dy,this.h,this.collisionPoint);
             this.x = this.collisionPoint[0];
             this.y = this.collisionPoint[1];
@@ -273,7 +275,7 @@ define('sprites/sprite',[],function() {
         this.directiony = this.y + dy;
 
         if (dh!==undefined) {
-            if (collisionRatio<1 && !this.quantizedHeight) {
+            if (collide && collisionRatio<1 && !this.quantizedHeight) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;
@@ -747,9 +749,33 @@ define('util/rnd',[],function() {
         return min+Math.random()*(max-min+1)|0;
     };
 
+    var rndFloat = function(min,max) {
+        return min+Math.random()*(max-min+1);
+    };
+
+    var genRands = function(min, max, setsize, fn) {
+        var lut = [];
+        setsize = setsize||10000;
+        for (var i=setsize; i>0; i--) {
+            lut.push(fn(min, max));
+        }
+
+        var pos = 0;
+
+        return function() {
+            pos++;
+            if (pos===lut.length) {
+                pos = 0;
+            }
+            return lut[pos];
+        };
+    };
+
     return {
 
         rnd: rnd,
+
+        rndFloat: rndFloat,
 
         /** Generates a function that returns a faster random number
          * generator, but which has a setup cost. If you're using a very large
@@ -766,21 +792,11 @@ define('util/rnd',[],function() {
          * precalculate.
          */
         fastRand: function(min, max,setsize) {
-            var lut = [];
-            setsize = setsize||10000;
-            for (var i=setsize; i>0; i--) {
-                lut.push(rnd(min, max));
-            }
+            return genRands(min, max, setsize, rnd);
+        },
 
-            var pos = 0;
-
-            return function() {
-                pos++;
-                if (pos===lut.length) {
-                    pos = 0;
-                }
-                return lut[pos];
-            };
+        fastRandFloat: function(min, max,setsize) {
+            return genRands(min, max, setsize, rndFloat);
         }
 
     };
@@ -839,6 +855,20 @@ define('util/debug',[],function() {
 
 });
 
+define('util/guid',[],function() {
+
+    
+
+    var next = 1;
+
+    /** Return a unique string for identifier purposes.
+     */
+    return function() {
+        return 'id'+(next++);
+    };
+
+});
+
 define('util/url',[],function() {
 
     
@@ -859,8 +889,9 @@ define('util/all',[
     'util/bitmap',
     'util/debug',
     'util/js',
+    'util/guid',
     'util/url'],
-function(Preloader, rnd, Bitmap, debug, js, Url) {
+function(Preloader, rnd, Bitmap, debug, js, guid, Url) {
 
     
 
@@ -868,6 +899,7 @@ function(Preloader, rnd, Bitmap, debug, js, Url) {
         Preloader: Preloader,
         rnd: rnd,
         js: js,
+        guid: guid,
         debug: debug,
         Bitmap: Bitmap,
         Url: Url
@@ -1324,7 +1356,7 @@ define('plugins/sprite/bounce',[],function() {
 
     /** Called with the sprite as the 'this' context.
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -1366,7 +1398,7 @@ define('plugins/sprite/follow-mouse',[],function() {
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -1422,7 +1454,7 @@ define('plugins/sprite/link',[],function() {
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -1492,7 +1524,7 @@ define('plugins/sprite/animate',[],function() {
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -1556,7 +1588,7 @@ define('plugins/sprite/8way',[],function() {
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -2238,7 +2270,7 @@ function(traceProp, midPtEllipse, localScan) {
             throw "Circle trace requires a radius >0 in its options.";
         }
 
-        this.edges = sn.getScreenEdges();
+        this.edges = sn.getScreenEdges(); /* TODO: Can the traceprop fn get this itself? */
 
         /* We call this a circle trace, but we use a half-height ellipse
          * to represent the perspective distortion of the isometric
@@ -2549,14 +2581,65 @@ define('animate/tween',[],function() {
 
 define('ai/update-phaser',[],function() {
 
-    function UpdatePhaser(phases) {
+    function UpdatePhaser(id, phases) {
+        this.id = id;
         this.phases = phases;
+        if (phases<2) {
+            throw "Update phasers must have at least 2 phases.";
+        }
+        this.buckets = new Array(phases);
+        this.bucketMax = new Array(phases);
     }
 
-    UpdatePhaser.prototype.phase = function(now) {
-        return true;
+    UpdatePhaser.prototype.phase = function(sprite) {
+        var data = sprite.phaserData[this.id];
+        return data.phase===0;
     };
-    /* TODO */
+
+    UpdatePhaser.prototype.rebalance = function(sprites) {
+        var i, s, data, max = 0;
+        var buckets = this.buckets;
+
+        var desiredMax = sprites.length/this.phases;
+
+        for (i = buckets.length - 1; i >= 0; i--) {
+            buckets[i] = 0;
+            this.bucketMax[i] = Math.floor((i+1)*desiredMax - Math.floor(i*desiredMax));
+        }
+
+        var clearing = [];
+        for (i = sprites.length - 1; i >= 0; i--) {
+            s = sprites[i];
+            data = s.phaserData[this.id];
+            data.phase++;
+            if (data.phase>=this.phases) {
+                data.phase = 0;
+            }
+            max = Math.max(max, ++buckets[data.phase]);
+            if (buckets[data.phase]>this.bucketMax[data.phase]) {
+                clearing.push(s);
+            }
+        }
+
+        if (desiredMax/max<0.8) { /* TODO: Check that this ratio is accurate or useful. */
+
+            var bucketIdx = 0;
+            for (i = clearing.length - 1; i >= 0; i--) {
+                s = clearing[i];
+                while(buckets[bucketIdx]>=this.bucketMax[bucketIdx]) {
+                    bucketIdx++;
+                    if (bucketIdx===this.phases) {
+                        bucketIdx = 0;
+                    }
+                }
+                data = s.phaserData[this.id];
+                buckets[data.phase]--;
+                data.phase = bucketIdx;
+                buckets[bucketIdx]++;
+            }
+        }
+
+    };
 
     return UpdatePhaser;
 
@@ -2628,6 +2711,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone = util.js.clone;
     var Preloader = util.Preloader;
+    var guid = util.guid;
 
     function Snaps(game, canvasID, settings) {
 
@@ -2685,6 +2769,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.spriteDefs = {};
         this.sprites = [];
+        this.phasers = [];
         this.spriteMap = {};
 
         this.lastFrameTime = 0;
@@ -2769,6 +2854,23 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         };
 
+        this.updatePhasers = function() {
+            for (var i = _this.phasers.length - 1; i >= 0; i--) {
+                var phased = [];
+                var id = _this.phasers[i].id;
+                for (var j = _this.sprites.length - 1; j >= 0; j--) {
+                    var s = _this.sprites[j];
+                    if (s.phaserData!==undefined && s.phaserData.hasOwnProperty(id)) {
+                        phased.push(s);
+                    }
+                }
+
+                if (phased.length>0) {
+                    _this.phasers[i].rebalance(phased);
+                }
+            }
+        };
+
         this.updateFX = function(now) {
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
@@ -2842,6 +2944,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var time = now - _this.lastFrameTime;
             _this.updateFX(now);
             _this.map.updateLayers(time);
+            _this.updatePhasers();
             update(time); /* This fn is in the game code */
             if (_this.camera) {
                 _this.camera.update(time);
@@ -2973,8 +3076,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.camera = this.cameras[name];
         };
 
-        this.nextName = 1;
-
         /**
          * Spawn a new sprite in the world
          * @param defName The name of the sprite definition to use. These are
@@ -3008,8 +3109,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var name = opts.name;
 
             if (name===undefined) {
-                name = "unnamed"+_this.nextName;
-                _this.nextName++;
+                name = guid();
             } else {
                 if(_this.spriteMap.hasOwnProperty(name)) {
                     throw "Error: duplicate sprite name " + name;
@@ -3023,20 +3123,32 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var sd = _this.spriteDefs[defName];
 
             var updates = opts.updates;
+            var phaserData;
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
-                    var suname = opts.updates[i].name;
+                    var optUpdate = opts.updates[i];
+                    var suname = optUpdate.name;
                     if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
                         throw "Sprite plugin used but not registered: "+suname;
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
-                    copyProps(opts.updates[i], updates[i]);
+                    if (optUpdate.hasOwnProperty('phaser')) {
+                        if (phaserData === undefined) {
+                            phaserData = {};
+                        }
+
+                        phaserData[optUpdate.phaser.id] = {
+                            phase:optUpdate.phaser.phases-1 /* TODO: This should be set up by the phaser. */
+                        };
+                    }
+                    copyProps(optUpdate, updates[i]);
                 }
             }
 
             opts = clone(opts);
             opts.updates = updates;
+            opts.phaserData = phaserData;
 
             var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);
@@ -3056,8 +3168,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.createComposite = function(x,y,name,endCallback) {
 
             if (name===undefined) {
-                name = "unnamed"+_this.nextName;
-                _this.nextName++;
+                name = guid();
             } else {
                 if(_this.spriteMap.hasOwnProperty(name)) {
                     throw "Warning: duplicate sprite (composite) name " + name;
@@ -3135,7 +3246,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.createPhaser = function(phases) {
-            return new UpdatePhaser(phases);
+            var phaser = new UpdatePhaser(guid(), phases);
+            this.phasers.push(phaser);
+            return phaser;
         };
 
         this.resizeCanvas = function() {
