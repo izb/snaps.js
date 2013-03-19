@@ -14,17 +14,17 @@ define(function() {
     };
 
     UpdatePhaser.prototype.rebalance = function(sprites) {
-        var s, data, max = 0;
+        var i, s, data, max = 0;
         var buckets = new Array(this.phases);
-        for (var i = buckets.length - 1; i >= 0; i--) {
+        for (i = buckets.length - 1; i >= 0; i--) {
             buckets[i] = 0;
         }
 
         var desiredMax = Math.ceil(sprites.length/this.phases);
 
         var clearing = [];
-        for (var i = sprites.length - 1; i >= 0; i--) {
-            var s = sprites[i];
+        for (i = sprites.length - 1; i >= 0; i--) {
+            s = sprites[i];
             data = s.phaserData[this.id];
             data.phase++;
             if (data.phase>=this.phases) {
@@ -39,7 +39,7 @@ define(function() {
         if (max/desiredMax<0.8) { /* TODO: Check that this ratio is accurate or useful. */
 
             var bucketIdx = 0;
-            for (var i = clearing.length - 1; i >= 0; i--) {
+            for (i = clearing.length - 1; i >= 0; i--) {
                 s = clearing[i];
                 while(buckets[bucketIdx]>desiredMax) {
                     bucketIdx++;

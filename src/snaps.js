@@ -176,10 +176,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
                 var phased = [];
                 var id = _this.phasers[i].id;
-                for (var i = _this.sprites.length - 1; i >= 0; i--) {
-                    var s = _this.sprites[i];
+                for (var j = _this.sprites.length - 1; j >= 0; j--) {
+                    var s = _this.sprites[j];
                     if (s.phaserData!==undefined && s.phaserData.hasOwnProperty[id]) {
-                        phased.push[s];
+                        phased.push(s);
                     }
                 }
 
@@ -451,7 +451,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
                     if (updates[i].hasOwnProperty('phaser')) {
-                        if (phaserData == undefined) {
+                        if (phaserData === undefined) {
                             phaserData = {};
                         }
 
