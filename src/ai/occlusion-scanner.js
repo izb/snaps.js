@@ -4,7 +4,7 @@ define(function() {
 
     }
 
-    /* TODO */
+    /* TODO: This should be able to generate polygons encapsulating visibility from a point. */
 
     return OcclusionScanner;
 
