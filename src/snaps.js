@@ -29,6 +29,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone = util.js.clone;
     var Preloader = util.Preloader;
+    var guid = util.guid;
 
     function Snaps(game, canvasID, settings) {
 
@@ -86,6 +87,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.spriteDefs = {};
         this.sprites = [];
+        this.phasers = [];
         this.spriteMap = {};
 
         this.lastFrameTime = 0;
@@ -170,6 +172,23 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         };
 
+        this.updatePhasers = function() {
+            for (var i = _this.phasers.length - 1; i >= 0; i--) {
+                var phased = [];
+                var id = _this.phasers[i].id;
+                for (var i = _this.sprites.length - 1; i >= 0; i--) {
+                    var s = _this.sprites[i];
+                    if (s.phaserData!==undefined && s.phaserData.hasOwnProperty[id]) {
+                        phased.push[s];
+                    }
+                }
+
+                if (phased.length>0) {
+                    _this.phasers[i].rebalance(phased);
+                }
+            }
+        };
+
         this.updateFX = function(now) {
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
@@ -243,6 +262,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var time = now - _this.lastFrameTime;
             _this.updateFX(now);
             _this.map.updateLayers(time);
+            _this.updatePhasers();
             update(time); /* This fn is in the game code */
             if (_this.camera) {
                 _this.camera.update(time);
@@ -374,8 +394,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.camera = this.cameras[name];
         };
 
-        this.nextName = 1;
-
         /**
          * Spawn a new sprite in the world
          * @param defName The name of the sprite definition to use. These are
@@ -409,8 +427,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var name = opts.name;
 
             if (name===undefined) {
-                name = "unnamed"+_this.nextName;
-                _this.nextName++;
+                name = guid();
             } else {
                 if(_this.spriteMap.hasOwnProperty(name)) {
                     throw "Error: duplicate sprite name " + name;
@@ -424,6 +441,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var sd = _this.spriteDefs[defName];
 
             var updates = opts.updates;
+            var phaserData;
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
@@ -432,12 +450,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                         throw "Sprite plugin used but not registered: "+suname;
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
+                    if (updates[i].hasOwnProperty('phaser')) {
+                        if (phaserData == undefined) {
+                            phaserData = {};
+                        }
+
+                        phaserData[updates[i].phaser.id] = {
+                            phase:updates[i].phaser.phases-1 /* TODO: Wonder if this should be set up by the phaser. */
+                        };
+                    }
                     copyProps(opts.updates[i], updates[i]);
                 }
             }
 
             opts = clone(opts);
             opts.updates = updates;
+            opts.phaserData = phaserData;
 
             var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);
@@ -457,8 +485,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.createComposite = function(x,y,name,endCallback) {
 
             if (name===undefined) {
-                name = "unnamed"+_this.nextName;
-                _this.nextName++;
+                name = guid();
             } else {
                 if(_this.spriteMap.hasOwnProperty(name)) {
                     throw "Warning: duplicate sprite (composite) name " + name;
@@ -536,7 +563,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.createPhaser = function(phases) {
-            return new UpdatePhaser(phases);
+            var phaser = new UpdatePhaser(guid(), phases);
+            this.phasers.push(phaser);
+            return phaser;
         };
 
         this.resizeCanvas = function() {

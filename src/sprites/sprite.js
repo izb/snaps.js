@@ -66,9 +66,9 @@ define(function() {
             this.autoRemove = true;
         }
 
-        this.collisionPoint = [0,0];
+        this.phaserData = opts.phaserData;
 
-        this.phaser = opts.phaser;
+        this.collisionPoint = [0,0];
 
         this.quantizedHeight = !!opts.quantizedHeight;
     }
@@ -144,11 +144,11 @@ define(function() {
 
     Sprite.prototype.update = function(now) {
 
-        var phaseOn = this.phaser?this.phaser.phase(now):true;
-
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                if(!this.updates[i].update(now, phaseOn)) {
+                var update = this.updates[i];
+                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this);
+                if(!update.update(now, phaseOn)) {
                     /* Return false from an update function to break the chain. */
                     break;
                 }

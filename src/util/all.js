@@ -4,8 +4,9 @@ define([
     'util/bitmap',
     'util/debug',
     'util/js',
+    'util/guid',
     'util/url'],
-function(Preloader, rnd, Bitmap, debug, js, Url) {
+function(Preloader, rnd, Bitmap, debug, js, guid, Url) {
 
     'use strict';
 
@@ -13,6 +14,7 @@ function(Preloader, rnd, Bitmap, debug, js, Url) {
         Preloader: Preloader,
         rnd: rnd,
         js: js,
+        guid: guid,
         debug: debug,
         Bitmap: Bitmap,
         Url: Url
