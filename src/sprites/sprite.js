@@ -68,6 +68,8 @@ define(function() {
 
         this.collisionPoint = [0,0];
 
+        this.phaser = opts.phaser;
+
         this.quantizedHeight = !!opts.quantizedHeight;
     }
 
@@ -141,9 +143,12 @@ define(function() {
     };
 
     Sprite.prototype.update = function(now) {
+
+        var phaseOn = this.phaser?this.phaser.phase(now):true;
+
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                if(!this.updates[i].update(now)) {
+                if(!this.updates[i].update(now, phaseOn)) {
                     /* Return false from an update function to break the chain. */
                     break;
                 }

@@ -12,12 +12,16 @@ define(['sprites/spritedef',
         /* Animation */
         'animate/tween',
 
+        /* AI */
+        'ai/update-phaser',
+
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
-        tweens) {
+        tweens,
+        UpdatePhaser) {
 
     'use strict';
 
@@ -529,6 +533,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.getNow = function() {
             return _this.now;
+        };
+
+        this.createPhaser = function(phases) {
+            return new UpdatePhaser(phases);
         };
 
         this.resizeCanvas = function() {

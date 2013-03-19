@@ -6,14 +6,13 @@ define(['util/js'], function(js) {
 
     var sn;
 
-    /* A sample layer effect that performs collision traces to approximate a circular
-     * occlusion scan. Just pretty, not (yet) useful. */
+    /* A sample layer effect that shows collisions for testing. TODO: Delete this please */
 
     /**
      * @param {Object} opts Parameters for customizing the layer. Requires these properties:
      * 'x' and 'y' The center of the scan.
      */
-    function OcclusionScan(layerName, opts) {
+    function DemoTrace(layerName, opts) {
         this.opts = opts||{};
         this.name = layerName;
         this.x = opts.x;
@@ -22,10 +21,10 @@ define(['util/js'], function(js) {
         this.collider = sn.createCollider('circle-trace', {radius:opts.radius});
     }
 
-    OcclusionScan.prototype.update = function(now) {
+    DemoTrace.prototype.update = function(now) {
     };
 
-    OcclusionScan.prototype.draw = function(ctx, now) {
+    DemoTrace.prototype.draw = function(ctx, now) {
 
         var endW = [0,0];
         var startS = [0,0];
@@ -89,13 +88,13 @@ define(['util/js'], function(js) {
         }
     };
 
-    OcclusionScan.prototype.set = function(newconf) {
+    DemoTrace.prototype.set = function(newconf) {
         copyProps(newconf, this);
     };
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('occlusion-scan', OcclusionScan, function(){});
+        sn.registerLayerPlugin('demo-trace', DemoTrace, function(){});
     };
 
 });

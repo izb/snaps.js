@@ -30,10 +30,15 @@ define(function() {
 
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    Animate.prototype.update = function(now) {
+    Animate.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
         var t = now - this.epoch;
         for(var prop in this.props) {

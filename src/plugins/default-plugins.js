@@ -6,7 +6,7 @@ define([
     'plugins/sprite/8way',
 
     'plugins/layer/ui-layer',
-    'plugins/layer/occlusion-scan',
+    'plugins/layer/demo-trace', /* TODO: Delete and remove */
 
     'plugins/fx/particles',
 
@@ -17,7 +17,7 @@ define([
     ],
 function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,
-        regUILayer, regOcclusionScan,
+        regUILayer, regDemoScan,
         regParticles,
         regPushCam,
         regLineTrace, regCircleTrace) {
@@ -32,7 +32,7 @@ function(
         reg8way(sn);
 
         regUILayer(sn);
-        regOcclusionScan(sn);
+        regDemoScan(sn);
 
         regParticles(sn);
 

@@ -135,6 +135,8 @@ define('sprites/sprite',[],function() {
 
         this.collisionPoint = [0,0];
 
+        this.phaser = opts.phaser;
+
         this.quantizedHeight = !!opts.quantizedHeight;
     }
 
@@ -208,9 +210,12 @@ define('sprites/sprite',[],function() {
     };
 
     Sprite.prototype.update = function(now) {
+
+        var phaseOn = this.phaser?this.phaser.phase(now):true;
+
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                if(!this.updates[i].update(now)) {
+                if(!this.updates[i].update(now, phaseOn)) {
                     /* Return false from an update function to break the chain. */
                     break;
                 }
@@ -1318,10 +1323,15 @@ define('plugins/sprite/bounce',[],function() {
      */
 
     /** Called with the sprite as the 'this' context.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    Bounce.prototype.update = function(now) {
+    Bounce.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
         var b = s.state.jogPos(s.epoch, sn.getNow());
         b*=2;
@@ -1355,10 +1365,15 @@ define('plugins/sprite/follow-mouse',[],function() {
 
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    FollowMouse.prototype.update = function(now) {
+    FollowMouse.prototype.update = function(now, phaseOn) {
 
         sn.mouseWorldPos(pos);
         var s = this.sprite;
@@ -1406,11 +1421,16 @@ define('plugins/sprite/link',[],function() {
 
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
 
-    Link.prototype.update = function(now) {
+    Link.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
         for (var i = this.link_to.length - 1; i >= 0; i--) {
             this.link_to[i].sprite.x = s.x + this.link_to[i].x;
@@ -1471,10 +1491,15 @@ define('plugins/sprite/animate',[],function() {
 
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    Animate.prototype.update = function(now) {
+    Animate.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
         var t = now - this.epoch;
         for(var prop in this.props) {
@@ -1530,10 +1555,15 @@ define('plugins/sprite/8way',[],function() {
 
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the sprite is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
      * @return true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
-    Face8Way.prototype.update = function(now) {
+    Face8Way.prototype.update = function(now, phaseOn) {
 
         var s = this.sprite;
 
@@ -1624,7 +1654,7 @@ define('plugins/layer/ui-layer',[],function() {
 
 });
 
-define('plugins/layer/occlusion-scan',['util/js'], function(js) {
+define('plugins/layer/demo-trace',['util/js'], function(js) {
 
     
 
@@ -1632,14 +1662,13 @@ define('plugins/layer/occlusion-scan',['util/js'], function(js) {
 
     var sn;
 
-    /* A sample layer effect that performs collision traces to approximate a circular
-     * occlusion scan. Just pretty, not (yet) useful. */
+    /* A sample layer effect that shows collisions for testing. TODO: Delete this please */
 
     /**
      * @param {Object} opts Parameters for customizing the layer. Requires these properties:
      * 'x' and 'y' The center of the scan.
      */
-    function OcclusionScan(layerName, opts) {
+    function DemoTrace(layerName, opts) {
         this.opts = opts||{};
         this.name = layerName;
         this.x = opts.x;
@@ -1648,10 +1677,10 @@ define('plugins/layer/occlusion-scan',['util/js'], function(js) {
         this.collider = sn.createCollider('circle-trace', {radius:opts.radius});
     }
 
-    OcclusionScan.prototype.update = function(now) {
+    DemoTrace.prototype.update = function(now) {
     };
 
-    OcclusionScan.prototype.draw = function(ctx, now) {
+    DemoTrace.prototype.draw = function(ctx, now) {
 
         var endW = [0,0];
         var startS = [0,0];
@@ -1715,13 +1744,13 @@ define('plugins/layer/occlusion-scan',['util/js'], function(js) {
         }
     };
 
-    OcclusionScan.prototype.set = function(newconf) {
+    DemoTrace.prototype.set = function(newconf) {
         copyProps(newconf, this);
     };
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('occlusion-scan', OcclusionScan, function(){});
+        sn.registerLayerPlugin('demo-trace', DemoTrace, function(){});
     };
 
 });
@@ -2329,7 +2358,7 @@ define('plugins/default-plugins',[
     'plugins/sprite/8way',
 
     'plugins/layer/ui-layer',
-    'plugins/layer/occlusion-scan',
+    'plugins/layer/demo-trace', /* TODO: Delete and remove */
 
     'plugins/fx/particles',
 
@@ -2340,7 +2369,7 @@ define('plugins/default-plugins',[
     ],
 function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,
-        regUILayer, regOcclusionScan,
+        regUILayer, regDemoScan,
         regParticles,
         regPushCam,
         regLineTrace, regCircleTrace) {
@@ -2355,7 +2384,7 @@ function(
         reg8way(sn);
 
         regUILayer(sn);
-        regOcclusionScan(sn);
+        regDemoScan(sn);
 
         regParticles(sn);
 
@@ -2518,6 +2547,21 @@ define('animate/tween',[],function() {
 
 });
 
+define('ai/update-phaser',[],function() {
+
+    function UpdatePhaser(phases) {
+        this.phases = phases;
+    }
+
+    UpdatePhaser.prototype.phase = function(now) {
+        return true;
+    };
+    /* TODO */
+
+    return UpdatePhaser;
+
+});
+
 define('polyfills/requestAnimationFrame',[],function() {
 
     
@@ -2567,12 +2611,16 @@ define('snaps',['sprites/spritedef',
         /* Animation */
         'animate/tween',
 
+        /* AI */
+        'ai/update-phaser',
+
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
-        tweens) {
+        tweens,
+        UpdatePhaser) {
 
     
 
@@ -3084,6 +3132,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.getNow = function() {
             return _this.now;
+        };
+
+        this.createPhaser = function(phases) {
+            return new UpdatePhaser(phases);
         };
 
         this.resizeCanvas = function() {
