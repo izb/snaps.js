@@ -58,7 +58,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.activeFX = [];
 
-        _this.now = 0;
+        this.now = 0;
+        this.epoch = 0; /* 0 in chrome, but moz passes unix time. Epoch will be adjusted on first repaint */
 
         var c = document.getElementById(canvasID);
         this.clientWidth = c.clientWidth;
@@ -256,6 +257,15 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         }
 
         function loop(now) {
+            if (now>315532800 && _this.epoch===0) {
+                /* Hack due to differences between moz and chrome implementations of
+                 * requestAnimationFrame. If time is > 10 years, we decide that this must be
+                 * firefox, and adjust our epoch and all timings henceforth. */
+                _this.epoch = now - 16; /* 1/60s, just because. */
+            }
+
+            now = now - _this.epoch;
+
             window.requestAnimationFrame(loop);
 
             _this.now = now;
