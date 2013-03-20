@@ -28,7 +28,7 @@
         "grunt-contrib-copy": "0.4.0",
         "grunt-contrib-jshint": "0.3.0",
         "grunt-contrib-watch": "0.3.1",
-        "grunt-closure-tools": "0.7.5"
+        "grunt-closure-tools": "0.7.7"
     },
     "devDependencies": {
     },
