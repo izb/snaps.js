@@ -12,3 +12,21 @@ around it.
 Trust me though, it's pretty good already.
 
 If you want to know more, head on over to the [wiki](https://github.com/izb/snaps.js/wiki).
+
+Notes on building
+-----------------
+
+To build, you need to install node.js. You need at least v0.10
+
+To set up:
+
+```bash
+npm install -g grunt-cli
+npm install
+```
+
+To build:
+
+```bash
+grunt
+```
