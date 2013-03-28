@@ -1,3 +1,4 @@
+/*global define*/
 define(function() {
 
     /**
@@ -30,9 +31,9 @@ define(function() {
         while (px < py) {
             x++;
             px += twob2;
-            if (p < 0)
+            if (p < 0) {
                 p += ry2 + px;
-            else {
+            } else {
                 y--;
                 py -= twoa2;
                 p += ry2 + px - py;
@@ -45,9 +46,9 @@ define(function() {
         while (y > 0) {
             y--;
             py -= twoa2;
-            if (p > 0)
+            if (p > 0) {
                 p += rx2 - py;
-            else {
+            } else {
                 x++;
                 px += twob2;
                 p += rx2 - py + px;

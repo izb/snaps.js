@@ -1,3 +1,4 @@
+/*global define*/
 define([
     'plugins/collision/lib/prop-scanner',
     'plugins/collision/lib/local-scanner'],

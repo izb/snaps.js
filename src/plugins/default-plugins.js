@@ -1,3 +1,4 @@
+/*global define*/
 define([
     'plugins/sprite/bounce',
     'plugins/sprite/follow-mouse',

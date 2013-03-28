@@ -1,3 +1,4 @@
+/*global define*/
 define(function() {
 
     function UpdatePhaser(id, phases) {

@@ -1,3 +1,4 @@
+/*global define*/
 define(['sprites/spritedef',
         'sprites/sprite',
         'sprites/composite',

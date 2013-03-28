@@ -1,3 +1,4 @@
+/*global define*/
 define([
     'util/preload',
     'util/rnd',

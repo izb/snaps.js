@@ -1,4 +1,5 @@
 
+/*global define*/
 define('sprites/spritedef',[],function() {
 
     
@@ -65,6 +66,7 @@ define('sprites/spritedef',[],function() {
 
 });
 
+/*global define*/
 define('sprites/sprite',[],function() {
 
     
@@ -332,6 +334,7 @@ define('sprites/sprite',[],function() {
 
 });
 
+/*global define*/
 define('util/js',[],function() {
 
     
@@ -372,6 +375,7 @@ define('util/js',[],function() {
 
 });
 
+/*global define*/
 define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
 
     
@@ -490,6 +494,7 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
 
 });
 
+/*global define*/
 define('input/keyboard',[],function() {
 
     
@@ -649,6 +654,7 @@ define('input/keyboard',[],function() {
 
 });
 
+/*global define*/
 define('input/mouse',[],function() {
 
     
@@ -681,6 +687,7 @@ define('input/mouse',[],function() {
 
 });
 
+/*global define*/
 define('util/preload',[],function() {
 
     
@@ -737,6 +744,7 @@ define('util/preload',[],function() {
 
 });
 
+/*global define*/
 define('util/rnd',[],function() {
 
     
@@ -803,6 +811,7 @@ define('util/rnd',[],function() {
 
 });
 
+/*global define*/
 define('util/bitmap',[],function() {
 
     
@@ -834,6 +843,7 @@ define('util/bitmap',[],function() {
 
 });
 
+/*global define*/
 define('util/debug',[],function() {
 
     
@@ -855,11 +865,14 @@ define('util/debug',[],function() {
 
 });
 
+/*global define*/
 define('util/guid',[],function() {
 
     
 
     var next = 1;
+
+    /* TODO: This is a uid, not a guid. */
 
     /** Return a unique string for identifier purposes.
      */
@@ -869,6 +882,7 @@ define('util/guid',[],function() {
 
 });
 
+/*global define*/
 define('util/url',[],function() {
 
     
@@ -883,6 +897,7 @@ define('util/url',[],function() {
 
 });
 
+/*global define*/
 define('util/all',[
     'util/preload',
     'util/rnd',
@@ -907,6 +922,7 @@ function(Preloader, rnd, Bitmap, debug, js, guid, Url) {
 
 });
 
+/*global define*/
 define('map/tile',[],function() {
 
     
@@ -951,6 +967,7 @@ define('map/tile',[],function() {
 
 });
 
+/*global define*/
 define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitmap, debug, js) {
 
     
@@ -1317,7 +1334,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                     }
                 }
 
-                if (i==top) {
+                if (i===top) {
                     var z = (y+2) * ystep;
                     while(spriteCursor<sprites.length && z>=sprites[spriteCursor].y) {
                         sprites[spriteCursor++].draw(ctx, this.xoffset, this.yoffset, now);
@@ -1331,6 +1348,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
 });
 
+/*global define*/
 define('plugins/sprite/bounce',[],function() {
 
     
@@ -1384,6 +1402,7 @@ define('plugins/sprite/bounce',[],function() {
 
 });
 
+/*global define*/
 define('plugins/sprite/follow-mouse',[],function() {
 
     
@@ -1424,6 +1443,7 @@ define('plugins/sprite/follow-mouse',[],function() {
 
 });
 
+/*global define*/
 define('plugins/sprite/link',[],function() {
 
     
@@ -1491,6 +1511,7 @@ define('plugins/sprite/link',[],function() {
 
 });
 
+/*global define*/
 define('plugins/sprite/animate',[],function() {
 
     
@@ -1576,6 +1597,7 @@ define('plugins/sprite/animate',[],function() {
 
 });
 
+/*global define*/
 define('plugins/sprite/8way',[],function() {
 
     
@@ -1653,6 +1675,7 @@ define('plugins/sprite/8way',[],function() {
 
 });
 
+/*global define*/
 define('plugins/layer/ui-layer',[],function() {
 
     
@@ -1686,6 +1709,7 @@ define('plugins/layer/ui-layer',[],function() {
 
 });
 
+/*global define*/
 define('plugins/layer/demo-trace',['util/js'], function(js) {
 
     
@@ -1787,6 +1811,7 @@ define('plugins/layer/demo-trace',['util/js'], function(js) {
 
 });
 
+/*global define*/
 define('plugins/fx/particles',[
     'sprites/sprite',
     'sprites/composite',
@@ -1903,6 +1928,7 @@ define('plugins/fx/particles',[
 
 });
 
+/*global define*/
 define('plugins/camera/push-cam',[],function() {
 
     
@@ -1937,6 +1963,7 @@ define('plugins/camera/push-cam',[],function() {
 
 });
 
+/*global define*/
 define('plugins/collision/lib/prop-scanner',[],function() {
 
     
@@ -2068,6 +2095,7 @@ define('plugins/collision/lib/prop-scanner',[],function() {
     return traceProp;
 });
 
+/*global define*/
 define('plugins/collision/lib/local-scanner',[],function() {
 
     
@@ -2130,6 +2158,7 @@ define('plugins/collision/lib/local-scanner',[],function() {
     };
 });
 
+/*global define*/
 define('plugins/collision/sprite-with-map/line-trace',[
     'plugins/collision/lib/prop-scanner',
     'plugins/collision/lib/local-scanner'],
@@ -2189,6 +2218,7 @@ function(traceProp, localScan) {
 
 });
 
+/*global define*/
 define('plugins/collision/lib/ellipse',[],function() {
 
     /**
@@ -2221,9 +2251,9 @@ define('plugins/collision/lib/ellipse',[],function() {
         while (px < py) {
             x++;
             px += twob2;
-            if (p < 0)
+            if (p < 0) {
                 p += ry2 + px;
-            else {
+            } else {
                 y--;
                 py -= twoa2;
                 p += ry2 + px - py;
@@ -2236,9 +2266,9 @@ define('plugins/collision/lib/ellipse',[],function() {
         while (y > 0) {
             y--;
             py -= twoa2;
-            if (p > 0)
+            if (p > 0) {
                 p += rx2 - py;
-            else {
+            } else {
                 x++;
                 px += twob2;
                 p += rx2 - py + px;
@@ -2249,6 +2279,7 @@ define('plugins/collision/lib/ellipse',[],function() {
     };
 });
 
+/*global define*/
 define('plugins/collision/sprite-with-map/circle-trace',[
     'plugins/collision/lib/prop-scanner',
     'plugins/collision/lib/ellipse',
@@ -2382,6 +2413,7 @@ function(traceProp, midPtEllipse, localScan) {
 
 });
 
+/*global define*/
 define('plugins/default-plugins',[
     'plugins/sprite/bounce',
     'plugins/sprite/follow-mouse',
@@ -2428,6 +2460,7 @@ function(
 
 });
 
+/*global define*/
 define('animate/tween',[],function() {
 
     
@@ -2579,6 +2612,7 @@ define('animate/tween',[],function() {
 
 });
 
+/*global define*/
 define('ai/update-phaser',[],function() {
 
     function UpdatePhaser(id, phases) {
@@ -2645,6 +2679,7 @@ define('ai/update-phaser',[],function() {
 
 });
 
+/*global define*/
 define('polyfills/requestAnimationFrame',[],function() {
 
     
@@ -2663,7 +2698,7 @@ define('polyfills/requestAnimationFrame',[],function() {
                                    window[vendors[x]+'CancelRequestAnimationFrame'];
     }
 
-    if (!window.requestAnimationFrame)
+    if (!window.requestAnimationFrame) {
         window.requestAnimationFrame = function(callback, element) {
             var currTime = new Date().getTime();
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
@@ -2672,14 +2707,17 @@ define('polyfills/requestAnimationFrame',[],function() {
             lastTime = currTime + timeToCall;
             return id;
         };
+    }
 
-    if (!window.cancelAnimationFrame)
+    if (!window.cancelAnimationFrame) {
         window.cancelAnimationFrame = function(id) {
             clearTimeout(id);
         };
+    }
 
 });
 
+/*global define*/
 define('snaps',['sprites/spritedef',
         'sprites/sprite',
         'sprites/composite',

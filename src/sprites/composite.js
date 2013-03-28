@@ -1,3 +1,4 @@
+/*global define*/
 define(['util/js', 'sprites/sprite'], function(js, Sprite) {
 
     'use strict';

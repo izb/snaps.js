@@ -1,3 +1,4 @@
+/*global define*/
 define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitmap, debug, js) {
 
     'use strict';
@@ -364,7 +365,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                     }
                 }
 
-                if (i==top) {
+                if (i===top) {
                     var z = (y+2) * ystep;
                     while(spriteCursor<sprites.length && z>=sprites[spriteCursor].y) {
                         sprites[spriteCursor++].draw(ctx, this.xoffset, this.yoffset, now);
