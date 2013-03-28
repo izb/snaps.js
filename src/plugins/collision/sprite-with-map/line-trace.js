@@ -13,7 +13,7 @@ function(traceProp, localScan) {
     function LineTrace(opts) {
         opts = opts || {};
         this.sn = sn;
-        this.edges = sn.getScreenEdges();
+        this.edges = sn.getWorldEdges();
 
         if (opts.autoSlip===undefined) {
             this.autoSlip = true;

@@ -1189,7 +1189,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         this.scrollTo(this.xoffset+dx, this.yoffset+dy);
     };
 
-    StaggeredIsometric.prototype.getScreenEdges = function() {
+    StaggeredIsometric.prototype.getWorldEdges = function() {
         return {
             le:this.minxoffset,
             te:this.minyoffset,
@@ -2173,7 +2173,7 @@ function(traceProp, localScan) {
     function LineTrace(opts) {
         opts = opts || {};
         this.sn = sn;
-        this.edges = sn.getScreenEdges();
+        this.edges = sn.getWorldEdges();
 
         if (opts.autoSlip===undefined) {
             this.autoSlip = true;
@@ -3036,7 +3036,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             /* Preloading failed */
             function() {
-                _this.game.onLoadError();
+                if (typeof _this.game.onLoadError === 'function') {
+                    _this.game.onLoadError();
+                }
             }
         );
 
@@ -3060,8 +3062,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             _this.map.scrollTo(x, y);
         };
 
-        this.getScreenEdges = function() {
-            return _this.map.getScreenEdges();
+        this.getWorldEdges = function() {
+            return _this.map.getWorldEdges();
         };
 
         this.drawWorld = function() {

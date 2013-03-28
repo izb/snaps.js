@@ -220,7 +220,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.scrollTo(this.xoffset+dx, this.yoffset+dy);
     };
 
-    StaggeredIsometric.prototype.getScreenEdges = function() {
+    StaggeredIsometric.prototype.getWorldEdges = function() {
         return {
             le:this.minxoffset,
             te:this.minyoffset,

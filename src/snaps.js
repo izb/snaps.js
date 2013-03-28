@@ -317,7 +317,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             /* Preloading failed */
             function() {
-                _this.game.onLoadError();
+                if (typeof _this.game.onLoadError === 'function') {
+                    _this.game.onLoadError();
+                }
             }
         );
 
@@ -341,8 +343,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             _this.map.scrollTo(x, y);
         };
 
-        this.getScreenEdges = function() {
-            return _this.map.getScreenEdges();
+        this.getWorldEdges = function() {
+            return _this.map.getWorldEdges();
         };
 
         this.drawWorld = function() {
