@@ -2759,6 +2759,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.util = util;
         this.tweens = tweens;
 
+        settings = settings || {};
         this.dbgShowMouse = !!settings.showMouse;
         this.dbgShowCounts = !!settings.showCounts;
         this.dbgShowRegions = !!settings.showRegions;

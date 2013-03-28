@@ -10,6 +10,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-mocha');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -37,9 +38,14 @@ module.exports = function(grunt) {
                     "dist/snaps-<%= pkg.version %>.js": "tmp/snaps.js"
                 }
             },
-            testable: {
+            testmin: {
                 files: {
-                    "tmp/snaps-edge.min.js": 'dist/snaps-<%= pkg.version %>.min.js'
+                    "tmp/snaps-test.js": 'dist/snaps-<%= pkg.version %>.min.js'
+                }
+            },
+            testdev: {
+                files: {
+                    "tmp/snaps-test.js": 'dist/snaps.js'
                 }
             }
         },
@@ -74,8 +80,8 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('dev', ['jshint:build','requirejs:snaps','copy:dist']);
-    grunt.registerTask('production', ['dev','closurecompiler:dist']);
+    grunt.registerTask('dev', ['jshint:build','requirejs:snaps','copy:dist', 'copy:testdev']);
+    grunt.registerTask('production', ['dev','closurecompiler:dist', 'copy:testmin']);
     grunt.registerTask('default', ['production']);
-    grunt.registerTask('test', ['copy:testable', 'mocha:all']);
+    grunt.registerTask('test', ['mocha:all']);
 };

@@ -40,11 +40,11 @@
         require.config({
             "baseUrl": "./",
             "paths": {
-                "snaps": "../tmp/snape-edge.min"
+                "snaps": "../tmp/snaps-test"
             }
         });
 
-        require(['test/simplegame'], function() {
+        require(['spec/simplegame'], function() {
             mocha
                 // .globals(['Wombat', 'Apple']) // acceptable globals
                 .run();

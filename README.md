@@ -30,3 +30,15 @@ To build:
 ```bash
 grunt
 ```
+
+To test:
+
+```bash
+grunt production test
+```
+
+Or to test unminified:
+
+```bash
+grunt dev test
+```
