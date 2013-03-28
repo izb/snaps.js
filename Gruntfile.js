@@ -45,7 +45,7 @@ module.exports = function(grunt) {
             },
             testdev: {
                 files: {
-                    "tmp/snaps-test.js": 'dist/snaps.js'
+                    "tmp/snaps-test.js": 'tmp/snaps.js'
                 }
             }
         },
