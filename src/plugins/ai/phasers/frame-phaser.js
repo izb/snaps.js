@@ -14,12 +14,21 @@ define(function() {
         this.bucketMax = new Array(opts.phases);
     }
 
-    FramePhaser.prototype.phase = function(sprite) {
+    /** Called by snaps.spawnSprite to generate the initial phaseData for this
+     * phaser instance.
+     * @return An object with data that will be assigned to the sprite accessible
+     * under sprite.phaseData[phaser_id]
+     */
+    FramePhaser.prototype.initData = function() {
+        return { phase: this.phases-1 };
+    };
+
+    FramePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
         return data.phase===0;
     };
 
-    FramePhaser.prototype.rebalance = function(sprites) {
+    FramePhaser.prototype.rebalance = function(sprites, now) {
         var i, s, data, max = 0;
         var buckets = this.buckets;
 

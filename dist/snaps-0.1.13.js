@@ -216,7 +216,7 @@ define('sprites/sprite',[],function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];
-                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this);
+                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this, now);
                 if(!update.update(now, phaseOn)) {
                     /* Return false from an update function to break the chain. */
                     break;
@@ -1934,13 +1934,47 @@ define('plugins/ai/phasers/time-phaser',[],function() {
     var sn;
 
     function TimePhaser(id, opts) {
+        this.id = id;
+        opts = opts || {};
+        if (opts.updatesPerSecond===undefined || opts.updatesPerSecond<1) {
+            throw "Time phasers must define a >0 number of updates per second.";
+        }
+        this.updatesPerSecond = opts.updatesPerSecond;
+        this.lastUpdate = 0;
+        this.updatesThisFrame = 0;
     }
 
-    TimePhaser.prototype.phase = function(sprite) {
-        return true;
+    /** Called by snaps.spawnSprite to generate the initial phaseData for this
+     * phaser instance.
+     * @return An object with data that will be assigned to the sprite accessible
+     * under sprite.phaseData[phaser_id]
+     */
+    TimePhaser.prototype.initData = function() {
+        return { lastUpdate: 0 };
     };
 
-    TimePhaser.prototype.rebalance = function(sprites) {
+    TimePhaser.prototype.phase = function(sprite, now) {
+        var data = sprite.phaserData[this.id];
+        if(data.phaseOn) {
+            data.lastUpdate = now;
+        }
+        return data.phaseOn;
+    };
+
+    TimePhaser.prototype.rebalance = function(sprites, now) {
+        var timeSinceLastFrame = now - this.lastUpdate;
+        this.lastUpdate = now;
+        var updateBudget = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
+
+        var id = this.id;
+
+        sprites.sort(function(a, b) {
+            return b.phaserData[id].lastUpdate - a.phaserData[id].lastUpdate;
+        });
+
+        for (var i = sprites.length - 1; i >= 0; i--) {
+            sprites[i].phaserData[this.id].phaseOn = (updateBudget--)>0;
+        }
     };
 
 
@@ -1966,12 +2000,21 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
         this.bucketMax = new Array(opts.phases);
     }
 
-    FramePhaser.prototype.phase = function(sprite) {
+    /** Called by snaps.spawnSprite to generate the initial phaseData for this
+     * phaser instance.
+     * @return An object with data that will be assigned to the sprite accessible
+     * under sprite.phaseData[phaser_id]
+     */
+    FramePhaser.prototype.initData = function() {
+        return { phase: this.phases-1 };
+    };
+
+    FramePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
         return data.phase===0;
     };
 
-    FramePhaser.prototype.rebalance = function(sprites) {
+    FramePhaser.prototype.rebalance = function(sprites, now) {
         var i, s, data, max = 0;
         var buckets = this.buckets;
 
@@ -2979,7 +3022,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
 
                 if (phased.length>0) {
-                    _this.phasers[i].rebalance(phased);
+                    _this.phasers[i].rebalance(phased, _this.now);
                 }
             }
         };
@@ -3261,10 +3304,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                         if (phaserData === undefined) {
                             phaserData = {};
                         }
-
-                        phaserData[optUpdate.phaser.id] = {
-                            phase:optUpdate.phaser.phases-1 /* TODO: This should be set up by the phaser. */
-                        };
+                        phaserData[optUpdate.phaser.id] = optUpdate.phaser.initData();
                     }
                     copyProps(optUpdate, updates[i]);
                 }

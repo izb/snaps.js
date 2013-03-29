@@ -148,7 +148,7 @@ define(function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];
-                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this);
+                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this, now);
                 if(!update.update(now, phaseOn)) {
                     /* Return false from an update function to break the chain. */
                     break;

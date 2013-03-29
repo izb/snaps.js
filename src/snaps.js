@@ -193,7 +193,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
 
                 if (phased.length>0) {
-                    _this.phasers[i].rebalance(phased);
+                    _this.phasers[i].rebalance(phased, _this.now);
                 }
             }
         };
@@ -475,10 +475,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                         if (phaserData === undefined) {
                             phaserData = {};
                         }
-
-                        phaserData[optUpdate.phaser.id] = {
-                            phase:optUpdate.phaser.phases-1 /* TODO: This should be set up by the phaser. */
-                        };
+                        phaserData[optUpdate.phaser.id] = optUpdate.phaser.initData();
                     }
                     copyProps(optUpdate, updates[i]);
                 }
