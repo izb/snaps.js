@@ -13,28 +13,28 @@ define(['sprites/spritedef',
         /* Animation */
         'animate/tween',
 
-        /* AI */
-        'ai/update-phaser',
-
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
-        tweens,
-        UpdatePhaser) {
+        tweens) {
 
     'use strict';
 
     var debugText = util.debug.debugText;
     var copyProps = util.js.copyProps;
-    var clone = util.js.clone;
+    var clone     = util.js.clone;
     var Preloader = util.Preloader;
-    var guid = util.guid;
+    var guid      = util.guid;
+
 
     function Snaps(game, canvasID, settings) {
 
         var _this = this;
+
+        /* For testing, we'd like to perhaps re-bind this function later, so... */
+        this.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
@@ -53,6 +53,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.fxUpdaters = {};
         this.layerPlugins = {};
         this.cameraPlugins = {};
+        this.phaserPlugins = {};
 
         this.timers = {};
         this.cameras = {};
@@ -114,6 +115,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.registerCameraPlugin = function(name, fn, init) {
             _this.cameraPlugins[name] = {fn:fn, init:init};
+        };
+
+        this.registerPhaserPlugin = function(name, fn) {
+            _this.phaserPlugins[name] = {fn:fn};
         };
 
         /* Register the default plugins */
@@ -203,7 +208,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.fx = function(name, opts) {
             if (!_this.fxUpdaters.hasOwnProperty(name)) {
-                throw "Can't spawn FX for unregistered FX type: " + name;
+                throw "Can't create FX for unregistered FX type: " + name;
             }
             _this.activeFX.push(new _this.fxUpdaters[name](opts));
         };
@@ -212,7 +217,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             /* TODO: index must be in range. name must be unique. */
 
             if (!_this.layerPlugins.hasOwnProperty(type)) {
-                throw "Can't spawn layer for unregistered layer type: " + type;
+                throw "Can't create layer for unregistered layer type: " + type;
             }
             var layer = new _this.layerPlugins[type](name, opts);
             _this.map.insertLayer(idx, layer);
@@ -268,7 +273,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             now = now - _this.epoch;
 
-            window.requestAnimationFrame(loop);
+            _this.requestAnimationFrame(loop);
 
             _this.now = now;
             var time = now - _this.lastFrameTime;
@@ -577,8 +582,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return _this.now;
         };
 
-        this.createPhaser = function(phases) {
-            var phaser = new UpdatePhaser(guid(), phases);
+        this.createPhaser = function(name, opts) {
+            if (!_this.phaserPlugins.hasOwnProperty(name)) {
+                throw "Can't create phaser for unregistered type: " + name;
+            }
+
+            var phaser = new _this.phaserPlugins[name].fn(guid(), opts);
             this.phasers.push(phaser);
             return phaser;
         };

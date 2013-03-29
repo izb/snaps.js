@@ -11,6 +11,9 @@ define([
 
     'plugins/fx/particles',
 
+    'plugins/ai/phasers/time-phaser',
+    'plugins/ai/phasers/frame-phaser',
+
     'plugins/camera/push-cam',
 
     'plugins/collision/sprite-with-map/line-trace',
@@ -20,6 +23,7 @@ function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,
         regUILayer, regDemoScan,
         regParticles,
+        regTimePhaser, regFramePhaser,
         regPushCam,
         regLineTrace, regCircleTrace) {
 
@@ -36,6 +40,9 @@ function(
         regDemoScan(sn);
 
         regParticles(sn);
+
+        regTimePhaser(sn);
+        regFramePhaser(sn);
 
         regPushCam(sn);
 

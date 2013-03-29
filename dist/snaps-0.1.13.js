@@ -1929,6 +1929,102 @@ define('plugins/fx/particles',[
 });
 
 /*global define*/
+define('plugins/ai/phasers/time-phaser',[],function() {
+
+    var sn;
+
+    function TimePhaser(id, opts) {
+    }
+
+    TimePhaser.prototype.phase = function(sprite) {
+        return true;
+    };
+
+    TimePhaser.prototype.rebalance = function(sprites) {
+    };
+
+
+    return function(snaps) {
+        sn = snaps;
+        sn.registerPhaserPlugin('time-phaser', TimePhaser);
+    };
+});
+
+/*global define*/
+define('plugins/ai/phasers/frame-phaser',[],function() {
+
+    var sn;
+
+    function FramePhaser(id, opts) {
+        this.id = id;
+        opts = opts || {};
+        if (opts.phases===undefined || opts.phases<2) {
+            throw "Frame phasers must have at least 2 phases.";
+        }
+        this.phases = opts.phases;
+        this.buckets = new Array(opts.phases);
+        this.bucketMax = new Array(opts.phases);
+    }
+
+    FramePhaser.prototype.phase = function(sprite) {
+        var data = sprite.phaserData[this.id];
+        return data.phase===0;
+    };
+
+    FramePhaser.prototype.rebalance = function(sprites) {
+        var i, s, data, max = 0;
+        var buckets = this.buckets;
+
+        var desiredMax = sprites.length/this.phases;
+
+        for (i = buckets.length - 1; i >= 0; i--) {
+            buckets[i] = 0;
+            this.bucketMax[i] = Math.floor((i+1)*desiredMax - Math.floor(i*desiredMax));
+        }
+
+        var clearing = [];
+        for (i = sprites.length - 1; i >= 0; i--) {
+            s = sprites[i];
+            data = s.phaserData[this.id];
+            data.phase++;
+            if (data.phase>=this.phases) {
+                data.phase = 0;
+            }
+            max = Math.max(max, ++buckets[data.phase]);
+            if (buckets[data.phase]>this.bucketMax[data.phase]) {
+                clearing.push(s);
+            }
+        }
+
+        if (desiredMax/max<0.8) { /* TODO: Check that this ratio is accurate or useful. */
+
+            var bucketIdx = 0;
+            for (i = clearing.length - 1; i >= 0; i--) {
+                s = clearing[i];
+                while(buckets[bucketIdx]>=this.bucketMax[bucketIdx]) {
+                    bucketIdx++;
+                    if (bucketIdx===this.phases) {
+                        bucketIdx = 0;
+                    }
+                }
+                data = s.phaserData[this.id];
+                buckets[data.phase]--;
+                data.phase = bucketIdx;
+                buckets[bucketIdx]++;
+            }
+        }
+
+    };
+
+
+    return function(snaps) {
+        sn = snaps;
+        sn.registerPhaserPlugin('frame-phaser', FramePhaser);
+    };
+
+});
+
+/*global define*/
 define('plugins/camera/push-cam',[],function() {
 
     
@@ -2301,7 +2397,7 @@ function(traceProp, midPtEllipse, localScan) {
             throw "Circle trace requires a radius >0 in its options.";
         }
 
-        this.edges = sn.getScreenEdges(); /* TODO: Can the traceprop fn get this itself? */
+        this.edges = sn.getWorldEdges(); /* TODO: Can the traceprop fn get this itself? */
 
         /* We call this a circle trace, but we use a half-height ellipse
          * to represent the perspective distortion of the isometric
@@ -2426,6 +2522,9 @@ define('plugins/default-plugins',[
 
     'plugins/fx/particles',
 
+    'plugins/ai/phasers/time-phaser',
+    'plugins/ai/phasers/frame-phaser',
+
     'plugins/camera/push-cam',
 
     'plugins/collision/sprite-with-map/line-trace',
@@ -2435,6 +2534,7 @@ function(
         regBounce, regFollowMouse, regLink, regAnimate, reg8way,
         regUILayer, regDemoScan,
         regParticles,
+        regTimePhaser, regFramePhaser,
         regPushCam,
         regLineTrace, regCircleTrace) {
 
@@ -2451,6 +2551,9 @@ function(
         regDemoScan(sn);
 
         regParticles(sn);
+
+        regTimePhaser(sn);
+        regFramePhaser(sn);
 
         regPushCam(sn);
 
@@ -2613,73 +2716,6 @@ define('animate/tween',[],function() {
 });
 
 /*global define*/
-define('ai/update-phaser',[],function() {
-
-    function UpdatePhaser(id, phases) {
-        this.id = id;
-        this.phases = phases;
-        if (phases<2) {
-            throw "Update phasers must have at least 2 phases.";
-        }
-        this.buckets = new Array(phases);
-        this.bucketMax = new Array(phases);
-    }
-
-    UpdatePhaser.prototype.phase = function(sprite) {
-        var data = sprite.phaserData[this.id];
-        return data.phase===0;
-    };
-
-    UpdatePhaser.prototype.rebalance = function(sprites) {
-        var i, s, data, max = 0;
-        var buckets = this.buckets;
-
-        var desiredMax = sprites.length/this.phases;
-
-        for (i = buckets.length - 1; i >= 0; i--) {
-            buckets[i] = 0;
-            this.bucketMax[i] = Math.floor((i+1)*desiredMax - Math.floor(i*desiredMax));
-        }
-
-        var clearing = [];
-        for (i = sprites.length - 1; i >= 0; i--) {
-            s = sprites[i];
-            data = s.phaserData[this.id];
-            data.phase++;
-            if (data.phase>=this.phases) {
-                data.phase = 0;
-            }
-            max = Math.max(max, ++buckets[data.phase]);
-            if (buckets[data.phase]>this.bucketMax[data.phase]) {
-                clearing.push(s);
-            }
-        }
-
-        if (desiredMax/max<0.8) { /* TODO: Check that this ratio is accurate or useful. */
-
-            var bucketIdx = 0;
-            for (i = clearing.length - 1; i >= 0; i--) {
-                s = clearing[i];
-                while(buckets[bucketIdx]>=this.bucketMax[bucketIdx]) {
-                    bucketIdx++;
-                    if (bucketIdx===this.phases) {
-                        bucketIdx = 0;
-                    }
-                }
-                data = s.phaserData[this.id];
-                buckets[data.phase]--;
-                data.phase = bucketIdx;
-                buckets[bucketIdx]++;
-            }
-        }
-
-    };
-
-    return UpdatePhaser;
-
-});
-
-/*global define*/
 define('polyfills/requestAnimationFrame',[],function() {
 
     
@@ -2732,28 +2768,28 @@ define('snaps',['sprites/spritedef',
         /* Animation */
         'animate/tween',
 
-        /* AI */
-        'ai/update-phaser',
-
         /* Non-referenced */
         'polyfills/requestAnimationFrame'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
-        tweens,
-        UpdatePhaser) {
+        tweens) {
 
     
 
     var debugText = util.debug.debugText;
     var copyProps = util.js.copyProps;
-    var clone = util.js.clone;
+    var clone     = util.js.clone;
     var Preloader = util.Preloader;
-    var guid = util.guid;
+    var guid      = util.guid;
+
 
     function Snaps(game, canvasID, settings) {
 
         var _this = this;
+
+        /* For testing, we'd like to perhaps re-bind this function later, so... */
+        this.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
@@ -2772,6 +2808,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.fxUpdaters = {};
         this.layerPlugins = {};
         this.cameraPlugins = {};
+        this.phaserPlugins = {};
 
         this.timers = {};
         this.cameras = {};
@@ -2833,6 +2870,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.registerCameraPlugin = function(name, fn, init) {
             _this.cameraPlugins[name] = {fn:fn, init:init};
+        };
+
+        this.registerPhaserPlugin = function(name, fn) {
+            _this.phaserPlugins[name] = {fn:fn};
         };
 
         /* Register the default plugins */
@@ -2922,7 +2963,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.fx = function(name, opts) {
             if (!_this.fxUpdaters.hasOwnProperty(name)) {
-                throw "Can't spawn FX for unregistered FX type: " + name;
+                throw "Can't create FX for unregistered FX type: " + name;
             }
             _this.activeFX.push(new _this.fxUpdaters[name](opts));
         };
@@ -2931,7 +2972,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             /* TODO: index must be in range. name must be unique. */
 
             if (!_this.layerPlugins.hasOwnProperty(type)) {
-                throw "Can't spawn layer for unregistered layer type: " + type;
+                throw "Can't create layer for unregistered layer type: " + type;
             }
             var layer = new _this.layerPlugins[type](name, opts);
             _this.map.insertLayer(idx, layer);
@@ -2987,7 +3028,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             now = now - _this.epoch;
 
-            window.requestAnimationFrame(loop);
+            _this.requestAnimationFrame(loop);
 
             _this.now = now;
             var time = now - _this.lastFrameTime;
@@ -3296,8 +3337,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return _this.now;
         };
 
-        this.createPhaser = function(phases) {
-            var phaser = new UpdatePhaser(guid(), phases);
+        this.createPhaser = function(name, opts) {
+            if (!_this.phaserPlugins.hasOwnProperty(name)) {
+                throw "Can't create phaser for unregistered type: " + name;
+            }
+
+            var phaser = new _this.phaserPlugins[name].fn(guid(), opts);
             this.phasers.push(phaser);
             return phaser;
         };

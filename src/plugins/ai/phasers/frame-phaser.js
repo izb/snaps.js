@@ -1,22 +1,25 @@
 /*global define*/
 define(function() {
 
-    function UpdatePhaser(id, phases) {
+    var sn;
+
+    function FramePhaser(id, opts) {
         this.id = id;
-        this.phases = phases;
-        if (phases<2) {
-            throw "Update phasers must have at least 2 phases.";
+        opts = opts || {};
+        if (opts.phases===undefined || opts.phases<2) {
+            throw "Frame phasers must have at least 2 phases.";
         }
-        this.buckets = new Array(phases);
-        this.bucketMax = new Array(phases);
+        this.phases = opts.phases;
+        this.buckets = new Array(opts.phases);
+        this.bucketMax = new Array(opts.phases);
     }
 
-    UpdatePhaser.prototype.phase = function(sprite) {
+    FramePhaser.prototype.phase = function(sprite) {
         var data = sprite.phaserData[this.id];
         return data.phase===0;
     };
 
-    UpdatePhaser.prototype.rebalance = function(sprites) {
+    FramePhaser.prototype.rebalance = function(sprites) {
         var i, s, data, max = 0;
         var buckets = this.buckets;
 
@@ -61,6 +64,10 @@ define(function() {
 
     };
 
-    return UpdatePhaser;
+
+    return function(snaps) {
+        sn = snaps;
+        sn.registerPhaserPlugin('frame-phaser', FramePhaser);
+    };
 
 });

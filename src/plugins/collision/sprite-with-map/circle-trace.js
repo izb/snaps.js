@@ -20,7 +20,7 @@ function(traceProp, midPtEllipse, localScan) {
             throw "Circle trace requires a radius >0 in its options.";
         }
 
-        this.edges = sn.getScreenEdges(); /* TODO: Can the traceprop fn get this itself? */
+        this.edges = sn.getWorldEdges(); /* TODO: Can the traceprop fn get this itself? */
 
         /* We call this a circle trace, but we use a half-height ellipse
          * to represent the perspective distortion of the isometric
