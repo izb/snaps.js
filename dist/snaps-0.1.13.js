@@ -2754,6 +2754,37 @@ define('polyfills/requestAnimationFrame',[],function() {
 });
 
 /*global define*/
+define('polyfills/bind',[],function() {
+
+    /* https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind */
+
+    
+
+    if (!Function.prototype.bind) {
+        Function.prototype.bind = function (oThis) {
+            if (typeof this !== "function") {
+                // closest thing possible to the ECMAScript 5 internal IsCallable function
+                throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+            }
+
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                NOP = function () {},
+                fBound = function () {
+                    return fToBind.apply(this instanceof NOP && oThis? this : oThis,
+                                       aArgs.concat(Array.prototype.slice.call(arguments)));
+                };
+
+            NOP.prototype = this.prototype;
+            fBound.prototype = new NOP();
+
+            return fBound;
+        };
+    }
+
+});
+
+/*global define*/
 define('snaps',['sprites/spritedef',
         'sprites/sprite',
         'sprites/composite',
@@ -2769,7 +2800,8 @@ define('snaps',['sprites/spritedef',
         'animate/tween',
 
         /* Non-referenced */
-        'polyfills/requestAnimationFrame'],
+        'polyfills/requestAnimationFrame',
+        'polyfills/bind'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,

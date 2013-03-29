@@ -14,7 +14,8 @@ define(['sprites/spritedef',
         'animate/tween',
 
         /* Non-referenced */
-        'polyfills/requestAnimationFrame'],
+        'polyfills/requestAnimationFrame',
+        'polyfills/bind'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
