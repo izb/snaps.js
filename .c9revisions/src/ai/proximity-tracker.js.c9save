@@ -1,1 +1,0 @@
-{"ts":1364580823904,"silentsave":true,"restoring":false,"patch":[[{"diffs":[[1,"/*global define*/\ndefine(function() {\n\n    function ProximityTracker() {\n\n    }\n\n    /* TODO : This should be able to quickly tell you what sprites are closest to a point. */\n\n    return ProximityTracker;\n\n});\n"]],"start1":0,"start2":0,"length1":0,"length2":210}]],"length":210}

@@ -221,3 +221,4 @@ grunt-exodus.js
 
 tmp/
 exodus.bat
+.c9revisions/
