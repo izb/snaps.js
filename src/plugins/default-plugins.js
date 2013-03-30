@@ -5,6 +5,7 @@ define([
     'plugins/sprite/link',
     'plugins/sprite/animate',
     'plugins/sprite/8way',
+    'plugins/sprite/track',
 
     'plugins/layer/ui-layer',
     'plugins/layer/demo-trace', /* TODO: Delete and remove */
@@ -20,7 +21,7 @@ define([
     'plugins/collision/sprite-with-map/circle-trace'
     ],
 function(
-        regBounce, regFollowMouse, regLink, regAnimate, reg8way,
+        regBounce, regFollowMouse, regLink, regAnimate, reg8way, regTrack,
         regUILayer, regDemoScan,
         regParticles,
         regTimePhaser, regFramePhaser,
@@ -30,11 +31,13 @@ function(
     'use strict';
 
     return function(sn) {
+        /* TODO: Loop over arguments instead? */
         regBounce(sn);
         regFollowMouse(sn);
         regLink(sn);
         regAnimate(sn);
         reg8way(sn);
+        regTrack(sn);
 
         regUILayer(sn);
         regDemoScan(sn);

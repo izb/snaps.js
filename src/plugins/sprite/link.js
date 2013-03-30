@@ -4,6 +4,8 @@ define(function() {
     'use strict';
 
     var sn;
+    
+    /* TODO: Replace this with the track plugin */
 
     function Link() {
 

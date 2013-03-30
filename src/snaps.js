@@ -12,6 +12,9 @@ define(['sprites/spritedef',
 
         /* Animation */
         'animate/tween',
+        
+        /* AI */
+        'ai/proximity-tracker',
 
         /* Non-referenced */
         'polyfills/requestAnimationFrame',
@@ -19,7 +22,8 @@ define(['sprites/spritedef',
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
-        tweens) {
+        tweens,
+        ProximityTracker) {
 
     'use strict';
 
@@ -40,6 +44,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
         this.tweens = tweens;
+        this.ProximityTracker = ProximityTracker;
 
         settings = settings || {};
         this.dbgShowMouse = !!settings.showMouse;
