@@ -19,7 +19,8 @@ define(function() {
 
      */
     ProximityTracker.prototype.track = function(sprite) {
-        
+        /* TODO This is called on each movement. It's also called once
+         * when the sprite is created to register it with the tracker. */
     }
 
     return ProximityTracker;

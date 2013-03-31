@@ -261,6 +261,10 @@ define(function() {
                 (this.y - offsety - this.def.y - this.h)|0,
                 now);
     };
+    
+    Sprite.prototype.onRemove = function() {
+        /* TODO: Call into each updater and each phaser, letting them know */
+    }
 
     return Sprite;
 

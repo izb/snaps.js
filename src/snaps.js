@@ -503,6 +503,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             _this.sprites.push(s);
             _this.spriteMap[name] = s;
+            return s;
         };
 
         this.createComposite = function(x,y,name,endCallback) {

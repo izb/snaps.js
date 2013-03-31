@@ -51,6 +51,7 @@ define(function() {
         this.x=s.x;
         this.y=s.y;
         this.h=s.h;
+        this.fn(s);
     };
 
     return function(snaps) {
