@@ -2,7 +2,6 @@
 define([
     'plugins/sprite/bounce',
     'plugins/sprite/follow-mouse',
-    'plugins/sprite/link',
     'plugins/sprite/animate',
     'plugins/sprite/8way',
     'plugins/sprite/track',
@@ -20,37 +19,14 @@ define([
     'plugins/collision/sprite-with-map/line-trace',
     'plugins/collision/sprite-with-map/circle-trace'
     ],
-function(
-        regBounce, regFollowMouse, regLink, regAnimate, reg8way, regTrack,
-        regUILayer, regDemoScan,
-        regParticles,
-        regTimePhaser, regFramePhaser,
-        regPushCam,
-        regLineTrace, regCircleTrace) {
+function() {
 
     'use strict';
 
     return function(sn) {
-        /* TODO: Loop over arguments instead? */
-        regBounce(sn);
-        regFollowMouse(sn);
-        regLink(sn);
-        regAnimate(sn);
-        reg8way(sn);
-        regTrack(sn);
-
-        regUILayer(sn);
-        regDemoScan(sn);
-
-        regParticles(sn);
-
-        regTimePhaser(sn);
-        regFramePhaser(sn);
-
-        regPushCam(sn);
-
-        regLineTrace(sn);
-        regCircleTrace(sn);
+        for (var i = 0; i < arguments.length; i++) {
+            arguments[i](sn);
+        }
     };
 
 });

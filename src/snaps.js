@@ -44,7 +44,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
         this.tweens = tweens;
-        this.ProximityTracker = ProximityTracker;
+        this.ProximityTracker = ProximityTracker.bind(ProximityTracker, sn);
 
         settings = settings || {};
         this.dbgShowMouse = !!settings.showMouse;
