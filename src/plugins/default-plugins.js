@@ -23,9 +23,11 @@ function() {
 
     'use strict';
 
+    var plugins = arguments;
+
     return function(sn) {
-        for (var i = 0; i < arguments.length; i++) {
-            arguments[i](sn);
+        for (var i = 0; i < plugins.length; i++) {
+            plugins[i](sn);
         }
     };
 

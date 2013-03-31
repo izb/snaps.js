@@ -18,7 +18,13 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: ".jshintrc"
             },
-            build:  ['Gruntfile.js', 'src/**/*.js']
+            production:  ['Gruntfile.js', 'src/**/*.js'],
+            dev: {
+                options: {
+                    devel:true
+                },
+                src:  ['Gruntfile.js', 'src/**/*.js']
+            }
         },
         requirejs: {
             snaps: {
@@ -80,8 +86,8 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('dev', ['jshint:build','requirejs:snaps','copy:dist', 'copy:testdev']);
-    grunt.registerTask('production', ['dev','closurecompiler:dist', 'copy:testmin']);
+    grunt.registerTask('dev', ['jshint:dev','requirejs:snaps','copy:dist', 'copy:testdev']);
+    grunt.registerTask('production', ['jshint:production','requirejs:snaps','copy:dist', 'copy:testdev','closurecompiler:dist', 'copy:testmin']);
     grunt.registerTask('default', ['production']);
     grunt.registerTask('test', ['mocha:all']);
 };

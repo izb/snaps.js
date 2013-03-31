@@ -4,13 +4,13 @@ define(function() {
     'use strict';
 
     var sn;
-    
+
     /*
      * Example options:
      *
      * updates:[{
      *     name:'track',
-     *     fn: function(sprite) { /* track sprite */ }
+     *     fn: function(sprite) { // track sprite // }
      * }]
      *
      * updates:[{
@@ -35,7 +35,7 @@ define(function() {
     Track.prototype.update = function(now, phaseOn) {
 
         var s = this.sprite;
-        
+
         if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
             this.fn(s);
             this.x=s.x;

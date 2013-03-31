@@ -12,7 +12,7 @@ define(['sprites/spritedef',
 
         /* Animation */
         'animate/tween',
-        
+
         /* AI */
         'ai/proximity-tracker',
 
@@ -44,7 +44,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
         this.tweens = tweens;
-        this.ProximityTracker = ProximityTracker.bind(ProximityTracker, sn);
+        this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
 
         settings = settings || {};
         this.dbgShowMouse = !!settings.showMouse;
@@ -203,10 +203,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         };
 
-        this.updateFX = function(now) {
+        this.updateFX = function() {
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
-                if (!fx.update(now)) {
+                if (!fx.update(_this.now)) {
                     _this.activeFX.splice(i, 1);
                 }
             }
@@ -278,17 +278,17 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
 
             now = now - _this.epoch;
+            _this.now = now;
 
             _this.requestAnimationFrame(loop);
 
-            _this.now = now;
-            var time = now - _this.lastFrameTime;
-            _this.updateFX(now);
-            _this.map.updateLayers(time);
+            _this.updateFX();
+            _this.map.updateLayers(now);
             _this.updatePhasers();
-            update(time); /* This fn is in the game code */
+            update(now - _this.lastFrameTime); /* This fn is in the game code */
+            _this.updateSprites();
             if (_this.camera) {
-                _this.camera.update(time);
+                _this.camera.update(now);
             }
             draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {

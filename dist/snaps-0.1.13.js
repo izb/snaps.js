@@ -330,6 +330,10 @@ define('sprites/sprite',[],function() {
                 now);
     };
 
+    Sprite.prototype.onRemove = function() {
+        /* TODO: Call into each updater and each phaser, letting them know */
+    };
+
     return Sprite;
 
 });
@@ -1271,7 +1275,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
     };
 
 
-    StaggeredIsometric.prototype.updateLayers = function(idx, layer, now) {
+    StaggeredIsometric.prototype.updateLayers = function(now) {
         var map = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
@@ -1444,74 +1448,6 @@ define('plugins/sprite/follow-mouse',[],function() {
 });
 
 /*global define*/
-define('plugins/sprite/link',[],function() {
-
-    
-
-    var sn;
-
-    function Link() {
-
-    }
-
-    /*
-     * Example options:
-     *
-     * updates:[{
-     *     name:'link',
-     *     link_to:[
-     *         {name:'shadow',x:0,y:0},
-     *         {name:'head',x:10,y:0}
-     *     ]
-     * }]
-     *
-     * Means that moving this sprite will also move the shadow and
-     * head sprites. Height of the linked sprites is not affected,
-     * only world x,y position which can be offset with the x and y
-     * values on the link.
-     */
-
-    /** Called with the update options as the 'this' context, one of which
-     * is this.sprite, which refers to the sprite being updated.
-     * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
-     * this will be true to hint that we do a full batch of work, or false
-     * to hint that we try to exit as trivially as possible. Ignored on this
-     * plugin.
-     * @return true normally, or false to prevent any further
-     * plugins being called on this sprite for this frame.
-     */
-
-    Link.prototype.update = function(now, phaseOn) {
-        var s = this.sprite;
-        for (var i = this.link_to.length - 1; i >= 0; i--) {
-            this.link_to[i].sprite.x = s.x + this.link_to[i].x;
-            this.link_to[i].sprite.y = s.y + this.link_to[i].y;
-        }
-        return true;
-    };
-
-    /** Called with the update options as the 'this' context, one of which
-     * is this.sprite, which refers to the sprite being updated.
-     */
-    Link.prototype.init = function() {
-        if (typeof this.link_to !== 'object') {
-            throw "Link plugin requires a link_to option value (array)";
-        }
-
-        for (var i = this.link_to.length - 1; i >= 0; i--) {
-            this.link_to[i].sprite = sn.spriteMap[this.link_to[i].name];
-        }
-    };
-
-    return function(snaps) {
-        sn = snaps;
-        sn.registerSpriteUpdater('link', Link);
-    };
-
-});
-
-/*global define*/
 define('plugins/sprite/animate',[],function() {
 
     
@@ -1671,6 +1607,69 @@ define('plugins/sprite/8way',[],function() {
     return function(snaps) {
         sn = snaps;
         sn.registerSpriteUpdater('8way', Face8Way);
+    };
+
+});
+
+/*global define*/
+define('plugins/sprite/track',[],function() {
+
+    
+
+    var sn;
+
+    /*
+     * Example options:
+     *
+     * updates:[{
+     *     name:'track',
+     *     fn: function(sprite) { // track sprite // }
+     * }]
+     *
+     * updates:[{
+     *     name:'track',
+     *     fn: myProximityTracker.track.bind(myProximityTracker)
+     * }]
+     */
+
+    function Track() {
+    }
+
+    /** Called with the update options as the 'this' context, one of which
+     * is this.sprite, which refers to the sprite being updated.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
+     * @return true normally, or false to prevent any further
+     * plugins being called on this sprite for this frame.
+     */
+    Track.prototype.update = function(now, phaseOn) {
+
+        var s = this.sprite;
+
+        if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
+            this.fn(s);
+            this.x=s.x;
+            this.y=s.y;
+            this.h=s.h;
+        }
+
+        return true;
+    };
+
+    Track.prototype.init = function() {
+        var s = this.sprite;
+        this.x=s.x;
+        this.y=s.y;
+        this.h=s.h;
+        this.fn(s);
+    };
+
+    return function(snaps) {
+        sn = snaps;
+        sn.registerSpriteUpdater('track', Track);
     };
 
 });
@@ -2556,9 +2555,9 @@ function(traceProp, midPtEllipse, localScan) {
 define('plugins/default-plugins',[
     'plugins/sprite/bounce',
     'plugins/sprite/follow-mouse',
-    'plugins/sprite/link',
     'plugins/sprite/animate',
     'plugins/sprite/8way',
+    'plugins/sprite/track',
 
     'plugins/layer/ui-layer',
     'plugins/layer/demo-trace', /* TODO: Delete and remove */
@@ -2573,35 +2572,16 @@ define('plugins/default-plugins',[
     'plugins/collision/sprite-with-map/line-trace',
     'plugins/collision/sprite-with-map/circle-trace'
     ],
-function(
-        regBounce, regFollowMouse, regLink, regAnimate, reg8way,
-        regUILayer, regDemoScan,
-        regParticles,
-        regTimePhaser, regFramePhaser,
-        regPushCam,
-        regLineTrace, regCircleTrace) {
+function() {
 
     
 
+    var plugins = arguments;
+
     return function(sn) {
-        regBounce(sn);
-        regFollowMouse(sn);
-        regLink(sn);
-        regAnimate(sn);
-        reg8way(sn);
-
-        regUILayer(sn);
-        regDemoScan(sn);
-
-        regParticles(sn);
-
-        regTimePhaser(sn);
-        regFramePhaser(sn);
-
-        regPushCam(sn);
-
-        regLineTrace(sn);
-        regCircleTrace(sn);
+        for (var i = 0; i < plugins.length; i++) {
+            plugins[i](sn);
+        }
     };
 
 });
@@ -2759,6 +2739,61 @@ define('animate/tween',[],function() {
 });
 
 /*global define*/
+define('ai/proximity-tracker',[],function() {
+
+    /**
+     * This constructor is magically bound when exposed through the engine ref,
+     * so construct it without the first parameter, e.g.
+     * new sn.ProximityTracker(myCellSize);
+     */
+    function ProximityTracker(sn, cellSize) {
+
+        /*
+         * Cell size is the width. In isometric world, the height will be half.
+         * This means that our scan will still be cells defined by a circle, but
+         * the cells aren't square, so we'll be fine.
+         */
+
+        if (cellSize<2 ||(cellSize&1)!==0 || (cellSize!==cellSize|0)) {
+            throw "Cell size must be an even integer > 0";
+        }
+
+        this.cellw=cellSize;
+        this.cellh=cellSize/2;
+
+        this.sn = sn;
+
+        var edges = sn.getWorldEdges();
+
+        this.le = edges.le;
+        this.re = edges.re;
+        this.te = edges.te;
+        this.be = edges.be;
+    }
+
+    /* TODO : This should be able to quickly tell you what sprites are closest to a point. */
+
+    /** Use this in conjunction with the track plugin. Add it to the list of sprite
+     * updaters on your tracked sprites, after the sprite has moved. E.g.
+     *
+     * updates:[{
+     *     name: 'some-sprite-moving-plugin'
+     * }, {
+     *     name:'track',
+     *     fn: myProximityTracker.track.bind(myProximityTracker)
+     * }]
+
+     */
+    ProximityTracker.prototype.track = function(sprite) {
+        /* TODO This is called on each movement. It's also called once
+         * when the sprite is created to register it with the tracker. */
+    };
+
+    return ProximityTracker;
+
+});
+
+/*global define*/
 define('polyfills/requestAnimationFrame',[],function() {
 
     
@@ -2842,13 +2877,17 @@ define('snaps',['sprites/spritedef',
         /* Animation */
         'animate/tween',
 
+        /* AI */
+        'ai/proximity-tracker',
+
         /* Non-referenced */
         'polyfills/requestAnimationFrame',
         'polyfills/bind'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
-        tweens) {
+        tweens,
+        ProximityTracker) {
 
     
 
@@ -2869,6 +2908,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
         this.tweens = tweens;
+        this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
 
         settings = settings || {};
         this.dbgShowMouse = !!settings.showMouse;
@@ -3027,10 +3067,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         };
 
-        this.updateFX = function(now) {
+        this.updateFX = function() {
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
-                if (!fx.update(now)) {
+                if (!fx.update(_this.now)) {
                     _this.activeFX.splice(i, 1);
                 }
             }
@@ -3102,17 +3142,17 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
 
             now = now - _this.epoch;
+            _this.now = now;
 
             _this.requestAnimationFrame(loop);
 
-            _this.now = now;
-            var time = now - _this.lastFrameTime;
-            _this.updateFX(now);
-            _this.map.updateLayers(time);
+            _this.updateFX();
+            _this.map.updateLayers(now);
             _this.updatePhasers();
-            update(time); /* This fn is in the game code */
+            update(now - _this.lastFrameTime); /* This fn is in the game code */
+            _this.updateSprites();
             if (_this.camera) {
-                _this.camera.update(time);
+                _this.camera.update(now);
             }
             draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {
@@ -3327,6 +3367,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             _this.sprites.push(s);
             _this.spriteMap[name] = s;
+            return s;
         };
 
         this.createComposite = function(x,y,name,endCallback) {

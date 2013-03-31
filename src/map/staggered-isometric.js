@@ -302,7 +302,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
     };
 
 
-    StaggeredIsometric.prototype.updateLayers = function(idx, layer, now) {
+    StaggeredIsometric.prototype.updateLayers = function(now) {
         var map = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
