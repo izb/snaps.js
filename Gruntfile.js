@@ -41,17 +41,7 @@ module.exports = function(grunt) {
         copy: {
             dist: {
                 files: {
-                    "dist/snaps-<%= pkg.version %>.js": "tmp/snaps.js"
-                }
-            },
-            testmin: {
-                files: {
-                    "tmp/snaps-test.js": 'dist/snaps-<%= pkg.version %>.min.js'
-                }
-            },
-            testdev: {
-                files: {
-                    "tmp/snaps-test.js": 'tmp/snaps.js'
+                    "dist/snaps.js": "tmp/snaps.js"
                 }
             }
         },
@@ -63,7 +53,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 src:'tmp/snaps.js',
-                dest:'dist/snaps-<%= pkg.version %>.min.js'
+                dest:'dist/snaps.min.js'
             }
         },
         mocha: {
@@ -86,8 +76,8 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('dev', ['jshint:dev','requirejs:snaps','copy:dist', 'copy:testdev']);
-    grunt.registerTask('production', ['jshint:production','requirejs:snaps','copy:dist', 'copy:testdev','closurecompiler:dist', 'copy:testmin']);
+    grunt.registerTask('dev', ['jshint:dev','requirejs:snaps','copy:dist']);
+    grunt.registerTask('production', ['jshint:production','requirejs:snaps','copy:dist','closurecompiler:dist']);
     grunt.registerTask('default', ['production']);
     grunt.registerTask('test', ['mocha:all']);
 };

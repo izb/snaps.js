@@ -1,0 +1,17 @@
+{
+  "name": "snaps.js",
+  "version": "0.1.14",
+  "main": "dist/snaps.min.js",
+  "ignore": [
+    ".*",
+    "*.js",
+    "*.json",
+    "*.md",
+    "*.yml",
+    "test/**/*",
+    "src/**/*",
+    "resources/**/*",
+  ]
+  "dependencies": {
+  }
+}
