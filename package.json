@@ -14,7 +14,7 @@
     "bugs": {
         "url": "https://github.com/izb/snaps.js/issues"
     },
-    "version": "0.1.14",
+    "version": "0.1.15",
     "jam": {
         "dependencies": {
         },
