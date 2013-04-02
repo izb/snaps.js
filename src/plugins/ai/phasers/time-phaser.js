@@ -12,16 +12,8 @@ define(function() {
         this.updatesPerSecond = opts.updatesPerSecond;
         this.lastUpdate = 0;
         this.updatesThisFrame = 0;
+        this.sprites = [];
     }
-
-    /** Called by snaps.spawnSprite to generate the initial phaseData for this
-     * phaser instance.
-     * @return An object with data that will be assigned to the sprite accessible
-     * under sprite.phaseData[phaser_id]
-     */
-    TimePhaser.prototype.initData = function() {
-        return { lastUpdate: 0 };
-    };
 
     TimePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
@@ -31,19 +23,58 @@ define(function() {
         return data.phaseOn;
     };
 
-    TimePhaser.prototype.rebalance = function(sprites, now) {
+    TimePhaser.prototype.addSprite = function(s) {
+        if (s.phaserData===undefined) {
+            s.phaserData = {};
+        }
+        s.phaserData[this.id] = { lastUpdate: 0 };
+        this.sprites.push(s);
+    };
+
+    TimePhaser.prototype.removeSprite = function(s) {
+        /* To remove a sprite, we just remove the data for this
+         * phaser. Later, when we rebalance, we look for this state
+         * and remove it from the list. */
+        delete s.phaserData[this.id];
+    };
+
+    TimePhaser.prototype.rebalance = function(now) {
         var timeSinceLastFrame = now - this.lastUpdate;
         this.lastUpdate = now;
         var updateBudget = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
 
+        var i, s;
+
         var id = this.id;
+
+        var sprites = this.sprites;
 
         sprites.sort(function(a, b) {
             return b.phaserData[id].lastUpdate - a.phaserData[id].lastUpdate;
         });
 
-        for (var i = sprites.length - 1; i >= 0; i--) {
-            sprites[i].phaserData[this.id].phaseOn = (updateBudget--)>0;
+        var deleted = 0;
+        for (i = sprites.length - 1; i >= 0; i--) {
+            s = sprites[i];
+            if (s.phaserData.hasOwnProperty(this.id)) {
+                s.phaserData[this.id].phaseOn = (updateBudget--)>0;
+            } else {
+                deleted++;
+            }
+        }
+
+        /* TODO: Perhaps we only want to remove dead sprites if the dead sprite count
+         * exceeds some limit */
+        if (deleted>0) {
+            sprites = [];
+            var len = this.sprites.length;
+            for (i = 0; i < len; i++) {
+                s = sprites[i];
+                if (s.phaserData.hasOwnProperty(this.id)) {
+                    sprites.push(s);
+                }
+            }
+            this.sprites = sprites;
         }
     };
 

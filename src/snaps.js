@@ -192,18 +192,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.updatePhasers = function() {
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
-                var phased = [];
-                var id = _this.phasers[i].id;
-                for (var j = _this.sprites.length - 1; j >= 0; j--) {
-                    var s = _this.sprites[j];
-                    if (s.phaserData!==undefined && s.phaserData.hasOwnProperty(id)) {
-                        phased.push(s);
-                    }
-                }
-
-                if (phased.length>0) {
-                    _this.phasers[i].rebalance(phased, _this.now);
-                }
+                _this.phasers[i].rebalance(_this.now);
             }
         };
 
@@ -470,7 +459,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var sd = _this.spriteDefs[defName];
 
             var updates = opts.updates;
-            var phaserData;
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
@@ -480,19 +468,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                         throw "Sprite plugin used but not registered: "+suname;
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
-                    if (optUpdate.hasOwnProperty('phaser')) {
-                        if (phaserData === undefined) {
-                            phaserData = {};
-                        }
-                        phaserData[optUpdate.phaser.id] = optUpdate.phaser.initData();
-                    }
                     copyProps(optUpdate, updates[i]);
                 }
             }
 
             opts = clone(opts);
             opts.updates = updates;
-            opts.phaserData = phaserData;
 
             var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);

@@ -12,25 +12,34 @@ define(function() {
         this.phases = opts.phases;
         this.buckets = new Array(opts.phases);
         this.bucketMax = new Array(opts.phases);
+        this.sprites = [];
     }
-
-    /** Called by snaps.spawnSprite to generate the initial phaseData for this
-     * phaser instance.
-     * @return An object with data that will be assigned to the sprite accessible
-     * under sprite.phaseData[phaser_id]
-     */
-    FramePhaser.prototype.initData = function() {
-        return { phase: this.phases-1 };
-    };
 
     FramePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
         return data.phase===0;
     };
 
-    FramePhaser.prototype.rebalance = function(sprites, now) {
+    FramePhaser.prototype.addSprite = function(s) {
+        if (s.phaserData===undefined) {
+            s.phaserData = {};
+        }
+        s.phaserData[this.id] = { phase: this.phases-1 };
+        this.sprites.push(s);
+    };
+
+    FramePhaser.prototype.removeSprite = function(s) {
+        /* To remove a sprite, we just remove the data for this
+         * phaser. Later, when we rebalance, we look for this state
+         * and remove it from the list. */
+        delete s.phaserData[this.id];
+    };
+
+    FramePhaser.prototype.rebalance = function(now) {
         var i, s, data, max = 0;
         var buckets = this.buckets;
+
+        var sprites = this.sprites;
 
         var desiredMax = sprites.length/this.phases;
 
@@ -40,16 +49,21 @@ define(function() {
         }
 
         var clearing = [];
+        var deleted = 0;
         for (i = sprites.length - 1; i >= 0; i--) {
             s = sprites[i];
-            data = s.phaserData[this.id];
-            data.phase++;
-            if (data.phase>=this.phases) {
-                data.phase = 0;
-            }
-            max = Math.max(max, ++buckets[data.phase]);
-            if (buckets[data.phase]>this.bucketMax[data.phase]) {
-                clearing.push(s);
+            if (s.phaserData.hasOwnProperty(this.id)) {
+                data = s.phaserData[this.id];
+                data.phase++;
+                if (data.phase>=this.phases) {
+                    data.phase = 0;
+                }
+                max = Math.max(max, ++buckets[data.phase]);
+                if (buckets[data.phase]>this.bucketMax[data.phase]) {
+                    clearing.push(s);
+                }
+            } else {
+                deleted++;
             }
         }
 
@@ -69,6 +83,19 @@ define(function() {
                 data.phase = bucketIdx;
                 buckets[bucketIdx]++;
             }
+        }
+
+        /* TODO: Perhaps we only want to remove dead sprites if the dead sprite count
+         * exceeds some limit */
+        if (deleted>0) {
+            sprites = [];
+            var len = this.sprites.length;
+            for (i = 0; i < len; i++) {
+                if (s.phaserData.hasOwnProperty(this.id)) {
+                    sprites.push(this.sprites[i]);
+                }
+            }
+            this.sprites = sprites;
         }
 
     };

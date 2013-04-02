@@ -126,13 +126,11 @@ define('sprites/sprite',[],function() {
         this.id = opts.id;
 
         this.endCallback = opts.endCallback;
-        this.collider = opts.collider; /* TODO: use this. */
+        this.collider = opts.collider;
         this.autoRemove = opts.autoRemove;
         if (this.autoRemove===undefined) {
             this.autoRemove = true;
         }
-
-        this.phaserData = opts.phaserData;
 
         this.collisionPoint = [0,0];
 
@@ -142,7 +140,11 @@ define('sprites/sprite',[],function() {
     Sprite.prototype.init = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].init(this);
+                var update = this.updates[i];
+                update.init(this);
+                if (update.hasOwnProperty('phaser')) {
+                    update.phaser.addSprite(this);
+                }
             }
         }
     };
@@ -305,6 +307,9 @@ define('sprites/sprite',[],function() {
          * Not implementing now, because it may be prefered to implement sampling predecates first, which
          * may render this task more difficult.
          *
+         * Alternatively, adjust the height as you trace. Actually yeah, that makes way more sense. Wouldn't even
+         * need bresenhams, just a linear tween calc.
+         *
          * Perhaps this can be called flight mode or something.
          */
     };
@@ -330,10 +335,13 @@ define('sprites/sprite',[],function() {
     };
 
     Sprite.prototype.onRemove = function() {
-        /* TODO: Call into each updater and each phaser, letting them know */
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].onSpriteRemoved();
+                var update = this.updates[i];
+                if(update.phaser!==undefined) {
+                    update.phaser.removeSprite(this);
+                }
+                update.onSpriteRemoved();
             }
         }
     };
@@ -1759,7 +1767,7 @@ define('plugins/layer/demo-trace',['util/js'], function(js) {
         this.name = layerName;
         this.x = opts.x;
         this.y = opts.y;
-        /* TODO: Circle trace for now because I'm testing that. */
+
         this.collider = sn.createCollider('circle-trace', {radius:opts.radius});
     }
 
@@ -1973,16 +1981,8 @@ define('plugins/ai/phasers/time-phaser',[],function() {
         this.updatesPerSecond = opts.updatesPerSecond;
         this.lastUpdate = 0;
         this.updatesThisFrame = 0;
+        this.sprites = [];
     }
-
-    /** Called by snaps.spawnSprite to generate the initial phaseData for this
-     * phaser instance.
-     * @return An object with data that will be assigned to the sprite accessible
-     * under sprite.phaseData[phaser_id]
-     */
-    TimePhaser.prototype.initData = function() {
-        return { lastUpdate: 0 };
-    };
 
     TimePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
@@ -1992,19 +1992,58 @@ define('plugins/ai/phasers/time-phaser',[],function() {
         return data.phaseOn;
     };
 
-    TimePhaser.prototype.rebalance = function(sprites, now) {
+    TimePhaser.prototype.addSprite = function(s) {
+        if (s.phaserData===undefined) {
+            s.phaserData = {};
+        }
+        s.phaserData[this.id] = { lastUpdate: 0 };
+        this.sprites.push(s);
+    };
+
+    TimePhaser.prototype.removeSprite = function(s) {
+        /* To remove a sprite, we just remove the data for this
+         * phaser. Later, when we rebalance, we look for this state
+         * and remove it from the list. */
+        delete s.phaserData[this.id];
+    };
+
+    TimePhaser.prototype.rebalance = function(now) {
         var timeSinceLastFrame = now - this.lastUpdate;
         this.lastUpdate = now;
         var updateBudget = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
 
+        var i, s;
+
         var id = this.id;
+
+        var sprites = this.sprites;
 
         sprites.sort(function(a, b) {
             return b.phaserData[id].lastUpdate - a.phaserData[id].lastUpdate;
         });
 
-        for (var i = sprites.length - 1; i >= 0; i--) {
-            sprites[i].phaserData[this.id].phaseOn = (updateBudget--)>0;
+        var deleted = 0;
+        for (i = sprites.length - 1; i >= 0; i--) {
+            s = sprites[i];
+            if (s.phaserData.hasOwnProperty(this.id)) {
+                s.phaserData[this.id].phaseOn = (updateBudget--)>0;
+            } else {
+                deleted++;
+            }
+        }
+
+        /* TODO: Perhaps we only want to remove dead sprites if the dead sprite count
+         * exceeds some limit */
+        if (deleted>0) {
+            sprites = [];
+            var len = this.sprites.length;
+            for (i = 0; i < len; i++) {
+                s = sprites[i];
+                if (s.phaserData.hasOwnProperty(this.id)) {
+                    sprites.push(s);
+                }
+            }
+            this.sprites = sprites;
         }
     };
 
@@ -2029,25 +2068,34 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
         this.phases = opts.phases;
         this.buckets = new Array(opts.phases);
         this.bucketMax = new Array(opts.phases);
+        this.sprites = [];
     }
-
-    /** Called by snaps.spawnSprite to generate the initial phaseData for this
-     * phaser instance.
-     * @return An object with data that will be assigned to the sprite accessible
-     * under sprite.phaseData[phaser_id]
-     */
-    FramePhaser.prototype.initData = function() {
-        return { phase: this.phases-1 };
-    };
 
     FramePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
         return data.phase===0;
     };
 
-    FramePhaser.prototype.rebalance = function(sprites, now) {
+    FramePhaser.prototype.addSprite = function(s) {
+        if (s.phaserData===undefined) {
+            s.phaserData = {};
+        }
+        s.phaserData[this.id] = { phase: this.phases-1 };
+        this.sprites.push(s);
+    };
+
+    FramePhaser.prototype.removeSprite = function(s) {
+        /* To remove a sprite, we just remove the data for this
+         * phaser. Later, when we rebalance, we look for this state
+         * and remove it from the list. */
+        delete s.phaserData[this.id];
+    };
+
+    FramePhaser.prototype.rebalance = function(now) {
         var i, s, data, max = 0;
         var buckets = this.buckets;
+
+        var sprites = this.sprites;
 
         var desiredMax = sprites.length/this.phases;
 
@@ -2057,20 +2105,25 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
         }
 
         var clearing = [];
+        var deleted = 0;
         for (i = sprites.length - 1; i >= 0; i--) {
             s = sprites[i];
-            data = s.phaserData[this.id];
-            data.phase++;
-            if (data.phase>=this.phases) {
-                data.phase = 0;
-            }
-            max = Math.max(max, ++buckets[data.phase]);
-            if (buckets[data.phase]>this.bucketMax[data.phase]) {
-                clearing.push(s);
+            if (s.phaserData.hasOwnProperty(this.id)) {
+                data = s.phaserData[this.id];
+                data.phase++;
+                if (data.phase>=this.phases) {
+                    data.phase = 0;
+                }
+                max = Math.max(max, ++buckets[data.phase]);
+                if (buckets[data.phase]>this.bucketMax[data.phase]) {
+                    clearing.push(s);
+                }
+            } else {
+                deleted++;
             }
         }
 
-        if (desiredMax/max<0.8) { /* TODO: Check that this ratio is accurate or useful. */
+        if (desiredMax/max<0.8) { /* Only if the buckets get noticeably unbalanced do we re-sort them */
 
             var bucketIdx = 0;
             for (i = clearing.length - 1; i >= 0; i--) {
@@ -2086,6 +2139,19 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
                 data.phase = bucketIdx;
                 buckets[bucketIdx]++;
             }
+        }
+
+        /* TODO: Perhaps we only want to remove dead sprites if the dead sprite count
+         * exceeds some limit */
+        if (deleted>0) {
+            sprites = [];
+            var len = this.sprites.length;
+            for (i = 0; i < len; i++) {
+                if (s.phaserData.hasOwnProperty(this.id)) {
+                    sprites.push(this.sprites[i]);
+                }
+            }
+            this.sprites = sprites;
         }
 
     };
@@ -2471,7 +2537,7 @@ function(traceProp, midPtEllipse, localScan) {
             throw "Circle trace requires a radius >0 in its options.";
         }
 
-        this.edges = sn.getWorldEdges(); /* TODO: Can the traceprop fn get this itself? */
+        this.edges = sn.getWorldEdges();
 
         /* We call this a circle trace, but we use a half-height ellipse
          * to represent the perspective distortion of the isometric
@@ -2934,6 +3000,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         tweens,
         ProximityTracker) {
 
+    /*
+     * TODO: https://github.com/izb/snaps.js/wiki/Todo
+     */
+
     
 
     var debugText = util.debug.debugText;
@@ -3097,18 +3167,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.updatePhasers = function() {
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
-                var phased = [];
-                var id = _this.phasers[i].id;
-                for (var j = _this.sprites.length - 1; j >= 0; j--) {
-                    var s = _this.sprites[j];
-                    if (s.phaserData!==undefined && s.phaserData.hasOwnProperty(id)) {
-                        phased.push(s);
-                    }
-                }
-
-                if (phased.length>0) {
-                    _this.phasers[i].rebalance(phased, _this.now);
-                }
+                _this.phasers[i].rebalance(_this.now);
             }
         };
 
@@ -3375,7 +3434,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var sd = _this.spriteDefs[defName];
 
             var updates = opts.updates;
-            var phaserData;
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
                 for (var i = 0; i < opts.updates.length; i++) {
@@ -3385,19 +3443,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                         throw "Sprite plugin used but not registered: "+suname;
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
-                    if (optUpdate.hasOwnProperty('phaser')) {
-                        if (phaserData === undefined) {
-                            phaserData = {};
-                        }
-                        phaserData[optUpdate.phaser.id] = optUpdate.phaser.initData();
-                    }
                     copyProps(optUpdate, updates[i]);
                 }
             }
 
             opts = clone(opts);
             opts.updates = updates;
-            opts.phaserData = phaserData;
 
             var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);

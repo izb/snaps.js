@@ -64,8 +64,6 @@ define(function() {
             this.autoRemove = true;
         }
 
-        this.phaserData = opts.phaserData;
-
         this.collisionPoint = [0,0];
 
         this.quantizedHeight = !!opts.quantizedHeight;
@@ -74,7 +72,11 @@ define(function() {
     Sprite.prototype.init = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].init(this);
+                var update = this.updates[i];
+                update.init(this);
+                if (update.hasOwnProperty('phaser')) {
+                    update.phaser.addSprite(this);
+                }
             }
         }
     };
@@ -237,6 +239,9 @@ define(function() {
          * Not implementing now, because it may be prefered to implement sampling predecates first, which
          * may render this task more difficult.
          *
+         * Alternatively, adjust the height as you trace. Actually yeah, that makes way more sense. Wouldn't even
+         * need bresenhams, just a linear tween calc.
+         *
          * Perhaps this can be called flight mode or something.
          */
     };
@@ -262,10 +267,13 @@ define(function() {
     };
 
     Sprite.prototype.onRemove = function() {
-        /* TODO: Call each phaser somehow, letting them know */
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].onSpriteRemoved();
+                var update = this.updates[i];
+                if(update.phaser!==undefined) {
+                    update.phaser.removeSprite(this);
+                }
+                update.onSpriteRemoved();
             }
         }
     };
