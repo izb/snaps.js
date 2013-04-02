@@ -14,6 +14,11 @@ define(function() {
         this.updatesThisFrame = 0;
         this.sprites = [];
 
+        /* On slow devices where the frame time exceeds 1s, every sprite will be in phase.
+         * To combat this, we cap the possible measured frame time to something <1s.
+         * This sacrifices update quality in order to give all sprites a change to have
+         * some off-phase updates. This is based on the reasoning that you should
+         * not expect things to run perfectly if your frame rate is that low. */
         if (opts.frameCap===undefined) {
             this.frameCap = 750; /* Frames will pretend they took no more than 750ms */
         } else {
