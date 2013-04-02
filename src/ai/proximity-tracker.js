@@ -29,6 +29,8 @@ define(function() {
         this.re = edges.re;
         this.te = edges.te;
         this.be = edges.be;
+
+        this.id = sn.util.uid();
     }
 
     /* TODO : This should be able to quickly tell you what sprites are closest to a point. */
@@ -40,13 +42,24 @@ define(function() {
      *     name: 'some-sprite-moving-plugin'
      * }, {
      *     name:'track',
-     *     fn: myProximityTracker.track.bind(myProximityTracker)
+     *     fn: myProximityTracker.track.bind(myProximityTracker),
+     *     register: myProximityTracker.register.bind(myProximityTracker),
+     *     deregister: myProximityTracker.unregister.bind(myProximityTracker)
      * }]
-
      */
     ProximityTracker.prototype.track = function(sprite) {
-        /* TODO This is called on each movement. It's also called once
-         * when the sprite is created to register it with the tracker. */
+        /* TODO This is called on each movement. */
+        //console.log()
+    };
+
+    ProximityTracker.prototype.register = function(sprite) {
+        /* TODO This is called when the track plugin is initialized by the sprite. */
+        //console.log("Register "+sprite.id+", with "+this.id);
+    };
+
+    ProximityTracker.prototype.unregister = function(sprite) {
+        /* TODO This is called when the track plugin is deinitialized by the sprite. */
+        //console.log("Unregister "+sprite.id+", with "+this.id);
     };
 
     return ProximityTracker;

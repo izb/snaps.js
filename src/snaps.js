@@ -31,7 +31,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
     var Preloader = util.Preloader;
-    var guid      = util.guid;
+    var uid      = util.uid;
 
 
     function Snaps(game, canvasID, settings) {
@@ -432,7 +432,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @param {Function/Number} h The height off the ground. If a function, it should take
          * no paremeters and return a number.
          * @param Optional parameter object, which can contain:
-         * 'name' if you want to be able to find your sprite again.
+         * 'id' if you want to be able to find your sprite again.
          * 'maxloops' if your sprite should remove itself from the world
          * after it's looped around its animation a certain number of times. Can be a function, like
          * the world position parameters.
@@ -449,13 +449,13 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 opts = {};
             }
 
-            var name = opts.name;
+            var id = opts.id;
 
-            if (name===undefined) {
-                name = guid();
+            if (id===undefined) {
+                id = uid();
             } else {
-                if(_this.spriteMap.hasOwnProperty(name)) {
-                    throw "Error: duplicate sprite name " + name;
+                if(_this.spriteMap.hasOwnProperty(id)) {
+                    throw "Error: duplicate sprite id " + id;
                 }
             }
 
@@ -502,24 +502,24 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             s.init();
 
             _this.sprites.push(s);
-            _this.spriteMap[name] = s;
+            _this.spriteMap[id] = s;
             return s;
         };
 
-        this.createComposite = function(x,y,name,endCallback) {
+        this.createComposite = function(x,y,id,endCallback) {
 
-            if (name===undefined) {
-                name = guid();
+            if (id===undefined) {
+                id = uid();
             } else {
-                if(_this.spriteMap.hasOwnProperty(name)) {
-                    throw "Warning: duplicate sprite (composite) name " + name;
+                if(_this.spriteMap.hasOwnProperty(id)) {
+                    throw "Warning: duplicate sprite (composite) id " + id;
                 }
             }
 
-            var comp = new Composite(this, x, y, endCallback);
+            var comp = new Composite(this, x, y, id, endCallback);
             comp.init();
             _this.sprites.push(comp);
-            _this.spriteMap[name] = comp;
+            _this.spriteMap[id] = comp;
             return comp;
         };
 
@@ -576,6 +576,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                     s.update(_this.now);
                     keepsprites.push(s);
                 } else {
+                    s.onRemove();
                     delete _this.spriteMap[s.name];
                 }
             }
@@ -591,7 +592,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 throw "Can't create phaser for unregistered type: " + name;
             }
 
-            var phaser = new _this.phaserPlugins[name].fn(guid(), opts);
+            var phaser = new _this.phaserPlugins[name].fn(uid(), opts);
             this.phasers.push(phaser);
             return phaser;
         };

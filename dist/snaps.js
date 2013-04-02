@@ -123,11 +123,8 @@ define('sprites/sprite',[],function() {
             this.maxloops = typeof opts.maxloops === 'function'?opts.maxloops():opts.maxloops;
         }
         this.updates = opts.updates;
-        if (this.updates!==undefined) {
-            for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].sprite = this;
-            }
-        }
+        this.id = opts.id;
+
         this.endCallback = opts.endCallback;
         this.collider = opts.collider; /* TODO: use this. */
         this.autoRemove = opts.autoRemove;
@@ -145,7 +142,7 @@ define('sprites/sprite',[],function() {
     Sprite.prototype.init = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].init();
+                this.updates[i].init(this);
             }
         }
     };
@@ -307,6 +304,8 @@ define('sprites/sprite',[],function() {
          *
          * Not implementing now, because it may be prefered to implement sampling predecates first, which
          * may render this task more difficult.
+         *
+         * Perhaps this can be called flight mode or something.
          */
     };
 
@@ -332,6 +331,11 @@ define('sprites/sprite',[],function() {
 
     Sprite.prototype.onRemove = function() {
         /* TODO: Call into each updater and each phaser, letting them know */
+        if (this.updates!==undefined) {
+            for (var i = 0; i < this.updates.length; i++) {
+                this.updates[i].onSpriteRemoved();
+            }
+        }
     };
 
     return Sprite;
@@ -387,7 +391,7 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
     var copyProps = js.copyProps;
     var clone = js.clone;
 
-    function Composite(sn, x, y, endCallback) {
+    function Composite(sn, x, y, id, endCallback) {
         this.sn = sn;
         this.x = x;
         this.y = y;
@@ -491,6 +495,12 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
             if (s.isActive(now)) {
                 s.drawAt(ctx, x+s.x-s.def.y, y+s.y-s.h-s.def.y, now);
             }
+        }
+    };
+
+    Composite.prototype.onRemove = function() {
+        for (var i = this.sprites.length - 1; i >= 0; i--) {
+            this.sprites[i].onRemove();
         }
     };
 
@@ -870,13 +880,11 @@ define('util/debug',[],function() {
 });
 
 /*global define*/
-define('util/guid',[],function() {
+define('util/uid',[],function() {
 
     
 
     var next = 1;
-
-    /* TODO: This is a uid, not a guid. */
 
     /** Return a unique string for identifier purposes.
      */
@@ -908,9 +916,9 @@ define('util/all',[
     'util/bitmap',
     'util/debug',
     'util/js',
-    'util/guid',
+    'util/uid',
     'util/url'],
-function(Preloader, rnd, Bitmap, debug, js, guid, Url) {
+function(Preloader, rnd, Bitmap, debug, js, uid, Url) {
 
     
 
@@ -918,7 +926,7 @@ function(Preloader, rnd, Bitmap, debug, js, guid, Url) {
         Preloader: Preloader,
         rnd: rnd,
         js: js,
-        guid: guid,
+        uid: uid,
         debug: debug,
         Bitmap: Bitmap,
         Url: Url
@@ -1396,7 +1404,11 @@ define('plugins/sprite/bounce',[],function() {
         return true;
     };
 
-    Bounce.prototype.init = function() {
+    Bounce.prototype.init = function(sprite) {
+        this.sprite = sprite;
+    };
+
+    Bounce.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {
@@ -1437,7 +1449,11 @@ define('plugins/sprite/follow-mouse',[],function() {
         return true;
     };
 
-    FollowMouse.prototype.init = function() {
+    FollowMouse.prototype.init = function(sprite) {
+        this.sprite = sprite;
+    };
+
+    FollowMouse.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {
@@ -1500,8 +1516,8 @@ define('plugins/sprite/animate',[],function() {
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      */
-    Animate.prototype.init = function() {
-        var s = this.sprite;
+    Animate.prototype.init = function(s) {
+        this.sprite = s;
         if (this.duration===undefined) {
             /* If duration is omitted, take the sprite duration in its current state. */
             this.duration = s.maxDuration();
@@ -1524,6 +1540,9 @@ define('plugins/sprite/animate',[],function() {
         this.tweenfn = sn.tweens[this.tween];
 
         this.epoch = sn.getNow();
+    };
+
+    Animate.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {
@@ -1600,8 +1619,12 @@ define('plugins/sprite/8way',[],function() {
         return true;
     };
 
-    Face8Way.prototype.init = function() {
+    Face8Way.prototype.init = function(sprite) {
+        this.sprite = sprite;
         this.direction = 'e';
+    };
+
+    Face8Way.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {
@@ -1659,12 +1682,20 @@ define('plugins/sprite/track',[],function() {
         return true;
     };
 
-    Track.prototype.init = function() {
-        var s = this.sprite;
+    Track.prototype.onSpriteRemoved = function() {
+        if (this.deregister) {
+            this.deregister(this.sprite);
+        }
+    };
+
+    Track.prototype.init = function(s) {
+        this.sprite = s;
         this.x=s.x;
         this.y=s.y;
         this.h=s.h;
-        this.fn(s);
+        if (this.register) {
+            this.register(s);
+        }
     };
 
     return function(snaps) {
@@ -1847,6 +1878,7 @@ define('plugins/fx/particles',[
      * sn.fx('particles', {
      *     number: 15,
      *     duration: largeRange,
+     *     id: (optional) A unique identifier for the particles composite
      *     x:smallRange,
      *     y:smallRange
      *     // etc
@@ -1868,7 +1900,7 @@ define('plugins/fx/particles',[
 
         this.endCallback = opts.endCallback;
 
-        this.comp = sn.createComposite(cx, cy, opts.name);
+        this.comp = sn.createComposite(cx, cy, opts.id);
 
         while(number-->0) {
             var so = opts.spritePos||{x:0,y:0,h:0};
@@ -2769,6 +2801,8 @@ define('ai/proximity-tracker',[],function() {
         this.re = edges.re;
         this.te = edges.te;
         this.be = edges.be;
+
+        this.id = sn.util.uid();
     }
 
     /* TODO : This should be able to quickly tell you what sprites are closest to a point. */
@@ -2780,13 +2814,24 @@ define('ai/proximity-tracker',[],function() {
      *     name: 'some-sprite-moving-plugin'
      * }, {
      *     name:'track',
-     *     fn: myProximityTracker.track.bind(myProximityTracker)
+     *     fn: myProximityTracker.track.bind(myProximityTracker),
+     *     register: myProximityTracker.register.bind(myProximityTracker),
+     *     deregister: myProximityTracker.unregister.bind(myProximityTracker)
      * }]
-
      */
     ProximityTracker.prototype.track = function(sprite) {
-        /* TODO This is called on each movement. It's also called once
-         * when the sprite is created to register it with the tracker. */
+        /* TODO This is called on each movement. */
+        //console.log()
+    };
+
+    ProximityTracker.prototype.register = function(sprite) {
+        /* TODO This is called when the track plugin is initialized by the sprite. */
+        //console.log("Register "+sprite.id+", with "+this.id);
+    };
+
+    ProximityTracker.prototype.unregister = function(sprite) {
+        /* TODO This is called when the track plugin is deinitialized by the sprite. */
+        //console.log("Unregister "+sprite.id+", with "+this.id);
     };
 
     return ProximityTracker;
@@ -2895,7 +2940,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
     var Preloader = util.Preloader;
-    var guid      = util.guid;
+    var uid      = util.uid;
 
 
     function Snaps(game, canvasID, settings) {
@@ -3296,7 +3341,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @param {Function/Number} h The height off the ground. If a function, it should take
          * no paremeters and return a number.
          * @param Optional parameter object, which can contain:
-         * 'name' if you want to be able to find your sprite again.
+         * 'id' if you want to be able to find your sprite again.
          * 'maxloops' if your sprite should remove itself from the world
          * after it's looped around its animation a certain number of times. Can be a function, like
          * the world position parameters.
@@ -3313,13 +3358,13 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 opts = {};
             }
 
-            var name = opts.name;
+            var id = opts.id;
 
-            if (name===undefined) {
-                name = guid();
+            if (id===undefined) {
+                id = uid();
             } else {
-                if(_this.spriteMap.hasOwnProperty(name)) {
-                    throw "Error: duplicate sprite name " + name;
+                if(_this.spriteMap.hasOwnProperty(id)) {
+                    throw "Error: duplicate sprite id " + id;
                 }
             }
 
@@ -3366,24 +3411,24 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             s.init();
 
             _this.sprites.push(s);
-            _this.spriteMap[name] = s;
+            _this.spriteMap[id] = s;
             return s;
         };
 
-        this.createComposite = function(x,y,name,endCallback) {
+        this.createComposite = function(x,y,id,endCallback) {
 
-            if (name===undefined) {
-                name = guid();
+            if (id===undefined) {
+                id = uid();
             } else {
-                if(_this.spriteMap.hasOwnProperty(name)) {
-                    throw "Warning: duplicate sprite (composite) name " + name;
+                if(_this.spriteMap.hasOwnProperty(id)) {
+                    throw "Warning: duplicate sprite (composite) id " + id;
                 }
             }
 
-            var comp = new Composite(this, x, y, endCallback);
+            var comp = new Composite(this, x, y, id, endCallback);
             comp.init();
             _this.sprites.push(comp);
-            _this.spriteMap[name] = comp;
+            _this.spriteMap[id] = comp;
             return comp;
         };
 
@@ -3440,6 +3485,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                     s.update(_this.now);
                     keepsprites.push(s);
                 } else {
+                    s.onRemove();
                     delete _this.spriteMap[s.name];
                 }
             }
@@ -3455,7 +3501,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 throw "Can't create phaser for unregistered type: " + name;
             }
 
-            var phaser = new _this.phaserPlugins[name].fn(guid(), opts);
+            var phaser = new _this.phaserPlugins[name].fn(uid(), opts);
             this.phasers.push(phaser);
             return phaser;
         };

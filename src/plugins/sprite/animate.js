@@ -51,8 +51,8 @@ define(function() {
     /** Called with the update options as the 'this' context, one of which
      * is this.sprite, which refers to the sprite being updated.
      */
-    Animate.prototype.init = function() {
-        var s = this.sprite;
+    Animate.prototype.init = function(s) {
+        this.sprite = s;
         if (this.duration===undefined) {
             /* If duration is omitted, take the sprite duration in its current state. */
             this.duration = s.maxDuration();
@@ -75,6 +75,9 @@ define(function() {
         this.tweenfn = sn.tweens[this.tween];
 
         this.epoch = sn.getNow();
+    };
+
+    Animate.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {

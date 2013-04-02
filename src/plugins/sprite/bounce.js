@@ -42,7 +42,11 @@ define(function() {
         return true;
     };
 
-    Bounce.prototype.init = function() {
+    Bounce.prototype.init = function(sprite) {
+        this.sprite = sprite;
+    };
+
+    Bounce.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {

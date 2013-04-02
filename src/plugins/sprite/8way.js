@@ -65,8 +65,12 @@ define(function() {
         return true;
     };
 
-    Face8Way.prototype.init = function() {
+    Face8Way.prototype.init = function(sprite) {
+        this.sprite = sprite;
         this.direction = 'e';
+    };
+
+    Face8Way.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {

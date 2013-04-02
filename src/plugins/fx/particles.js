@@ -35,6 +35,7 @@ define([
      * sn.fx('particles', {
      *     number: 15,
      *     duration: largeRange,
+     *     id: (optional) A unique identifier for the particles composite
      *     x:smallRange,
      *     y:smallRange
      *     // etc
@@ -56,7 +57,7 @@ define([
 
         this.endCallback = opts.endCallback;
 
-        this.comp = sn.createComposite(cx, cy, opts.name);
+        this.comp = sn.createComposite(cx, cy, opts.id);
 
         while(number-->0) {
             var so = opts.spritePos||{x:0,y:0,h:0};

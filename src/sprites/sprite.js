@@ -55,11 +55,8 @@ define(function() {
             this.maxloops = typeof opts.maxloops === 'function'?opts.maxloops():opts.maxloops;
         }
         this.updates = opts.updates;
-        if (this.updates!==undefined) {
-            for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].sprite = this;
-            }
-        }
+        this.id = opts.id;
+
         this.endCallback = opts.endCallback;
         this.collider = opts.collider; /* TODO: use this. */
         this.autoRemove = opts.autoRemove;
@@ -77,7 +74,7 @@ define(function() {
     Sprite.prototype.init = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
-                this.updates[i].init();
+                this.updates[i].init(this);
             }
         }
     };
@@ -239,6 +236,8 @@ define(function() {
          *
          * Not implementing now, because it may be prefered to implement sampling predecates first, which
          * may render this task more difficult.
+         *
+         * Perhaps this can be called flight mode or something.
          */
     };
 
@@ -264,6 +263,11 @@ define(function() {
 
     Sprite.prototype.onRemove = function() {
         /* TODO: Call into each updater and each phaser, letting them know */
+        if (this.updates!==undefined) {
+            for (var i = 0; i < this.updates.length; i++) {
+                this.updates[i].onSpriteRemoved();
+            }
+        }
     };
 
     return Sprite;

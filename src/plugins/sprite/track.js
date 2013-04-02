@@ -46,12 +46,20 @@ define(function() {
         return true;
     };
 
-    Track.prototype.init = function() {
-        var s = this.sprite;
+    Track.prototype.onSpriteRemoved = function() {
+        if (this.deregister) {
+            this.deregister(this.sprite);
+        }
+    };
+
+    Track.prototype.init = function(s) {
+        this.sprite = s;
         this.x=s.x;
         this.y=s.y;
         this.h=s.h;
-        this.fn(s);
+        if (this.register) {
+            this.register(s);
+        }
     };
 
     return function(snaps) {

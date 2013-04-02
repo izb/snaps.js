@@ -8,9 +8,9 @@
     "*.json",
     "*.md",
     "*.yml",
-    "test/**/*",
-    "src/**/*",
-    "resources/**/*"
+    "test/",
+    "src/",
+    "resources/"
   ],
   "dependencies": {
   }

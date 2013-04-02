@@ -6,7 +6,7 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
     var copyProps = js.copyProps;
     var clone = js.clone;
 
-    function Composite(sn, x, y, endCallback) {
+    function Composite(sn, x, y, id, endCallback) {
         this.sn = sn;
         this.x = x;
         this.y = y;
@@ -110,6 +110,12 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
             if (s.isActive(now)) {
                 s.drawAt(ctx, x+s.x-s.def.y, y+s.y-s.h-s.def.y, now);
             }
+        }
+    };
+
+    Composite.prototype.onRemove = function() {
+        for (var i = this.sprites.length - 1; i >= 0; i--) {
+            this.sprites[i].onRemove();
         }
     };
 

@@ -29,7 +29,11 @@ define(function() {
         return true;
     };
 
-    FollowMouse.prototype.init = function() {
+    FollowMouse.prototype.init = function(sprite) {
+        this.sprite = sprite;
+    };
+
+    FollowMouse.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {
