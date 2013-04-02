@@ -18,7 +18,7 @@ define(['util/js'], function(js) {
         this.name = layerName;
         this.x = opts.x;
         this.y = opts.y;
-        /* TODO: Circle trace for now because I'm testing that. */
+
         this.collider = sn.createCollider('circle-trace', {radius:opts.radius});
     }
 

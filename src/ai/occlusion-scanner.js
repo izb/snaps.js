@@ -5,7 +5,9 @@ define(function() {
 
     }
 
-    /* TODO: This should be able to generate polygons encapsulating visibility from a point. */
+    /* TODO: We should be able to trace visibility between 2 points
+     * and link that to the proximity scanner, filtering out invisible sprites.
+     */
 
     return OcclusionScanner;
 

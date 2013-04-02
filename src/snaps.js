@@ -25,6 +25,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         tweens,
         ProximityTracker) {
 
+    /*
+     * TODO: https://github.com/izb/snaps.js/wiki/Todo
+     */
+
     'use strict';
 
     var debugText = util.debug.debugText;

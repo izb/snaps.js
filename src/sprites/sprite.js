@@ -58,7 +58,7 @@ define(function() {
         this.id = opts.id;
 
         this.endCallback = opts.endCallback;
-        this.collider = opts.collider; /* TODO: use this. */
+        this.collider = opts.collider;
         this.autoRemove = opts.autoRemove;
         if (this.autoRemove===undefined) {
             this.autoRemove = true;
@@ -262,7 +262,7 @@ define(function() {
     };
 
     Sprite.prototype.onRemove = function() {
-        /* TODO: Call into each updater and each phaser, letting them know */
+        /* TODO: Call each phaser somehow, letting them know */
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 this.updates[i].onSpriteRemoved();
