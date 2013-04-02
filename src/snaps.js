@@ -442,13 +442,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 opts = {};
             }
 
-            var id = opts.id;
-
-            if (id===undefined) {
-                id = uid();
+            if (opts.id===undefined) {
+                opts.id = uid();
             } else {
-                if(_this.spriteMap.hasOwnProperty(id)) {
-                    throw "Error: duplicate sprite id " + id;
+                if(_this.spriteMap.hasOwnProperty(opts.id)) {
+                    throw "Error: duplicate sprite id " + opts.id;
                 }
             }
 
@@ -487,7 +485,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             s.init();
 
             _this.sprites.push(s);
-            _this.spriteMap[id] = s;
+            _this.spriteMap[opts.id] = s;
             return s;
         };
 
