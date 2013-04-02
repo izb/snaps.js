@@ -13,6 +13,12 @@ define(function() {
         this.lastUpdate = 0;
         this.updatesThisFrame = 0;
         this.sprites = [];
+
+        if (opts.frameCap===undefined) {
+            this.frameCap = 750; /* Frames will pretend they took no more than 750ms */
+        } else {
+            this.frameCap = Math.min(1000, (opts.frameCap * 1000)|0);
+        }
     }
 
     TimePhaser.prototype.phase = function(sprite, now) {
@@ -39,7 +45,7 @@ define(function() {
     };
 
     TimePhaser.prototype.rebalance = function(now) {
-        var timeSinceLastFrame = now - this.lastUpdate;
+        var timeSinceLastFrame = Math.min(this.frameCap, now - this.lastUpdate);
         this.lastUpdate = now;
         var updateBudget = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
 
