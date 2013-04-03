@@ -1005,17 +1005,15 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         this.clientWidth = clientWidth;
         this.clientHeight = clientHeight;
 
+        this.minxoffset = this.data.tilewidth/2;
+        this.minyoffset = this.data.tileheight/2;
 
-       this.minxoffset = this.data.tilewidth/2;
-       this.minyoffset = this.data.tileheight/2;
-
-       this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
-       this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
 
         /* Start in SW-corner by default */
         this.xoffset = this.minxoffset;
         this.yoffset = this.maxyoffset;
-
     }
 
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
@@ -1301,6 +1299,14 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         }
     };
 
+    StaggeredIsometric.prototype.onResize = function(w, h) {
+        this.clientWidth = w;
+        this.clientHeight = h;
+
+        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+    };
+
 
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
 
@@ -1316,6 +1322,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
         /* Sort sprites first by height, then by y-axis */
+        /* TODO: Cull off-screen sprites first. */
         sprites.sort(function(a, b) {
             var n = a.y - b.y;
             return n!==0?n:a.h - b.h;
@@ -2895,7 +2902,6 @@ define('ai/proximity-tracker',[],function() {
 
     var removeFromItsCell = function(sprite) {
         var pd = sprite.proximityData[this.id];
-
         if (pd.cell!==undefined) {
             var cell = this.cells[pd.cell];
             var idx = cell.sprites.indexOf(sprite);
@@ -2915,26 +2921,37 @@ define('ai/proximity-tracker',[],function() {
             return;
         }
 
-        this.certains = [];
-        this.uncertains = [];
 
-        var rmax = (r+1)*(r+1);
-        var rmin = (r-1)*(r-1);
-        for(var x = -r-1; x <= r+1; x++) {
-            for(var y = -r-1; y <= r+1; y++) {
+        if (r===1) {
+            /* Our circle algorithm breaks down with radius 1, so we treat it as a special
+             * case and hand-creaft the values. */
+            this.certains = [];
+            var s = this.span;
+            this.uncertains = [-s-1,-s,-s+1,-1,0,1,s-1,s,s+1];
 
-                var x2 = x+(x>0?1:-1);
-                var y2 = y+(y>0?1:-1);
-                if((x2*x2+y2*y2)<(r*r)) {
-                    this.certains.push(y*this.span+x);
-                } else {
-                    var x1 = x-(x>0?1:-1);
-                    var y1 = y-(y>0?1:-1);
-                    if((x1*x1+y1*y1)<(r*r)) {
-                        this.uncertains.push(y*this.span+x);
+        } else {
+            this.certains = [];
+            this.uncertains = [];
+
+            var rmax = (r+1)*(r+1);
+            var rmin = (r-1)*(r-1);
+            for(var x = -r-1; x <= r+1; x++) {
+                for(var y = -r-1; y <= r+1; y++) {
+
+                    var x2 = x+(x>0?1:-1);
+                    var y2 = y+(y>0?1:-1);
+                    if((x2*x2+y2*y2)<(r*r)) {
+                        this.certains.push(y*this.span+x);
+                    } else {
+                        var x1 = x-(x>0?1:-1);
+                        var y1 = y-(y>0?1:-1);
+                        if((x1*x1+y1*y1)<(r*r)) {
+                            this.uncertains.push(y*this.span+x);
+                        }
                     }
                 }
             }
+
         }
 
         this.candidateCache[r] = {
@@ -2953,9 +2970,11 @@ define('ai/proximity-tracker',[],function() {
      */
     ProximityTracker.prototype.find = function(x,y,r) {
 
+        /* This call sets the values in this.certains and this.uncertains appropriate to
+         * the radius. */
         setCurrentCandidateCells.call(this, r);
 
-        var i, j, oc, cell, s;
+        var i, j, oc, cell, s, r2;
 
         var found = [];
 
@@ -2971,7 +2990,7 @@ define('ai/proximity-tracker',[],function() {
                 if (cell!==undefined) {
                     for (j = cell.sprites.length - 1; j >= 0; j--) {
                         s = cell.sprites[j];
-                        s.ct='green';
+                        s.ct='green'; /* TODO: Remove this for loop. It's just for testing. */
                     }
 
                     found = found.concat(cell.sprites);
@@ -2981,8 +3000,7 @@ define('ai/proximity-tracker',[],function() {
 
         /* Cells that are not certain to be within the radius must have
          * every distance tested */
-        var r2 = r*r;
-        for (i = this.uncertains.length - 1; i >= 0; i--) {
+        for (r2 = r*r, i = this.uncertains.length - 1; i >= 0; i--) {
             oc = c+this.uncertains[i];
             if (oc>=0 && oc<this.cells.length) {
                 cell = this.cells[oc];
@@ -2992,7 +3010,7 @@ define('ai/proximity-tracker',[],function() {
                         var dx = x-s.x;
                         var dy = (y-s.y)*2;
                         if((dx*dx+dy*dy)<=r2) {
-                            s.ct='red';
+                            s.ct='red'; /* TODO: Remove this colour. It's just for testing. */
                             found.push(s);
                         }
                     }
@@ -3021,22 +3039,39 @@ define('ai/proximity-tracker',[],function() {
         var x = (sprite.x/this.cellw)|0;
         var y = (sprite.y/this.cellh)|0;
         var c = y*this.span+x;
-        if (this.cells[c]===undefined) {
-            this.cells[c] = {
-                sprites:[sprite]
-            };
-            pd.cell = c;
-        } else if(c!==pd.cell) {
+
+        if(c!==pd.cell) {
             removeFromItsCell.call(this, sprite);
-            this.cells[c].sprites.push(sprite);
+
+            if (this.cells[c]===undefined) {
+                this.cells[c] = {
+                    sprites:[sprite]
+                };
+            } else {
+                this.cells[c].sprites.push(sprite);
+            }
+
             pd.cell = c;
         }
 
     };
 
     ProximityTracker.prototype.register = function(sprite) {
+
+        var x = (sprite.x/this.cellw)|0;
+        var y = (sprite.y/this.cellh)|0;
+        var c = y*this.span+x;
+
+        if (this.cells[c]===undefined) {
+            this.cells[c] = {
+                sprites:[sprite]
+            };
+        } else {
+            this.cells[c].sprites.push(sprite);
+        }
+
         sprite.proximityData = {};
-        sprite.proximityData[this.id] = {cell: undefined};
+        sprite.proximityData[this.id] = {cell: c};
         this.track(sprite);
     };
 
@@ -3155,8 +3190,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
     var Preloader = util.Preloader;
-    var uid      = util.uid;
-
+    var uid       = util.uid;
 
     function Snaps(game, canvasID, settings) {
 
@@ -3171,9 +3205,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
 
         settings = settings || {};
-        this.dbgShowMouse = !!settings.showMouse;
-        this.dbgShowCounts = !!settings.showCounts;
-        this.dbgShowRegions = !!settings.showRegions;
+        this.dbgShowMouse     = !!settings.showMouse;
+        this.dbgShowCounts    = !!settings.showCounts;
+        this.dbgShowRegions   = !!settings.showRegions;
         this.dbgShowMouseTile = !!settings.showMouseTile;
 
         this.imageCache = {};
@@ -3696,12 +3730,17 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
 
             var phaser = new _this.phaserPlugins[name].fn(uid(), opts);
-            this.phasers.push(phaser);
+            _this.phasers.push(phaser);
             return phaser;
         };
 
         this.resizeCanvas = function() {
-            /* TODO: Remember the map should be resized to the new client width/height too */
+
+            var c = document.getElementById(canvasID);
+            this.clientWidth = c.clientWidth;
+            this.clientHeight = c.clientHeight;
+
+            _this.map.onResize(c.clientWidth, c.clientHeight);
         };
     }
 

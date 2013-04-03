@@ -35,8 +35,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
     var Preloader = util.Preloader;
-    var uid      = util.uid;
-
+    var uid       = util.uid;
 
     function Snaps(game, canvasID, settings) {
 
@@ -51,9 +50,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
 
         settings = settings || {};
-        this.dbgShowMouse = !!settings.showMouse;
-        this.dbgShowCounts = !!settings.showCounts;
-        this.dbgShowRegions = !!settings.showRegions;
+        this.dbgShowMouse     = !!settings.showMouse;
+        this.dbgShowCounts    = !!settings.showCounts;
+        this.dbgShowRegions   = !!settings.showRegions;
         this.dbgShowMouseTile = !!settings.showMouseTile;
 
         this.imageCache = {};
@@ -576,12 +575,17 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
 
             var phaser = new _this.phaserPlugins[name].fn(uid(), opts);
-            this.phasers.push(phaser);
+            _this.phasers.push(phaser);
             return phaser;
         };
 
         this.resizeCanvas = function() {
-            /* TODO: Remember the map should be resized to the new client width/height too */
+
+            var c = document.getElementById(canvasID);
+            this.clientWidth = c.clientWidth;
+            this.clientHeight = c.clientHeight;
+
+            _this.map.onResize(c.clientWidth, c.clientHeight);
         };
     }
 

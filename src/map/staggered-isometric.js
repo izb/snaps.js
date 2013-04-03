@@ -16,17 +16,15 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.clientWidth = clientWidth;
         this.clientHeight = clientHeight;
 
+        this.minxoffset = this.data.tilewidth/2;
+        this.minyoffset = this.data.tileheight/2;
 
-       this.minxoffset = this.data.tilewidth/2;
-       this.minyoffset = this.data.tileheight/2;
-
-       this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
-       this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
 
         /* Start in SW-corner by default */
         this.xoffset = this.minxoffset;
         this.yoffset = this.maxyoffset;
-
     }
 
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
@@ -312,6 +310,14 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    StaggeredIsometric.prototype.onResize = function(w, h) {
+        this.clientWidth = w;
+        this.clientHeight = h;
+
+        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+    };
+
 
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
 
@@ -327,6 +333,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
         /* Sort sprites first by height, then by y-axis */
+        /* TODO: Cull off-screen sprites first. */
         sprites.sort(function(a, b) {
             var n = a.y - b.y;
             return n!==0?n:a.h - b.h;
