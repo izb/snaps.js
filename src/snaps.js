@@ -1,9 +1,6 @@
 /*global define*/
-define(['sprites/spritedef',
-        'sprites/sprite',
-        'sprites/composite',
-        'input/keyboard',
-        'input/mouse',
+define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
+        'input/keyboard', 'input/mouse',
         'util/all',
         'map/staggered-isometric',
 
@@ -17,8 +14,7 @@ define(['sprites/spritedef',
         'ai/proximity-tracker',
 
         /* Non-referenced */
-        'polyfills/requestAnimationFrame',
-        'polyfills/bind'],
+        'polyfills/requestAnimationFrame', 'polyfills/bind'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
@@ -48,6 +44,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.util = util;
         this.tweens = tweens;
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
+        this.PathFinder = PathFinder.bind(ProximityTracker);
 
         settings = settings || {};
         this.dbgShowMouse     = !!settings.showMouse;

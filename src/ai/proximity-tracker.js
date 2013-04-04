@@ -110,9 +110,11 @@ define(function() {
      * @param {Number} r The radius to search. Note that although this is
      * in pixels, it is horizontal pixels. The search area will be an ellipse
      * to account for the isometric projection.
+     * @param {Bool} sort Optional. Pass true to have the results sorted in
+     * ascending distance from the test point.
      * @return {Array} An array of sprites that fall within the search area.
      */
-    ProximityTracker.prototype.find = function(x,y,r) {
+    ProximityTracker.prototype.find = function(x,y,r,sort) {
 
         /* This call sets the values in this.certains and this.uncertains appropriate to
          * the radius. */
@@ -132,9 +134,14 @@ define(function() {
             if (oc>=0 && oc<this.cells.length) {
                 cell = this.cells[oc];
                 if (cell!==undefined) {
-                    for (j = cell.sprites.length - 1; j >= 0; j--) {
-                        s = cell.sprites[j];
-                        s.ct='green'; /* TODO: Remove this for loop. It's just for testing. */
+                    if (sort===true) {
+                        /* Store distances in the sprite for sorting later */
+                        for (j = cell.sprites.length - 1; j >= 0; j--) {
+                            s = cell.sprites[j];
+                            var dx = x-s.x;
+                            var dy = (y-s.y)*2;
+                            s.tmpDist2=(dx*dx+dy*dy);
+                        }
                     }
 
                     found = found.concat(cell.sprites);
@@ -153,13 +160,19 @@ define(function() {
                         s = cell.sprites[j];
                         var dx = x-s.x;
                         var dy = (y-s.y)*2;
-                        if((dx*dx+dy*dy)<=r2) {
-                            s.ct='red'; /* TODO: Remove this colour. It's just for testing. */
+                        s.tmpDist2=(dx*dx+dy*dy);
+                        if(s.tmpDist2<=r2) {
                             found.push(s);
                         }
                     }
                 }
             }
+        }
+
+        if (sort===true) {
+            found.sort(function(a, b) {
+                return a.tmpDist2 - b.tmpDist2;
+            });
         }
 
         return found;

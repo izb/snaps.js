@@ -1,7 +1,9 @@
 /*global define*/
 define(function() {
 
-    function PathFinder() {
+    function PathFinder(sn) {
+
+        this.sn = sn;
 
     }
 
