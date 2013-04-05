@@ -65,13 +65,17 @@ module.exports = function(grunt) {
                 run: false
             },
             all: {
-                src: ["test/*.html"]
+                src: ["test/p*.html"]
             }
         },
         watch: {
             js: {
                 files: ['src/**/*.js'],
                 tasks: 'dev'
+            },
+            test: {
+                files: ['test/**/*.js','test/**/*.html'],
+                tasks: 'test'
             }
         }
     });

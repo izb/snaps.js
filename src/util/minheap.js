@@ -14,7 +14,7 @@ define(function() {
 
     function MinHeap() {
 
-        this.heap = new Array();
+        this.heap = [];
 
         /**
          * Retrieve the index of the left child of the node at index i.
@@ -53,7 +53,7 @@ define(function() {
             if (rIdx < this.heap.length && (this.heap[rIdx].score < this.heap[smallest].score)) {
                 smallest = rIdx;
             }
-            if (i != smallest) {
+            if (i !== smallest) {
                 var temp = this.heap[smallest];
                 this.heap[smallest] = this.heap[i];
                 this.heap[i] = temp;

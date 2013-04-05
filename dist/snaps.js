@@ -888,6 +888,143 @@ define('util/debug',[],function() {
 });
 
 /*global define*/
+define('util/minheap',[],function() {
+
+    
+
+    /**
+     * Implementation of a min heap.
+     *
+     * http://www.digitaltsunami.net/projects/javascript/minheap/index.html
+     *
+     * Modified to expect only to contain objects that expose a 'score'
+     * value for comparison.
+     */
+
+    function MinHeap() {
+
+        this.heap = [];
+
+        /**
+         * Retrieve the index of the left child of the node at index i.
+         */
+        this.left = function(i) {
+            return 2 * i + 1;
+        };
+
+        /**
+         * Retrieve the index of the right child of the node at index i.
+         */
+        this.right = function(i) {
+            return 2 * i + 2;
+        };
+
+        /**
+         * Retrieve the index of the parent of the node at index i.
+         */
+        this.parent = function(i) {
+            return Math.ceil(i / 2) - 1;
+        };
+
+        /**
+         * Ensure that the contents of the heap don't violate the
+         * constraint.
+         */
+        this.heapify = function(i) {
+            var lIdx = this.left(i);
+            var rIdx = this.right(i);
+            var smallest;
+            if (lIdx < this.heap.length && (this.heap[lIdx].score < this.heap[i].score)) {
+                smallest = lIdx;
+            } else {
+                smallest = i;
+            }
+            if (rIdx < this.heap.length && (this.heap[rIdx].score < this.heap[smallest].score)) {
+                smallest = rIdx;
+            }
+            if (i !== smallest) {
+                var temp = this.heap[smallest];
+                this.heap[smallest] = this.heap[i];
+                this.heap[i] = temp;
+                this.heapify(smallest);
+            }
+        };
+
+        /**
+         * Starting with the node at index i, move up the heap until parent value
+         * is less than the node.
+         */
+        this.siftUp = function(i) {
+            var p = this.parent(i);
+            if (p >= 0 && (this.heap[p].score < this.heap[i].score)) {
+                var temp = this.heap[p];
+                this.heap[p] = this.heap[i];
+                this.heap[i] = temp;
+                this.siftUp(p);
+            }
+        };
+    }
+
+    /**
+     * Place an item in the heap.
+     * @param item
+     */
+    MinHeap.prototype.push = function(item) {
+        this.heap.push(item);
+        this.siftUp(this.heap.length - 1);
+    };
+
+    /**
+     * Insert an item into the heap.
+     * @param item
+     */
+    MinHeap.prototype.insert = function(item) {
+        this.push(item);
+    };
+
+    /**
+     * Pop the minimum valued item off of the heap. The heap is then updated
+     * to float the next smallest item to the top of the heap.
+     * @returns the minimum value contained within the heap.
+     */
+    MinHeap.prototype.pop = function() {
+        var value;
+        if (this.heap.length > 1) {
+            value = this.heap[0];
+            // Put the bottom element at the top and let it drift down.
+            this.heap[0] = this.heap.pop();
+            this.heapify(0);
+        } else {
+            value = this.heap.pop();
+        }
+        return value;
+    };
+
+
+    /**
+     * Returns the minimum value contained within the heap.  This will
+     * not remove the value from the heap.
+     * @returns the minimum value within the heap.
+     */
+    MinHeap.prototype.peek = function() {
+        return this.heap[0];
+    };
+
+    /**
+     * Return the current number of elements within the heap.
+     * @returns size of the heap.
+     */
+    MinHeap.prototype.size = function() {
+        return this.heap.length;
+    };
+
+    MinHeap.prototype.clear = function() {
+        this.heap.length = 0;
+        return this;
+    };
+});
+
+/*global define*/
 define('util/uid',[],function() {
 
     
@@ -924,9 +1061,10 @@ define('util/all',[
     'util/bitmap',
     'util/debug',
     'util/js',
+    'util/minheap',
     'util/uid',
     'util/url'],
-function(Preloader, rnd, Bitmap, debug, js, uid, Url) {
+function(Preloader, rnd, Bitmap, debug, js, MinHeap, uid, Url) {
 
     
 
@@ -934,6 +1072,7 @@ function(Preloader, rnd, Bitmap, debug, js, uid, Url) {
         Preloader: Preloader,
         rnd: rnd,
         js: js,
+        MinHeap: MinHeap,
         uid: uid,
         debug: debug,
         Bitmap: Bitmap,
@@ -1299,6 +1438,22 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         }
     };
 
+    StaggeredIsometric.prototype.groundLayer = function() {
+        var map = this.data;
+        for (var i = 0; i < map.layers.length; i++) {
+            var l = map.layers[i];
+
+            if ('draw' in l || !l.visible) {
+                continue;
+            }
+
+            return l;
+        }
+
+        return undefined;
+
+    };
+
     StaggeredIsometric.prototype.onResize = function(w, h) {
         this.clientWidth = w;
         this.clientHeight = h;
@@ -1306,6 +1461,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
         this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
     };
+
 
 
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
@@ -2966,15 +3122,17 @@ define('ai/proximity-tracker',[],function() {
      * @param {Number} r The radius to search. Note that although this is
      * in pixels, it is horizontal pixels. The search area will be an ellipse
      * to account for the isometric projection.
+     * @param {Bool} sort Optional. Pass true to have the results sorted in
+     * ascending distance from the test point.
      * @return {Array} An array of sprites that fall within the search area.
      */
-    ProximityTracker.prototype.find = function(x,y,r) {
+    ProximityTracker.prototype.find = function(x,y,r,sort) {
 
         /* This call sets the values in this.certains and this.uncertains appropriate to
          * the radius. */
         setCurrentCandidateCells.call(this, r);
 
-        var i, j, oc, cell, s, r2;
+        var i, j, oc, cell, s, r2, dx, dy;
 
         var found = [];
 
@@ -2988,9 +3146,14 @@ define('ai/proximity-tracker',[],function() {
             if (oc>=0 && oc<this.cells.length) {
                 cell = this.cells[oc];
                 if (cell!==undefined) {
-                    for (j = cell.sprites.length - 1; j >= 0; j--) {
-                        s = cell.sprites[j];
-                        s.ct='green'; /* TODO: Remove this for loop. It's just for testing. */
+                    if (sort===true) {
+                        /* Store distances in the sprite for sorting later */
+                        for (j = cell.sprites.length - 1; j >= 0; j--) {
+                            s = cell.sprites[j];
+                            dx = x-s.x;
+                            dy = (y-s.y)*2;
+                            s.tmpDist2=(dx*dx+dy*dy);
+                        }
                     }
 
                     found = found.concat(cell.sprites);
@@ -3007,15 +3170,21 @@ define('ai/proximity-tracker',[],function() {
                 if (cell!==undefined) {
                     for (j = cell.sprites.length - 1; j >= 0; j--) {
                         s = cell.sprites[j];
-                        var dx = x-s.x;
-                        var dy = (y-s.y)*2;
-                        if((dx*dx+dy*dy)<=r2) {
-                            s.ct='red'; /* TODO: Remove this colour. It's just for testing. */
+                        dx = x-s.x;
+                        dy = (y-s.y)*2;
+                        s.tmpDist2=(dx*dx+dy*dy);
+                        if(s.tmpDist2<=r2) {
                             found.push(s);
                         }
                     }
                 }
             }
+        }
+
+        if (sort===true) {
+            found.sort(function(a, b) {
+                return b.tmpDist2 - a.tmpDist2;
+            });
         }
 
         return found;
@@ -3081,6 +3250,136 @@ define('ai/proximity-tracker',[],function() {
     };
 
     return ProximityTracker;
+
+});
+
+/*global define*/
+define('ai/pathfinder',[],function() {
+
+    function Node(x,y) {
+        this.x = x;
+        this.y = y;
+        this.score = 0;
+    }
+
+    function PathFinder(sn, diagonals, solid) {
+
+        this.sn = sn;
+        this.ground = sn.map.groundLayer();
+        this.xcount = sn.map.data.width;
+        this.ycount = sn.map.data.height;
+        this.nodeRows = new Array(this.ycount);
+
+        for (var i = this.nodeRows.length - 1; i >= 0; i--) {
+            this.nodeRows[i] = new Array(this.xcount);
+        }
+
+        var r2=Math.sqrt(2);
+
+        this.xdirections = diagonals?[1,  1, 0, -1, -1, -1,  0,  1]:[1, 0, -1,  0];
+        this.ydirections = diagonals?[0,  1, 1,  1,  0, -1, -1, -1]:[0, 1,  0, -1];
+        this.distances   = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
+
+        this.scoreHeap = new sn.MinHeap();
+
+        this.node = function(x,y) {
+            if (x<0||x>=this.xcount||y<0||y>-this.ycount) {
+                return null;
+            }
+            if (solid(x,y)) {
+                return null;
+            }
+            /* TODO: If solid, return null */
+            var n;
+            if (this.nodeRows[y].length===0) {
+                this.nodeRows[y].length = this.xcount;
+            }
+
+            if (this.nodeRows[y][x]===undefined) {
+                n = new Node(x,y);
+                this.nodeRows[y][x] = n;
+            } else {
+                return this.nodeRows[y][x];
+            }
+
+            return n;
+        };
+
+
+        this.reconstructPath = function(current) {
+
+            var path = [];
+
+            while(current.cameFrom) {
+                path.push(current.x,current.y);
+                current = current.cameFrom;
+            }
+
+            return path;
+        };
+    }
+
+    var distance2 = function(x0,y0,x1,y1) {
+        var dx = x1-x0;
+        var dy = y1-y0;
+        return (dx*dx)+(dy*dy);
+    };
+
+
+
+    PathFinder.prototype.route = function(x0,y0,x1,y1) {
+
+        var i;
+
+        /* Reset everything */
+        for (i = this.nodeRows.length - 1; i >= 0; i--) {
+            this.nodeRows[i].length = 0;
+        }
+        var n = this.node(x0,y0);
+        n.open = true;
+        this.scoreHeap.clear().push(n);
+        n.fscore = distance2(x0,y0,x1,y1);
+
+        while(this.scoreHeap.size()>0)
+        {
+            var current = this.scoreHeap.peek();
+            if (current.x===x1&&current.y===y1) {
+                return this.reconstructPath(current);
+            }
+
+            this.scoreHeap.pop();
+            current.closed = true;
+
+            for (i = this.xdirections.length - 1; i >= 0; i--) {
+                var xd = this.xdirections[i];
+                var yd = this.ydirections[i];
+                var neighbour = this.node(current.x+xd,current.y+y0);
+                if (neighbour===null) {
+                    /* Can't move that way. */
+                    continue;
+                }
+
+                var tscore = current.score + this.distances[i];
+                if (neighbour.closed && tscore>=neighbour.score) {
+                    continue;
+                }
+
+                if (!neighbour.open || tscore < neighbour.score) {
+                    neighbour.cameFrom=current;
+                    neighbour.score = tscore;
+                    neighbour.fscore = neighbour.gscore+distance2(neighbour.x,neighbour.y,x1,y1);
+                    if (!neighbour.open) {
+                        neighbour.open = true;
+                        this.scoreHeap.push(neighbour);
+                    }
+                }
+            }
+        }
+
+        return [];
+    };
+
+    return PathFinder;
 
 });
 
@@ -3154,11 +3453,8 @@ define('polyfills/bind',[],function() {
 });
 
 /*global define*/
-define('snaps',['sprites/spritedef',
-        'sprites/sprite',
-        'sprites/composite',
-        'input/keyboard',
-        'input/mouse',
+define('snaps',['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
+        'input/keyboard', 'input/mouse',
         'util/all',
         'map/staggered-isometric',
 
@@ -3170,15 +3466,15 @@ define('snaps',['sprites/spritedef',
 
         /* AI */
         'ai/proximity-tracker',
+        'ai/pathfinder',
 
         /* Non-referenced */
-        'polyfills/requestAnimationFrame',
-        'polyfills/bind'],
+        'polyfills/requestAnimationFrame', 'polyfills/bind'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
         tweens,
-        ProximityTracker) {
+        ProximityTracker, PathFinder) {
 
     /*
      * TODO: https://github.com/izb/snaps.js/wiki/Todo
@@ -3190,6 +3486,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
     var Preloader = util.Preloader;
+    var MinHeap   = util.MinHeap;
     var uid       = util.uid;
 
     function Snaps(game, canvasID, settings) {
@@ -3202,7 +3499,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
         this.tweens = tweens;
+        this.MinHeap = MinHeap;
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
+        this.PathFinder = PathFinder.bind(PathFinder, this);
 
         settings = settings || {};
         this.dbgShowMouse     = !!settings.showMouse;

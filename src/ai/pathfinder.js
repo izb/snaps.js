@@ -11,8 +11,8 @@ define(function() {
 
         this.sn = sn;
         this.ground = sn.map.groundLayer();
-        this.xcount = this.data.width;
-        this.ycount = this.data.height;
+        this.xcount = sn.map.data.width;
+        this.ycount = sn.map.data.height;
         this.nodeRows = new Array(this.ycount);
 
         for (var i = this.nodeRows.length - 1; i >= 0; i--) {
@@ -31,7 +31,7 @@ define(function() {
             if (x<0||x>=this.xcount||y<0||y>-this.ycount) {
                 return null;
             }
-            if (solid(s,y)) {
+            if (solid(x,y)) {
                 return null;
             }
             /* TODO: If solid, return null */
@@ -52,12 +52,16 @@ define(function() {
 
 
         this.reconstructPath = function(current) {
-            if current in came_from
-                p := reconstruct_path(came_from, came_from[current])
-                return (p + current_node)
-            else
-                return current_node
-        }
+
+            var path = [];
+
+            while(current.cameFrom) {
+                path.push(current.x,current.y);
+                current = current.cameFrom;
+            }
+
+            return path;
+        };
     }
 
     var distance2 = function(x0,y0,x1,y1) {
@@ -70,8 +74,10 @@ define(function() {
 
     PathFinder.prototype.route = function(x0,y0,x1,y1) {
 
+        var i;
+
         /* Reset everything */
-        for (var i = this.nodeRows.length - 1; i >= 0; i--) {
+        for (i = this.nodeRows.length - 1; i >= 0; i--) {
             this.nodeRows[i].length = 0;
         }
         var n = this.node(x0,y0);
@@ -89,7 +95,7 @@ define(function() {
             this.scoreHeap.pop();
             current.closed = true;
 
-            for (var i = this.xdirections.length - 1; i >= 0; i--) {
+            for (i = this.xdirections.length - 1; i >= 0; i--) {
                 var xd = this.xdirections[i];
                 var yd = this.ydirections[i];
                 var neighbour = this.node(current.x+xd,current.y+y0);
