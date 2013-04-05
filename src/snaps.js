@@ -32,6 +32,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
     var Preloader = util.Preloader;
+    var MinHeap   = util.MinHeap;
     var uid       = util.uid;
 
     function Snaps(game, canvasID, settings) {
@@ -44,6 +45,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Make some functionality directly available to the game via the engine ref */
         this.util = util;
         this.tweens = tweens;
+        this.MinHeap = MinHeap;
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
         this.PathFinder = PathFinder.bind(PathFinder, this);
 
