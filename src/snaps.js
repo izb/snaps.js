@@ -12,6 +12,7 @@ define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
 
         /* AI */
         'ai/proximity-tracker',
+        'ai/pathfinder',
 
         /* Non-referenced */
         'polyfills/requestAnimationFrame', 'polyfills/bind'],
@@ -19,7 +20,7 @@ define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
         tweens,
-        ProximityTracker) {
+        ProximityTracker, PathFinder) {
 
     /*
      * TODO: https://github.com/izb/snaps.js/wiki/Todo
@@ -44,7 +45,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.util = util;
         this.tweens = tweens;
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
-        this.PathFinder = PathFinder.bind(ProximityTracker);
+        this.PathFinder = PathFinder.bind(PathFinder, this);
 
         settings = settings || {};
         this.dbgShowMouse     = !!settings.showMouse;

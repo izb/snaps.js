@@ -310,6 +310,22 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    StaggeredIsometric.prototype.groundLayer = function() {
+        var map = this.data;
+        for (var i = 0; i < map.layers.length; i++) {
+            var l = map.layers[i];
+
+            if ('draw' in l || !l.visible) {
+                continue;
+            }
+
+            return l;
+        }
+
+        return undefined;
+
+    };
+
     StaggeredIsometric.prototype.onResize = function(w, h) {
         this.clientWidth = w;
         this.clientHeight = h;
@@ -317,6 +333,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
         this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
     };
+
 
 
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {

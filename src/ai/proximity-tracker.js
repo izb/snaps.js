@@ -120,7 +120,7 @@ define(function() {
          * the radius. */
         setCurrentCandidateCells.call(this, r);
 
-        var i, j, oc, cell, s, r2;
+        var i, j, oc, cell, s, r2, dx, dy;
 
         var found = [];
 
@@ -138,8 +138,8 @@ define(function() {
                         /* Store distances in the sprite for sorting later */
                         for (j = cell.sprites.length - 1; j >= 0; j--) {
                             s = cell.sprites[j];
-                            var dx = x-s.x;
-                            var dy = (y-s.y)*2;
+                            dx = x-s.x;
+                            dy = (y-s.y)*2;
                             s.tmpDist2=(dx*dx+dy*dy);
                         }
                     }
@@ -158,8 +158,8 @@ define(function() {
                 if (cell!==undefined) {
                     for (j = cell.sprites.length - 1; j >= 0; j--) {
                         s = cell.sprites[j];
-                        var dx = x-s.x;
-                        var dy = (y-s.y)*2;
+                        dx = x-s.x;
+                        dy = (y-s.y)*2;
                         s.tmpDist2=(dx*dx+dy*dy);
                         if(s.tmpDist2<=r2) {
                             found.push(s);
@@ -171,7 +171,7 @@ define(function() {
 
         if (sort===true) {
             found.sort(function(a, b) {
-                return a.tmpDist2 - b.tmpDist2;
+                return b.tmpDist2 - a.tmpDist2;
             });
         }
 
