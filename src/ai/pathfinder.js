@@ -28,13 +28,14 @@ define(function() {
         this.scoreHeap = new sn.MinHeap();
 
         this.node = function(x,y) {
-            if (x<0||x>=this.xcount||y<0||y>-this.ycount) {
+            if (x<0||x>=this.xcount||y<0||y>=this.ycount) {
                 return null;
             }
+
             if (solid(x,y)) {
                 return null;
             }
-            /* TODO: If solid, return null */
+
             var n;
             if (this.nodeRows[y].length===0) {
                 this.nodeRows[y].length = this.xcount;
@@ -69,8 +70,6 @@ define(function() {
         var dy = y1-y0;
         return (dx*dx)+(dy*dy);
     };
-
-
 
     PathFinder.prototype.route = function(x0,y0,x1,y1) {
 

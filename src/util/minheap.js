@@ -133,4 +133,6 @@ define(function() {
         this.heap.length = 0;
         return this;
     };
+
+    return MinHeap;
 });

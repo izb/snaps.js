@@ -1,15 +1,15 @@
 /*global define,describe,expect,it*/
 define('spec/pathfinding', ['snaps'], function(Snaps) {
 
-    /* The game */
-
+    /* Dummy game */
     function PathFinding() {
+        /* Some dummy map data */
         this.map = {
             tilewidth:192,
             tileheight:96,
             tilesets: [],
             layers:[{
-                "data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                "data":Array.apply(null, new Array(100)).map(Number.prototype.valueOf,0),
                 "height":10,
                 "name":"ground",
                 "opacity":1,
@@ -51,9 +51,12 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
         it('should find its way in an empty room', function() {
             /* If snaps through an exception on startup, sn will be
              * undefined */
-            var pf = new sn.PathFinder(true, function() { return false; });
+            var pf = new sn.PathFinder(true, function(x,y) {
+                /* Nothing is solid */
+                return false;
+            });
 
-            var route = pf.route(0,0,10,10);
+            var route = pf.route(0,0,9,9);
 
             expect(route.length).to.equal(20);
 
