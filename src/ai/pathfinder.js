@@ -97,7 +97,7 @@ define(function() {
             for (i = this.xdirections.length - 1; i >= 0; i--) {
                 var xd = this.xdirections[i];
                 var yd = this.ydirections[i];
-                var neighbour = this.node(current.x+xd,current.y+y0);
+                var neighbour = this.node(current.x+xd,current.y+yd);
                 if (neighbour===null) {
                     /* Can't move that way. */
                     continue;
