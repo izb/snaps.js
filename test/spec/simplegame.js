@@ -27,7 +27,7 @@ define('spec/simplegame', ['snaps', 'map'], function(Snaps, map) {
         it('should have loaded a map into the engine', function() {
             /* If snaps through an exception on startup, sn will be
              * undefined */
-            expect(ex).to.be.undefined;
+            expect(ex).to.equal(undefined);
         });
 
         it('should have correct initial map boundaries', function() {

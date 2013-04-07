@@ -67,7 +67,7 @@ define(function() {
          */
         this.siftUp = function(i) {
             var p = this.parent(i);
-            if (p >= 0 && (this.heap[p].score < this.heap[i].score)) {
+            if (p >= 0 && (this.heap[p].score > this.heap[i].score)) {
                 var temp = this.heap[p];
                 this.heap[p] = this.heap[i];
                 this.heap[i] = temp;
@@ -83,14 +83,6 @@ define(function() {
     MinHeap.prototype.push = function(item) {
         this.heap.push(item);
         this.siftUp(this.heap.length - 1);
-    };
-
-    /**
-     * Insert an item into the heap.
-     * @param item
-     */
-    MinHeap.prototype.insert = function(item) {
-        this.push(item);
     };
 
     /**

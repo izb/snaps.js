@@ -18,12 +18,12 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: ".jshintrc"
             },
-            production:  ['Gruntfile.js', 'src/**/*.js'],
+            production:  ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
             dev: {
                 options: {
                     devel:true
                 },
-                src:  ['Gruntfile.js', 'src/**/*.js']
+                src:  ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js']
             }
         },
         requirejs: {
@@ -65,17 +65,17 @@ module.exports = function(grunt) {
                 run: false
             },
             all: {
-                src: ["test/p*.html"]
+                src: ["test/*.html"]
             }
         },
         watch: {
             js: {
                 files: ['src/**/*.js'],
-                tasks: 'dev'
+                tasks: ['dev']
             },
             test: {
                 files: ['test/**/*.js','test/**/*.html'],
-                tasks: 'test'
+                tasks: ['jshint:dev', 'test']
             }
         }
     });
