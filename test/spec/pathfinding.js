@@ -1,4 +1,4 @@
-/*global define,describe,expect,it*/
+/*global define,describe,expect,it,console*/
 define('spec/pathfinding', ['snaps'], function(Snaps) {
 
     var logGrids = false;
