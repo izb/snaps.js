@@ -42,39 +42,6 @@ $(function() {
         }
     }
 
-    var distToEdgeNaive = function(x,y) {
-        var o = 4*(y*w+x);
-        var pt = buf[o];
-
-        var dist = 1000;
-
-        for (var i = x; i < w; i++) {
-            if (isedge(i,y)) {
-                dist = Math.min(i-x, dist);
-            }
-        }
-
-        for (var i = x; i >=0; i--) {
-            if (isedge(i,y)) {
-                dist = Math.min(x-i, dist);
-            }
-        }
-
-        for (var i = y; i < h; i++) {
-            if (isedge(x,i)) {
-                dist = Math.min(i-y, dist);
-            }
-        }
-
-        for (var i = y; i >=0; i--) {
-            if (isedge(x,i)) {
-                dist = Math.min(y-i, dist);
-            }
-        }
-
-        return dist;
-    };
-
     var distToEdge = function(sx,sy) {
 
         if (isedge(sx,sy)) {
@@ -100,7 +67,9 @@ $(function() {
             }
         }
 
-        return Math.max(1,Math.sqrt(dist2)|0);
+        var dist = Math.max(1,Math.sqrt(dist2)|0);
+
+        return Math.min(127, dist);
     };
 
     for(var y = 0; y < h; y++) {

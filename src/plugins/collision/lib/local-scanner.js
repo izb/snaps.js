@@ -3,51 +3,44 @@ define(function() {
 
     'use strict';
 
-    /** Returns a bitmask representing the local pixels around a point, and how
-     * solid they are.
-     *
-     * +-----------------+
-     * |  1  |  2  |  4  |
-     * +-----------------+
-     * |  8  |  Pt |  16 |
-     * +-----------------+
-     * |  32 |  64 | 128 |
-     * +-----------------+
-     *
-     * Where Pt is the sampled point
-     */
-    var localScan = function(sn, x, y, prop,limit){
-
-        var scanmask = sn.getTilePropAtWorldPos(prop,x+1,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y-1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y-1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y-1)>limit;
-
-        return scanmask;
-    };
-
     var ySlip = function(sn, x0, y0, h, dx, dy) {
         var localmask;
         var r = dx/dy;
 
         if (r>=2&&r<=3) {
+
             /* nw/se */
-            localmask = localScan(sn, x0, y0, 'height',h);
-            if (localmask===23) {
+
+            if (sn.getTilePropAtWorldPos('height',x+1,y-1)>h &&    //  .##
+                    sn.getTilePropAtWorldPos('height',x,y-1)>h &&  //  .o#
+                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  ...
+
+                /* Technically we should test that our shifted y position is not solid,
+                 * but really if you are using collision maps that look like that then
+                 * you're asking for trouble. */
                 return 1;
-            } else if (localmask===232) {
+
+            } else if(sn.getTilePropAtWorldPos('height',x-1,y+1)>h &&  //  ...
+                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropAtWorldPos('height',x,y+1)>h) {      //  ##.
+
                 return -1;
             }
+
         } else if (r<=-2&&r>=-3) {
+
             /* sw/ne */
-            localmask = localScan(sn, x0, y0, 'height',h);
-            if (localmask===240) {
+
+            if (sn.getTilePropAtWorldPos('height',x+1,y+1)>h &&    //  ...
+                    sn.getTilePropAtWorldPos('height',x,y+1)>h &&  //  .o#
+                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  .##
+
                 return -1;
-            } else if (localmask===15) {
+
+            } else if(sn.getTilePropAtWorldPos('height',x-1,y-1)>h &&  //  ##.
+                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropAtWorldPos('height',x,y-1)>h) {      //  ...
+
                 return 1;
             }
         }
@@ -56,7 +49,6 @@ define(function() {
     };
 
     return {
-        localScan:localScan,
         ySlip:ySlip
     };
 });

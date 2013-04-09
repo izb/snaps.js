@@ -232,6 +232,15 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         };
     };
 
+    /** Takes a world position and tells you what tile it lies on. Take
+     * care with the return value, the function signature is all backwards.
+     * @param {Number} x A world x position
+     * @param {Number} y A world y position
+     * @param {Array} out A 2-length array that will recieve the tile x/y
+     * position in its 0/1 values.
+     * @return {Number} The distance from the given world position to the
+     * closest tile edge, capped at 127px.
+     */
     StaggeredIsometric.prototype.worldToTilePos = function(x, y, out) {
         // http://gamedev.stackexchange.com/a/48507/3188
 
@@ -246,22 +255,27 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var eventilex = Math.floor(x%tw);
         var eventiley = Math.floor(y%th);
 
-        if (this.hitTest[eventilex + eventiley * tw] >= 128) {
+        var dist = this.hitTest[eventilex + eventiley * tw];
+
+        if (dist >= 128) {
             /* On even tile */
 
             out[0] = (((x + tw) / tw)|0) - 1;
             out[1] = 2 * ((((y + th) / th)|0) - 1);
 
+            return dist-128;
         } else {
             /* On odd tile */
 
             out[0] = (((x + tw / 2) / tw)|0) - 1;
             out[1] = 2 * (((y + th / 2) / th)|0) - 1;
+
+            return dist;
         }
     };
 
     StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
-        this.worldToTilePos(x, y, xy);
+        /*(void)*/this.worldToTilePos(x, y, xy);
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
@@ -281,6 +295,15 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         return undefined;
     };
 
+    /** Takes a screen position and tells you what tile it lies on. Take
+     * care with the return value, the function signature is all backwards.
+     * @param {Number} x A screen x position
+     * @param {Number} y A screen y position
+     * @param {Array} out A 2-length array that will recieve the tile x/y
+     * position in its 0/1 values.
+     * @return {Number} The distance from the given screen position to the
+     * closest tile edge, capped at 127px.
+     */
     StaggeredIsometric.prototype.screenToTilePos = function(x, y, out) {
         this.worldToTilePos(x+this.xoffset, y+this.yoffset, out);
     };

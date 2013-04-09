@@ -367,12 +367,30 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             _this.map.screenToWorldPos(_this.mouse.x, _this.mouse.y, out);
         };
 
+        /** Takes a world position and tells you what tile it lies on. Take
+         * care with the return value, the function signature is all backwards.
+         * @param {Number} x A world x position
+         * @param {Number} y A world y position
+         * @param {Array} out A 2-length array that will recieve the tile x/y
+         * position in its 0/1 values.
+         * @return {Number} The distance from the given world position to the
+         * closest tile edge, capped at 127px.
+         */
         this.worldToTilePos = function(x, y, out) {
-            this.map.worldToTilePos(x,y, out);
+            return this.map.worldToTilePos(x,y, out);
         };
 
+        /** Takes a screen position and tells you what tile it lies on. Take
+         * care with the return value, the function signature is all backwards.
+         * @param {Number} x A screen x position
+         * @param {Number} y A screen y position
+         * @param {Array} out A 2-length array that will recieve the tile x/y
+         * position in its 0/1 values.
+         * @return {Number} The distance from the given screen position to the
+         * closest tile edge, capped at 127px.
+         */
         this.screenToTilePos = function(x, y, out) {
-            this.map.screenToTilePos(x,y, out);
+            return this.map.screenToTilePos(x,y, out);
         };
 
         this.screenToWorldPos = function(x, y, out) {

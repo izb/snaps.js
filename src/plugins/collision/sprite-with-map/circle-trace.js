@@ -20,6 +20,8 @@ function(traceProp, midPtEllipse, localScan) {
             throw "Circle trace requires a radius >0 in its options.";
         }
 
+        this.radius = opts.radius;
+
         this.edges = sn.getWorldEdges();
 
         /* We call this a circle trace, but we use a half-height ellipse
@@ -50,6 +52,19 @@ function(traceProp, midPtEllipse, localScan) {
     CircleTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 
         var sxo, syo, i;
+
+        /* TODO: I don't actually think there's any reason to overload this function
+         * so much. Perhaps duplicate and tweak it? */
+        var safeDist = this.worldToTilePos = function(x, y, this.xy);
+        var xdx = Math.abs(dx)+this.radius;
+        var xdy = Math.abs(dy/2)+this.radius;
+        if (xdx*xdx+xdy*xdy<=safeDist*safeDist) {
+            /* Trivial non-collision case */
+            /* TODO: There may be an issue if height is involved. */
+            out[0] = x0+dx;
+            out[1] = y0+dy;
+            return false;
+        }
 
         if (this.autoSlip) {
             /* First, distance ourself from key jagged shapes in key directions,

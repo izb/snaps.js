@@ -14,6 +14,7 @@ function(traceProp, localScan) {
         opts = opts || {};
         this.sn = sn;
         this.edges = sn.getWorldEdges();
+        this.xy = [0,0];
 
         if (opts.autoSlip===undefined) {
             this.autoSlip = true;
@@ -33,6 +34,18 @@ function(traceProp, localScan) {
      * @return {Boolean} True if there was a collision.
      */
     LineTrace.prototype.test = function(x0, y0, dx, dy, h, out){
+
+        /* TODO: I don't actually think there's any reason to overload this function
+         * so much. Perhaps duplicate and tweak it? */
+        var safeDist = this.worldToTilePos = function(x, y, this.xy);
+        if (dx*dx+dy*dy<=safeDist*safeDist) {
+            /* Trivial non-collision case */
+            /* TODO: There may be an issue if height is involved. */
+            out[0] = x0+dx;
+            out[1] = y0+dy;
+            return false;
+        }
+
 
         if (this.autoSlip) {
             /* First, distance ourself from key jagged shapes in key directions,
