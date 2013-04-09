@@ -37,7 +37,7 @@ function(traceProp, localScan) {
 
         /* TODO: I don't actually think there's any reason to overload this function
          * so much. Perhaps duplicate and tweak it? */
-        var safeDist = this.worldToTilePos = function(x, y, this.xy);
+        var safeDist = sn.worldToTilePos(x0, y0, this.xy);
         if (dx*dx+dy*dy<=safeDist*safeDist) {
             /* Trivial non-collision case */
             /* TODO: There may be an issue if height is involved. */

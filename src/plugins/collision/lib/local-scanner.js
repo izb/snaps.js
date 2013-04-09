@@ -3,7 +3,7 @@ define(function() {
 
     'use strict';
 
-    var ySlip = function(sn, x0, y0, h, dx, dy) {
+    var ySlip = function(sn, x, y, h, dx, dy) {
         var localmask;
         var r = dx/dy;
 

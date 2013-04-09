@@ -34,6 +34,10 @@ function(traceProp, midPtEllipse, localScan) {
         if (opts.autoSlip===undefined) {
             this.autoSlip = true;
             /* TODO: This should default to true ONLY for isometric maps. */
+            /* TODO: Note in manual that autoslip is only useful for main player characters
+             * that walk parallel to walls and that switching it off may improve performance
+             * in certain circumstances. */
+            /* TODO: Perhaps we should switch it off my default? */
         } else {
             this.autoSlip = opts.autoSlip;
         }
@@ -55,7 +59,7 @@ function(traceProp, midPtEllipse, localScan) {
 
         /* TODO: I don't actually think there's any reason to overload this function
          * so much. Perhaps duplicate and tweak it? */
-        var safeDist = this.worldToTilePos = function(x, y, this.xy);
+        var safeDist = sn.worldToTilePos(x0, y0, this.lineHit);
         var xdx = Math.abs(dx)+this.radius;
         var xdy = Math.abs(dy/2)+this.radius;
         if (xdx*xdx+xdy*xdy<=safeDist*safeDist) {

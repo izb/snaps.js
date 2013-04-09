@@ -1354,6 +1354,15 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         };
     };
 
+    /** Takes a world position and tells you what tile it lies on. Take
+     * care with the return value, the function signature is all backwards.
+     * @param {Number} x A world x position
+     * @param {Number} y A world y position
+     * @param {Array} out A 2-length array that will recieve the tile x/y
+     * position in its 0/1 values.
+     * @return {Number} The distance from the given world position to the
+     * closest tile edge, capped at 127px.
+     */
     StaggeredIsometric.prototype.worldToTilePos = function(x, y, out) {
         // http://gamedev.stackexchange.com/a/48507/3188
 
@@ -1368,22 +1377,27 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         var eventilex = Math.floor(x%tw);
         var eventiley = Math.floor(y%th);
 
-        if (this.hitTest[eventilex + eventiley * tw] >= 128) {
+        var dist = this.hitTest[eventilex + eventiley * tw];
+
+        if (dist >= 128) {
             /* On even tile */
 
             out[0] = (((x + tw) / tw)|0) - 1;
             out[1] = 2 * ((((y + th) / th)|0) - 1);
 
+            return dist-128;
         } else {
             /* On odd tile */
 
             out[0] = (((x + tw / 2) / tw)|0) - 1;
             out[1] = 2 * (((y + th / 2) / th)|0) - 1;
+
+            return dist;
         }
     };
 
     StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
-        this.worldToTilePos(x, y, xy);
+        /*(void)*/this.worldToTilePos(x, y, xy);
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
@@ -1403,6 +1417,15 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         return undefined;
     };
 
+    /** Takes a screen position and tells you what tile it lies on. Take
+     * care with the return value, the function signature is all backwards.
+     * @param {Number} x A screen x position
+     * @param {Number} y A screen y position
+     * @param {Array} out A 2-length array that will recieve the tile x/y
+     * position in its 0/1 values.
+     * @return {Number} The distance from the given screen position to the
+     * closest tile edge, capped at 127px.
+     */
     StaggeredIsometric.prototype.screenToTilePos = function(x, y, out) {
         this.worldToTilePos(x+this.xoffset, y+this.yoffset, out);
     };
@@ -1812,6 +1835,9 @@ define('plugins/sprite/track',[],function() {
     var sn;
 
     /*
+     * The track plugin will call a callback function only whenever a
+     * sprite's position changes.
+     *
      * Example options:
      *
      * updates:[{
@@ -2509,51 +2535,44 @@ define('plugins/collision/lib/local-scanner',[],function() {
 
     
 
-    /** Returns a bitmask representing the local pixels around a point, and how
-     * solid they are.
-     *
-     * +-----------------+
-     * |  1  |  2  |  4  |
-     * +-----------------+
-     * |  8  |  Pt |  16 |
-     * +-----------------+
-     * |  32 |  64 | 128 |
-     * +-----------------+
-     *
-     * Where Pt is the sampled point
-     */
-    var localScan = function(sn, x, y, prop,limit){
-
-        var scanmask = sn.getTilePropAtWorldPos(prop,x+1,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y+1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x+1,y-1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x,y-1)>limit;
-        scanmask = scanmask<<1|sn.getTilePropAtWorldPos(prop,x-1,y-1)>limit;
-
-        return scanmask;
-    };
-
-    var ySlip = function(sn, x0, y0, h, dx, dy) {
+    var ySlip = function(sn, x, y, h, dx, dy) {
         var localmask;
         var r = dx/dy;
 
         if (r>=2&&r<=3) {
+
             /* nw/se */
-            localmask = localScan(sn, x0, y0, 'height',h);
-            if (localmask===23) {
+
+            if (sn.getTilePropAtWorldPos('height',x+1,y-1)>h &&    //  .##
+                    sn.getTilePropAtWorldPos('height',x,y-1)>h &&  //  .o#
+                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  ...
+
+                /* Technically we should test that our shifted y position is not solid,
+                 * but really if you are using collision maps that look like that then
+                 * you're asking for trouble. */
                 return 1;
-            } else if (localmask===232) {
+
+            } else if(sn.getTilePropAtWorldPos('height',x-1,y+1)>h &&  //  ...
+                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropAtWorldPos('height',x,y+1)>h) {      //  ##.
+
                 return -1;
             }
+
         } else if (r<=-2&&r>=-3) {
+
             /* sw/ne */
-            localmask = localScan(sn, x0, y0, 'height',h);
-            if (localmask===240) {
+
+            if (sn.getTilePropAtWorldPos('height',x+1,y+1)>h &&    //  ...
+                    sn.getTilePropAtWorldPos('height',x,y+1)>h &&  //  .o#
+                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  .##
+
                 return -1;
-            } else if (localmask===15) {
+
+            } else if(sn.getTilePropAtWorldPos('height',x-1,y-1)>h &&  //  ##.
+                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropAtWorldPos('height',x,y-1)>h) {      //  ...
+
                 return 1;
             }
         }
@@ -2562,7 +2581,6 @@ define('plugins/collision/lib/local-scanner',[],function() {
     };
 
     return {
-        localScan:localScan,
         ySlip:ySlip
     };
 });
@@ -2583,6 +2601,7 @@ function(traceProp, localScan) {
         opts = opts || {};
         this.sn = sn;
         this.edges = sn.getWorldEdges();
+        this.xy = [0,0];
 
         if (opts.autoSlip===undefined) {
             this.autoSlip = true;
@@ -2602,6 +2621,18 @@ function(traceProp, localScan) {
      * @return {Boolean} True if there was a collision.
      */
     LineTrace.prototype.test = function(x0, y0, dx, dy, h, out){
+
+        /* TODO: I don't actually think there's any reason to overload this function
+         * so much. Perhaps duplicate and tweak it? */
+        var safeDist = sn.worldToTilePos(x0, y0, this.xy);
+        if (dx*dx+dy*dy<=safeDist*safeDist) {
+            /* Trivial non-collision case */
+            /* TODO: There may be an issue if height is involved. */
+            out[0] = x0+dx;
+            out[1] = y0+dy;
+            return false;
+        }
+
 
         if (this.autoSlip) {
             /* First, distance ourself from key jagged shapes in key directions,
@@ -2710,6 +2741,8 @@ function(traceProp, midPtEllipse, localScan) {
             throw "Circle trace requires a radius >0 in its options.";
         }
 
+        this.radius = opts.radius;
+
         this.edges = sn.getWorldEdges();
 
         /* We call this a circle trace, but we use a half-height ellipse
@@ -2722,6 +2755,10 @@ function(traceProp, midPtEllipse, localScan) {
         if (opts.autoSlip===undefined) {
             this.autoSlip = true;
             /* TODO: This should default to true ONLY for isometric maps. */
+            /* TODO: Note in manual that autoslip is only useful for main player characters
+             * that walk parallel to walls and that switching it off may improve performance
+             * in certain circumstances. */
+            /* TODO: Perhaps we should switch it off my default? */
         } else {
             this.autoSlip = opts.autoSlip;
         }
@@ -2740,6 +2777,19 @@ function(traceProp, midPtEllipse, localScan) {
     CircleTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 
         var sxo, syo, i;
+
+        /* TODO: I don't actually think there's any reason to overload this function
+         * so much. Perhaps duplicate and tweak it? */
+        var safeDist = sn.worldToTilePos(x0, y0, this.lineHit);
+        var xdx = Math.abs(dx)+this.radius;
+        var xdy = Math.abs(dy/2)+this.radius;
+        if (xdx*xdx+xdy*xdy<=safeDist*safeDist) {
+            /* Trivial non-collision case */
+            /* TODO: There may be an issue if height is involved. */
+            out[0] = x0+dx;
+            out[1] = y0+dy;
+            return false;
+        }
 
         if (this.autoSlip) {
             /* First, distance ourself from key jagged shapes in key directions,
@@ -3819,12 +3869,30 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             _this.map.screenToWorldPos(_this.mouse.x, _this.mouse.y, out);
         };
 
+        /** Takes a world position and tells you what tile it lies on. Take
+         * care with the return value, the function signature is all backwards.
+         * @param {Number} x A world x position
+         * @param {Number} y A world y position
+         * @param {Array} out A 2-length array that will recieve the tile x/y
+         * position in its 0/1 values.
+         * @return {Number} The distance from the given world position to the
+         * closest tile edge, capped at 127px.
+         */
         this.worldToTilePos = function(x, y, out) {
-            this.map.worldToTilePos(x,y, out);
+            return this.map.worldToTilePos(x,y, out);
         };
 
+        /** Takes a screen position and tells you what tile it lies on. Take
+         * care with the return value, the function signature is all backwards.
+         * @param {Number} x A screen x position
+         * @param {Number} y A screen y position
+         * @param {Array} out A 2-length array that will recieve the tile x/y
+         * position in its 0/1 values.
+         * @return {Number} The distance from the given screen position to the
+         * closest tile edge, capped at 127px.
+         */
         this.screenToTilePos = function(x, y, out) {
-            this.map.screenToTilePos(x,y, out);
+            return this.map.screenToTilePos(x,y, out);
         };
 
         this.screenToWorldPos = function(x, y, out) {

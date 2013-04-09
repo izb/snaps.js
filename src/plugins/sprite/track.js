@@ -6,6 +6,9 @@ define(function() {
     var sn;
 
     /*
+     * The track plugin will call a callback function only whenever a
+     * sprite's position changes.
+     *
      * Example options:
      *
      * updates:[{
