@@ -1171,6 +1171,11 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
             if (name==='hit') {
                 _this.hitTest = Bitmap.imageToRData(image);
+                /* TODO: It should be noted in documentation that the hit test image
+                 * should under no circumstances be re-saved with a colour profile attached. */
+
+                /* TODO: A unit test to ensure the integrity of the hitmap image data
+                 * would be helpful. */
             } else {
                 /* TODO: Figure out what to do with custom hit test images */
             }
@@ -1363,7 +1368,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         var eventilex = Math.floor(x%tw);
         var eventiley = Math.floor(y%th);
 
-        if (this.hitTest[eventilex + eventiley * tw] !== 255) {
+        if (this.hitTest[eventilex + eventiley * tw] >= 128) {
             /* On even tile */
 
             out[0] = (((x + tw) / tw)|0) - 1;

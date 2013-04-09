@@ -1,0 +1,126 @@
+<!doctype html>
+
+<img id="tile" src="tile.png"></img>
+<br />
+<canvas id="c2" width="192" height="96"></canvas>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+/* TODO: Package this up nicer. */
+/* TODO: Ideally this should be made vastly more efficient and then generated when the
+ * engine starts. This is of particular concern since the generated image is
+ * sensitive to having colour profiles accidentally in photoshop. */
+
+$(function() {
+    var w = $('#tile').width();
+    var h = $('#tile').height();
+
+    var c=document.getElementById("c2");
+    var ctx=c.getContext("2d");
+    ctx.drawImage(img,0,0);
+
+    var imgData=ctx.getImageData(0,0,w,h);
+    var buf = imgData.data;
+
+    var newbuf = new Array(w*h);
+
+    var isedge = function(x,y) {
+        var o = 4*(y*w+x);
+        var pt = buf[o];
+        var up=y===0?0:-1,
+            down=y===h-1?0:1,
+            left=x===0?0:-1,
+            right=x===w-1?0:1;
+        if ((x===0&&pt!==buf[0])||(y===0&&pt!==buf[0])||(x===w-1&&pt!==buf[0])||(y===h-1&&pt!==buf[0])) {
+            return true;
+        }
+        if (buf[4*((y+up)*w+x)]!==pt||buf[4*((y+down)*w+x)]!==pt||buf[4*(y*w+(x+left))]!==pt||buf[4*(y*w+(x+right))]!==pt) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    var distToEdgeNaive = function(x,y) {
+        var o = 4*(y*w+x);
+        var pt = buf[o];
+
+        var dist = 1000;
+
+        for (var i = x; i < w; i++) {
+            if (isedge(i,y)) {
+                dist = Math.min(i-x, dist);
+            }
+        }
+
+        for (var i = x; i >=0; i--) {
+            if (isedge(i,y)) {
+                dist = Math.min(x-i, dist);
+            }
+        }
+
+        for (var i = y; i < h; i++) {
+            if (isedge(x,i)) {
+                dist = Math.min(i-y, dist);
+            }
+        }
+
+        for (var i = y; i >=0; i--) {
+            if (isedge(x,i)) {
+                dist = Math.min(y-i, dist);
+            }
+        }
+
+        return dist;
+    };
+
+    var distToEdge = function(sx,sy) {
+
+        if (isedge(sx,sy)) {
+            return 0;
+        }
+
+        var o = 4*(sy*w+sx);
+        var pt = buf[o];
+
+        var dist2 = 1000000;
+
+        for(var y = 0; y < h; y++) {
+            for(var x = 0; x < w; x++) {
+                if (isedge(x,y)) {
+                    /* closest edge? */
+                    var dx = x-sx;
+                    var dy = y-sy;
+                    var d = ((dx*dx)+(dy*dy));
+                    if (d<dist2) {
+                        dist2 = d;
+                    }
+                }
+            }
+        }
+
+        return Math.max(1,Math.sqrt(dist2)|0);
+    };
+
+    for(var y = 0; y < h; y++) {
+        for(var x = 0; x < w; x++) {
+            var o = 4*(y*w+x);
+            var pt = buf[o];
+            var shift = pt===0?128:0;
+            newbuf[o/4]=shift+distToEdge(x,y);
+        }
+    }
+
+    for (var i = 0; i < buf.length; i+=4) {
+        buf[i] = newbuf[i/4]; // R <128 range in >=128 range+128 out.
+        buf[i+1] = 0; // G null
+        buf[i+2] = 0; // B nul
+        //buf[o+3]; // A untouched
+    }
+
+    ctx.putImageData(imgData,0,0);
+});
+
+
+</script>
