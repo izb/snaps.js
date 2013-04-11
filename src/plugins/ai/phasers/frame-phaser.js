@@ -67,7 +67,7 @@ define(function() {
             }
         }
 
-        if (desiredMax/max<0.8) { /* Only if the buckets get noticeably unbalanced do we re-sort them */
+        if (desiredMax>1 && desiredMax/max<0.8) { /* Only if the buckets get noticeably unbalanced do we re-sort them */
 
             var bucketIdx = 0;
             for (i = clearing.length - 1; i >= 0; i--) {

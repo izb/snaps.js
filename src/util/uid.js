@@ -8,7 +8,7 @@ define(function() {
     /** Return a unique string for identifier purposes.
      */
     return function() {
-        return 'id'+(next++);
+        return next++;
     };
 
 });
