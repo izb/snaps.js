@@ -57,6 +57,13 @@ define(function() {
         this.updates = opts.updates;
         this.id = opts.id;
 
+        if (typeof(this.id)==='number') {
+            this.nuid = this.id;
+            this.id = 'id'+this.id;
+        } else {
+            this.nuid = sn.util.uid();
+        }
+
         this.endCallback = opts.endCallback;
         this.collider = opts.collider;
         this.autoRemove = opts.autoRemove;
@@ -148,7 +155,6 @@ define(function() {
     };
 
     Sprite.prototype.update = function(now) {
-
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];

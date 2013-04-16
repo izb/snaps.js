@@ -8,7 +8,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     var xy = [0,0]; // work area
 
-    function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight) {
+    function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight, stats) {
         this.data = tileData;
         this.hitTests = hitTests;
         this.maxXOverdraw = 0;
@@ -25,6 +25,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         /* Start in SW-corner by default */
         this.xoffset = this.minxoffset;
         this.yoffset = this.maxyoffset;
+
+        this.stats = stats;
     }
 
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
@@ -329,6 +331,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
 
     StaggeredIsometric.prototype.updateLayers = function(now) {
+        var epoch = +new Date();
         var map = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
@@ -336,6 +339,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 l.update(now);
             }
         }
+        this.stats.count('updateLayers', (+new Date())-epoch);
     };
 
     StaggeredIsometric.prototype.groundLayer = function() {
@@ -368,6 +372,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
         var map = this.data;
 
+        var epoch;
+
         var xstep = map.tilewidth;
         var ystep = map.tileheight / 2;
 
@@ -377,15 +383,21 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
         var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
-        /* Sort sprites first by height, then by y-axis */
-        /* TODO: Cull off-screen sprites first. */
+        epoch = +new Date();
+        /* Sort sprites first by y-axis, then by height, then creation order */
+        /* TODO: Cull off-screen sprites first? */
         sprites.sort(function(a, b) {
             var n = a.y - b.y;
-            return n!==0?n:a.h - b.h;
+            if (n!==0) {
+                return n;
+            }
+            n = a.h - b.h;
+            return n!==0?n:a.nuid - b.nuid;
         });
+        this.stats.count('spriteSort', (+new Date())-epoch);
 
+        epoch = +new Date();
         var spriteCursor = 0;
-
         var stagger = 0;
         var x, y, r, l, i, layerEndY, layerEndX;
         var top = map.layers.length-1;
@@ -425,6 +437,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 }
             }
         }
+        this.stats.count('paintWorld', (+new Date())-epoch);
     };
 
     return StaggeredIsometric;

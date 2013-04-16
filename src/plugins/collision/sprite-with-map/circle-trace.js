@@ -51,23 +51,26 @@ function(traceProp, midPtEllipse, localScan) {
      * character can go along its path at which it will be touching a solid
      * object. If there is no collision, the output position will be the
      * desired new position.
-     * @return {Boolean} True if there was a collision.
+     * @return {Number} A number from 0-1 representing how far along the route
+     * the trace managed to get.
      */
     CircleTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 
         var sxo, syo, i;
 
+        /* TODO: Some evidence seems to show that the code actually runs slightly slower with
+         * this code in place. Investigate this. */
         /* TODO: I don't actually think there's any reason to overload this function
          * so much. Perhaps duplicate and tweak it? */
         var safeDist = sn.worldToTilePos(x0, y0, this.lineHit);
         var xdx = Math.abs(dx)+this.radius;
-        var xdy = Math.abs(dy/2)+this.radius;
+        var xdy = Math.abs(dy/2)+this.radius/2;
         if (xdx*xdx+xdy*xdy<=safeDist*safeDist) {
             /* Trivial non-collision case */
             /* TODO: There may be an issue if height is involved. */
             out[0] = x0+dx;
             out[1] = y0+dy;
-            return false;
+            return 1;
         }
 
         if (this.autoSlip) {

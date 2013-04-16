@@ -34,6 +34,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var Preloader = util.Preloader;
     var MinHeap   = util.MinHeap;
     var uid       = util.uid;
+    var Stats     = util.Stats;
 
     function Snaps(game, canvasID, settings) {
 
@@ -46,6 +47,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.util = util;
         this.tweens = tweens;
         this.MinHeap = MinHeap;
+        this.Stats = Stats;
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
         this.PathFinder = PathFinder.bind(PathFinder, this);
 
@@ -63,6 +65,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.layerPlugins = {};
         this.cameraPlugins = {};
         this.phaserPlugins = {};
+
+        this.stats = new Stats();
 
         this.timers = {};
         this.cameras = {};
@@ -92,7 +96,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             /* Obviously we're assuming it's always a staggered isometric map.
              * We don't yet support anything else. */
-            this.map = new StaggeredIsometric(game.map, game.hitTests, this.clientWidth, this.clientHeight);
+            this.map = new StaggeredIsometric(game.map, game.hitTests, this.clientWidth, this.clientHeight, this.stats);
         }
 
         var draw = _this.game.draw;
@@ -190,18 +194,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.updatePhasers = function() {
+            var epoch = +new Date();
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
                 _this.phasers[i].rebalance(_this.now);
             }
+            this.stats.count('updatePhasers', (+new Date())-epoch);
         };
 
         this.updateFX = function() {
+            var epoch = +new Date();
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
                 if (!fx.update(_this.now)) {
                     _this.activeFX.splice(i, 1);
                 }
             }
+            this.stats.count('updateFX', (+new Date())-epoch);
         };
 
         this.fx = function(name, opts) {
@@ -290,6 +298,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             drawDebug();
 
             _this.lastFrameTime = _this.now;
+
+            //console.log(_this.stats.averages);
         }
 
         preloader.load(
@@ -509,7 +519,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.createComposite = function(x,y,id,endCallback) {
 
             if (id===undefined) {
-                id = uid();
+                id = 'id'+uid();
             } else {
                 if(_this.spriteMap.hasOwnProperty(id)) {
                     throw "Warning: duplicate sprite (composite) id " + id;
@@ -569,6 +579,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.updateSprites = function() {
+            var epoch = +new Date();
             var keepsprites = [];
             for (var i = 0; i < _this.sprites.length; i++) {
                 var s = _this.sprites[i];
@@ -581,6 +592,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
             _this.sprites = keepsprites;
+            this.stats.count('updateSprites', (+new Date())-epoch);
         };
 
         this.getNow = function() {
@@ -592,7 +604,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 throw "Can't create phaser for unregistered type: " + name;
             }
 
-            var phaser = new _this.phaserPlugins[name].fn(uid(), opts);
+            var phaser = new _this.phaserPlugins[name].fn('id'+uid(), opts);
             _this.phasers.push(phaser);
             return phaser;
         };
