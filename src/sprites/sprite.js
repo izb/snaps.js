@@ -67,6 +67,11 @@ define(function() {
         this.collisionPoint = [0,0];
 
         this.quantizedHeight = !!opts.quantizedHeight;
+
+        this.directionNormalized = false;
+
+        this.vectorx = 0;
+        this.vectory = 1;
     }
 
     Sprite.prototype.init = function() {
@@ -204,8 +209,7 @@ define(function() {
             this.y=this.y+dy;
         }
 
-        this.directionx = this.x + dx;
-        this.directiony = this.y + dy;
+        this.setDirection(this.x + dx, this.y + dy);
 
         if (dh!==undefined) {
             if (collide && collisionRatio<1 && !this.quantizedHeight) {
@@ -256,6 +260,24 @@ define(function() {
     Sprite.prototype.setDirection = function(tox, toy) {
         this.directionx = tox;
         this.directiony = toy;
+        this.directionNormalized = false;
+    };
+
+    /** Calculates the normalized vector of the sprite's direction.
+     * @param {Number} out An 2-length array that will recieve the xy values of
+     * the vector in that order.
+     */
+    Sprite.prototype.vector = function(out) {
+        if (!this.directionNormalized) {
+            this.directionNormalized = true;
+            var dx = this.directionx - this.x;
+            var dy = this.directiony - this.y;
+            var mag = Math.sqrt((dx*dx)+(dy*dy));
+            this.vectorx = dx/mag;
+            this.vectory = dy/mag;
+        }
+        out[0] = this.vectorx;
+        out[1] = this.vectory;
     };
 
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
