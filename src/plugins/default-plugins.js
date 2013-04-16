@@ -5,6 +5,7 @@ define([
     'plugins/sprite/animate',
     'plugins/sprite/8way',
     'plugins/sprite/track',
+    'plugins/sprite/flock',
 
     'plugins/layer/ui-layer',
     'plugins/layer/demo-trace', /* TODO: Delete and remove */
