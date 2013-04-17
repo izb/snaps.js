@@ -79,6 +79,13 @@ define(function() {
 
         this.vectorx = 0;
         this.vectory = 1;
+
+        this.directionx = x;
+        this.directiony = y+1;
+
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself. */
+        this.velocityx = 0;
+        this.velocityy = 0;
     }
 
     Sprite.prototype.init = function() {
@@ -278,12 +285,30 @@ define(function() {
             this.directionNormalized = true;
             var dx = this.directionx - this.x;
             var dy = this.directiony - this.y;
-            var mag = Math.sqrt((dx*dx)+(dy*dy));
-            this.vectorx = dx/mag;
-            this.vectory = dy/mag;
+            if (dx===0&&dy===0) {
+                this.vectorx = 1;
+                this.vectory = 0;
+            } else {
+                var mag = Math.sqrt((dx*dx)+(dy*dy));
+                this.vectorx = dx/mag;
+                this.vectory = dy/mag;
+            }
         }
         out[0] = this.vectorx;
         out[1] = this.vectory;
+    };
+
+    Sprite.prototype.vectorTo = function(x, y, out) {
+        var dx = x - this.x;
+        var dy = y - this.y;
+        if (dx===0&&dy===0) {
+            out[0] = 1;
+            out[1] = 0;
+        } else {
+            var mag = Math.sqrt((dx*dx)+(dy*dy));
+            out[0] = dx/mag;
+            out[1] = dy/mag;
+        }
     };
 
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {

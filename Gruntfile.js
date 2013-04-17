@@ -84,4 +84,6 @@ module.exports = function(grunt) {
     grunt.registerTask('production', ['jshint:production','requirejs:snaps','copy:dist','closurecompiler:dist']);
     grunt.registerTask('default', ['production']);
     grunt.registerTask('test', ['mocha:all']);
+
+    grunt.registerTask('start', ['clean', 'dev', 'watch']);
 };

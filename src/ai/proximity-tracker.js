@@ -171,7 +171,7 @@ define(function() {
 
         if (sort===true) {
             found.sort(function(a, b) {
-                return b.tmpDist2 - a.tmpDist2;
+                return a.tmpDist2 - b.tmpDist2;
             });
         }
 
