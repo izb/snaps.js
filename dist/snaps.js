@@ -125,6 +125,13 @@ define('sprites/sprite',[],function() {
         this.updates = opts.updates;
         this.id = opts.id;
 
+        if (typeof(this.id)==='number') {
+            this.nuid = this.id;
+            this.id = 'id'+this.id;
+        } else {
+            this.nuid = sn.util.uid();
+        }
+
         this.endCallback = opts.endCallback;
         this.collider = opts.collider;
         this.autoRemove = opts.autoRemove;
@@ -135,6 +142,18 @@ define('sprites/sprite',[],function() {
         this.collisionPoint = [0,0];
 
         this.quantizedHeight = !!opts.quantizedHeight;
+
+        this.directionNormalized = false;
+
+        this.vectorx = 0;
+        this.vectory = 1;
+
+        this.directionx = x;
+        this.directiony = y+1;
+
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself. */
+        this.velocityx = 0;
+        this.velocityy = 0;
     }
 
     Sprite.prototype.init = function() {
@@ -211,7 +230,6 @@ define('sprites/sprite',[],function() {
     };
 
     Sprite.prototype.update = function(now) {
-
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];
@@ -272,8 +290,7 @@ define('sprites/sprite',[],function() {
             this.y=this.y+dy;
         }
 
-        this.directionx = this.x + dx;
-        this.directiony = this.y + dy;
+        this.setDirection(this.x + dx, this.y + dy);
 
         if (dh!==undefined) {
             if (collide && collisionRatio<1 && !this.quantizedHeight) {
@@ -324,6 +341,42 @@ define('sprites/sprite',[],function() {
     Sprite.prototype.setDirection = function(tox, toy) {
         this.directionx = tox;
         this.directiony = toy;
+        this.directionNormalized = false;
+    };
+
+    /** Calculates the normalized vector of the sprite's direction.
+     * @param {Number} out An 2-length array that will recieve the xy values of
+     * the vector in that order.
+     */
+    Sprite.prototype.vector = function(out) {
+        if (!this.directionNormalized) {
+            this.directionNormalized = true;
+            var dx = this.directionx - this.x;
+            var dy = this.directiony - this.y;
+            if (dx===0&&dy===0) {
+                this.vectorx = 0;
+                this.vectory = 0;
+            } else {
+                var mag = Math.sqrt((dx*dx)+(dy*dy));
+                this.vectorx = dx/mag;
+                this.vectory = dy/mag;
+            }
+        }
+        out[0] = this.vectorx;
+        out[1] = this.vectory;
+    };
+
+    Sprite.prototype.vectorTo = function(x, y, out) {
+        var dx = x - this.x;
+        var dy = y - this.y;
+        if (dx===0&&dy===0) {
+            out[0] = 0;
+            out[1] = 0;
+        } else {
+            var mag = Math.sqrt((dx*dx)+(dy*dy));
+            out[0] = dx/mag;
+            out[1] = dy/mag;
+        }
     };
 
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
@@ -1019,6 +1072,41 @@ define('util/minheap',[],function() {
 });
 
 /*global define*/
+define('util/stats',[],function() {
+
+    
+
+    function Stats() {
+        this.samples = {};
+        this.totals = {};
+        this.averages = {};
+    }
+
+    Stats.prototype.count = function(name, val) {
+        var s, t;
+        if (!this.samples.hasOwnProperty(name)) {
+            s = [];
+            t=0;
+            this.samples[name] = s;
+        } else {
+            t = this.totals[name];
+            s = this.samples[name];
+        }
+        s.push(val);
+        t+=val;
+        if (s.length>10) {
+            t -= s[0];
+            s.splice(0,1);
+        }
+        this.totals[name]=t;
+        this.averages[name]=t/s.length;
+    };
+
+
+    return Stats;
+});
+
+/*global define*/
 define('util/uid',[],function() {
 
     
@@ -1028,7 +1116,7 @@ define('util/uid',[],function() {
     /** Return a unique string for identifier purposes.
      */
     return function() {
-        return 'id'+(next++);
+        return next++;
     };
 
 });
@@ -1056,9 +1144,10 @@ define('util/all',[
     'util/debug',
     'util/js',
     'util/minheap',
+    'util/stats',
     'util/uid',
     'util/url'],
-function(Preloader, rnd, Bitmap, debug, js, MinHeap, uid, Url) {
+function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 
     
 
@@ -1067,6 +1156,7 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, uid, Url) {
         rnd: rnd,
         js: js,
         MinHeap: MinHeap,
+        Stats: Stats,
         uid: uid,
         debug: debug,
         Bitmap: Bitmap,
@@ -1130,7 +1220,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
     var xy = [0,0]; // work area
 
-    function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight) {
+    function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight, stats) {
         this.data = tileData;
         this.hitTests = hitTests;
         this.maxXOverdraw = 0;
@@ -1147,6 +1237,8 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         /* Start in SW-corner by default */
         this.xoffset = this.minxoffset;
         this.yoffset = this.maxyoffset;
+
+        this.stats = stats;
     }
 
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
@@ -1451,6 +1543,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
 
     StaggeredIsometric.prototype.updateLayers = function(now) {
+        var epoch = +new Date();
         var map = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
@@ -1458,6 +1551,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                 l.update(now);
             }
         }
+        this.stats.count('updateLayers', (+new Date())-epoch);
     };
 
     StaggeredIsometric.prototype.groundLayer = function() {
@@ -1490,6 +1584,8 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
         var map = this.data;
 
+        var epoch;
+
         var xstep = map.tilewidth;
         var ystep = map.tileheight / 2;
 
@@ -1499,15 +1595,21 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
         var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
-        /* Sort sprites first by height, then by y-axis */
-        /* TODO: Cull off-screen sprites first. */
+        epoch = +new Date();
+        /* Sort sprites first by y-axis, then by height, then creation order */
+        /* TODO: Cull off-screen sprites first? */
         sprites.sort(function(a, b) {
             var n = a.y - b.y;
-            return n!==0?n:a.h - b.h;
+            if (n!==0) {
+                return n;
+            }
+            n = a.h - b.h;
+            return n!==0?n:a.nuid - b.nuid;
         });
+        this.stats.count('spriteSort', (+new Date())-epoch);
 
+        epoch = +new Date();
         var spriteCursor = 0;
-
         var stagger = 0;
         var x, y, r, l, i, layerEndY, layerEndX;
         var top = map.layers.length-1;
@@ -1547,6 +1649,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                 }
             }
         }
+        this.stats.count('paintWorld', (+new Date())-epoch);
     };
 
     return StaggeredIsometric;
@@ -1897,6 +2000,256 @@ define('plugins/sprite/track',[],function() {
     return function(snaps) {
         sn = snaps;
         sn.registerSpriteUpdater('track', Track);
+    };
+
+});
+
+/*global define*/
+define('plugins/sprite/flock',[],function() {
+
+    
+
+    var sn;
+
+    /*
+     * The track plugin will call a callback function only whenever a
+     * sprite's position changes.
+     *
+     * Example options:
+     *
+     * var tracker = new _this.sn.ProximityTracker(100);
+     *
+     * updates:[{
+     *     name:'flock',
+     *     tracker: tracker,
+     *     flock_speed: 120,
+     *     flock_neighborhood: 50,
+     *     flock_separation: 20,
+     *     flock_neighbor_limit: 5,
+     *     flock_steering: function(s, out) {
+     *         out[0]=1;
+     *         out[1]=0;
+     *     }
+     * }]
+     *
+     * flock_speed is in pixels/second. Initial sprite orientation should be set on the
+     * sprite with setDirection.
+     *
+     * flock_neighborhood is in pixels and defines the radius that defines the influential
+     * flockmates. Larger is generally better but slower, dependant on the tracker.
+     *
+     * flock_neighbor_limit is the number of neighbors that will contribute to the influence.
+     * E.g. if set to 5, only the 5 closest flockmates will influence the sprite. Larger is
+     * better, but slower. Set to a very large number to include all flockmates in the
+     * neighborhood.
+     *
+     * flock_steering is a function that should provide a normalized vector determining the general
+     * direction for a particular sprite.
+     *
+     * Sprites that flock with the same tracker will belong to the same flock.
+     *
+     * This plugin supports phasers and will flock more efficiently, but with less
+     * accuracy with phased updates.
+     *
+     */
+
+    function Flock() {
+        this.xy=[0,0];
+        this.xy2=[0,0];
+    }
+
+    /** Called with the update options as the 'this' context, one of which
+     * is this.sprite, which refers to the sprite being updated.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
+     * @return true normally, or false to prevent any further
+     * plugins being called on this sprite for this frame.
+     */
+    Flock.prototype.update = function(now, phaseOn) {
+
+        var dt;
+        if (this.lastTime===undefined) {
+            dt = 16;
+        } else {
+            dt = now - this.lastTime;
+        }
+        this.lastTime = now;
+
+        var x = 0, y = 0, i, dx, dy, d2, n;
+        var s = this.sprite;
+
+        var neighbors = this.tracker.find(s.x, s.y, this.flock_neighborhood, true);
+
+        /* TODO: Maintain current direction.
+         *
+         * TODO: Should phasing alter weights?
+         */
+
+        var weightSeparation = 2;
+        var weightAlignment = 1;
+        var weightCohesion = 1.8;
+        var weightSteering = 0.5;
+        var weightInertia =1.5;
+        var hweightInertia =weightInertia/2;
+
+        /* steering */
+
+        this.flock_steering(s, this.xy);
+
+        this.xy[0] = this.xy[0] * weightSteering;
+        this.xy[1] = this.xy[1] * weightSteering;
+
+        /* cohesion: Find average location of neighbours for cohesion vector */
+
+        var count = Math.min(this.flock_neighbor_limit, neighbors.length);
+        if (count>0) {
+            for (i = count - 1; i >= 0; i--) {
+                n = neighbors[i];
+                x+=n.x;
+                y+=n.y;
+            }
+            x/=count;
+            y/=count;
+            s.vectorTo(x, y, this.xy2);
+            this.xy[0] = this.xy[0] + weightCohesion * this.xy2[0];
+            this.xy[1] = this.xy[1] + weightCohesion * this.xy2[1];
+        }
+
+        /* alignment: average vector of neighbours */
+
+        if (count>0) {
+            for (x = 0, y = 0, i = count - 1; i >= 0; i--) {
+                n = neighbors[i];
+                s.vector(this.xy2);
+                x+=this.xy2[0];
+                y+=this.xy2[1];
+            }
+            x/=count;
+            y/=count;
+            this.xy[0] = this.xy[0] + weightAlignment * x/count;
+            this.xy[1] = this.xy[1] + weightAlignment * y/count;
+        }
+
+        /* separation: Any flockmates that are too close should repel the sprite. */
+        count = 0;
+        for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
+            n = neighbors[i];
+            dx = s.x - n.x;
+            dy = s.y - n.y;
+            d2 = (dx*dx)+(dy+dy);
+            if (d2>this.flock_separation2) {
+                break;
+            }
+            count++;
+            x+=n.x; /* TODO: Normalize and weight by distance */
+            y+=n.y;
+        }
+
+        if (count>0) {
+            x/=count;
+            y/=count;
+            s.vectorTo(x, y, this.xy2);
+            this.xy[0] = this.xy[0] - weightSeparation*this.xy2[0];
+            this.xy[1] = this.xy[1] - weightSeparation*this.xy2[1];
+        }
+
+        /* update velocity */
+
+        s.velocityx = weightInertia  * s.velocityx + this.xy[0];
+        s.velocityy = hweightInertia * s.velocityy + this.xy[1];
+
+        var maxSpeed = this.flock_speed * dt/1000;
+        var mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
+        if (mag>(maxSpeed*maxSpeed)) {
+            mag = Math.sqrt(mag);
+            s.velocityx = maxSpeed * s.velocityx/mag;
+            s.velocityy = maxSpeed * s.velocityy/mag;
+        }
+
+        return true;
+    };
+
+    Flock.prototype.onSpriteRemoved = function() {
+    };
+
+    Flock.prototype.init = function(s) {
+        this.sprite = s;
+
+        /* Some sensible defaults */
+
+        if (this.flock_speed===undefined) {
+            this.flock_speed = 120;
+        }
+
+        if (this.flock_neighborhood===undefined) {
+            this.flock_neighborhood = 50;
+        }
+
+        if (this.flock_separation===undefined) {
+            this.flock_separation = Math.min(20, this.flock_neighborhood / 2);
+        }
+        this.flock_separation2 = this.flock_separation*this.flock_separation;
+
+        if (this.flock_neighbor_limit===undefined) {
+            this.flock_neighbor_limit = 5;
+        }
+    };
+
+    return function(snaps) {
+        sn = snaps;
+        sn.registerSpriteUpdater('flock', Flock);
+    };
+
+});
+
+/*global define*/
+define('plugins/sprite/apply-velocity',[],function() {
+
+    
+
+    var sn;
+
+    function ApplyVelocity() {
+
+    }
+
+    /*
+     * Example options:
+     *
+     * updates:[{
+     *     name:'applyvelocity'
+     * }]
+     *
+     */
+
+    /** Called with the sprite as the 'this' context.
+     * @param  {Number} now The time of the current frame
+     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * this will be true to hint that we do a full batch of work, or false
+     * to hint that we try to exit as trivially as possible. Ignored on this
+     * plugin.
+     * @return true normally, or false to prevent any further
+     * plugins being called on this sprite for this frame.
+     */
+    ApplyVelocity.prototype.update = function(now, phaseOn) {
+        var s = this.sprite;
+        s.move(s.velocityx, s.velocityy);
+        return true;
+    };
+
+    ApplyVelocity.prototype.init = function(sprite) {
+        this.sprite = sprite;
+    };
+
+    ApplyVelocity.prototype.onSpriteRemoved = function() {
+    };
+
+    return function(snaps) {
+        sn = snaps;
+        sn.registerSpriteUpdater('apply-velocity', ApplyVelocity);
     };
 
 });
@@ -2322,7 +2675,7 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
             }
         }
 
-        if (desiredMax/max<0.8) { /* Only if the buckets get noticeably unbalanced do we re-sort them */
+        if (desiredMax>1 && desiredMax/max<0.8) { /* Only if the buckets get noticeably unbalanced do we re-sort them */
 
             var bucketIdx = 0;
             for (i = clearing.length - 1; i >= 0; i--) {
@@ -2772,23 +3125,26 @@ function(traceProp, midPtEllipse, localScan) {
      * character can go along its path at which it will be touching a solid
      * object. If there is no collision, the output position will be the
      * desired new position.
-     * @return {Boolean} True if there was a collision.
+     * @return {Number} A number from 0-1 representing how far along the route
+     * the trace managed to get.
      */
     CircleTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 
         var sxo, syo, i;
 
+        /* TODO: Some evidence seems to show that the code actually runs slightly slower with
+         * this code in place. Investigate this. */
         /* TODO: I don't actually think there's any reason to overload this function
          * so much. Perhaps duplicate and tweak it? */
         var safeDist = sn.worldToTilePos(x0, y0, this.lineHit);
         var xdx = Math.abs(dx)+this.radius;
-        var xdy = Math.abs(dy/2)+this.radius;
+        var xdy = Math.abs(dy/2)+this.radius/2;
         if (xdx*xdx+xdy*xdy<=safeDist*safeDist) {
             /* Trivial non-collision case */
             /* TODO: There may be an issue if height is involved. */
             out[0] = x0+dx;
             out[1] = y0+dy;
-            return false;
+            return 1;
         }
 
         if (this.autoSlip) {
@@ -2879,6 +3235,8 @@ define('plugins/default-plugins',[
     'plugins/sprite/animate',
     'plugins/sprite/8way',
     'plugins/sprite/track',
+    'plugins/sprite/flock',
+    'plugins/sprite/apply-velocity',
 
     'plugins/layer/ui-layer',
     'plugins/layer/demo-trace', /* TODO: Delete and remove */
@@ -3232,7 +3590,7 @@ define('ai/proximity-tracker',[],function() {
 
         if (sort===true) {
             found.sort(function(a, b) {
-                return b.tmpDist2 - a.tmpDist2;
+                return a.tmpDist2 - b.tmpDist2;
             });
         }
 
@@ -3536,6 +3894,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var Preloader = util.Preloader;
     var MinHeap   = util.MinHeap;
     var uid       = util.uid;
+    var Stats     = util.Stats;
 
     function Snaps(game, canvasID, settings) {
 
@@ -3548,6 +3907,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.util = util;
         this.tweens = tweens;
         this.MinHeap = MinHeap;
+        this.Stats = Stats;
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
         this.PathFinder = PathFinder.bind(PathFinder, this);
 
@@ -3565,6 +3925,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.layerPlugins = {};
         this.cameraPlugins = {};
         this.phaserPlugins = {};
+
+        this.stats = new Stats();
 
         this.timers = {};
         this.cameras = {};
@@ -3594,7 +3956,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             /* Obviously we're assuming it's always a staggered isometric map.
              * We don't yet support anything else. */
-            this.map = new StaggeredIsometric(game.map, game.hitTests, this.clientWidth, this.clientHeight);
+            this.map = new StaggeredIsometric(game.map, game.hitTests, this.clientWidth, this.clientHeight, this.stats);
         }
 
         var draw = _this.game.draw;
@@ -3692,18 +4054,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.updatePhasers = function() {
+            var epoch = +new Date();
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
                 _this.phasers[i].rebalance(_this.now);
             }
+            this.stats.count('updatePhasers', (+new Date())-epoch);
         };
 
         this.updateFX = function() {
+            var epoch = +new Date();
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
                 if (!fx.update(_this.now)) {
                     _this.activeFX.splice(i, 1);
                 }
             }
+            this.stats.count('updateFX', (+new Date())-epoch);
         };
 
         this.fx = function(name, opts) {
@@ -3792,6 +4158,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             drawDebug();
 
             _this.lastFrameTime = _this.now;
+
+            //console.log(_this.stats.averages);
         }
 
         preloader.load(
@@ -4011,7 +4379,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.createComposite = function(x,y,id,endCallback) {
 
             if (id===undefined) {
-                id = uid();
+                id = 'id'+uid();
             } else {
                 if(_this.spriteMap.hasOwnProperty(id)) {
                     throw "Warning: duplicate sprite (composite) id " + id;
@@ -4071,6 +4439,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.updateSprites = function() {
+            var epoch = +new Date();
             var keepsprites = [];
             for (var i = 0; i < _this.sprites.length; i++) {
                 var s = _this.sprites[i];
@@ -4083,6 +4452,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
             _this.sprites = keepsprites;
+            this.stats.count('updateSprites', (+new Date())-epoch);
         };
 
         this.getNow = function() {
@@ -4094,7 +4464,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 throw "Can't create phaser for unregistered type: " + name;
             }
 
-            var phaser = new _this.phaserPlugins[name].fn(uid(), opts);
+            var phaser = new _this.phaserPlugins[name].fn('id'+uid(), opts);
             _this.phasers.push(phaser);
             return phaser;
         };

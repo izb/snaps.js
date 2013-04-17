@@ -286,7 +286,7 @@ define(function() {
             var dx = this.directionx - this.x;
             var dy = this.directiony - this.y;
             if (dx===0&&dy===0) {
-                this.vectorx = 1;
+                this.vectorx = 0;
                 this.vectory = 0;
             } else {
                 var mag = Math.sqrt((dx*dx)+(dy*dy));
@@ -302,7 +302,7 @@ define(function() {
         var dx = x - this.x;
         var dy = y - this.y;
         if (dx===0&&dy===0) {
-            out[0] = 1;
+            out[0] = 0;
             out[1] = 0;
         } else {
             var mag = Math.sqrt((dx*dx)+(dy*dy));

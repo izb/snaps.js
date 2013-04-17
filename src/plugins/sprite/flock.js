@@ -87,6 +87,7 @@ define(function() {
         var weightCohesion = 1.8;
         var weightSteering = 0.5;
         var weightInertia =1.5;
+        var hweightInertia =weightInertia/2;
 
         /* steering */
 
@@ -151,8 +152,8 @@ define(function() {
 
         /* update velocity */
 
-        s.velocityx = weightInertia * s.velocityx + this.xy[0];
-        s.velocityy = weightInertia * s.velocityy + this.xy[1];
+        s.velocityx = weightInertia  * s.velocityx + this.xy[0];
+        s.velocityy = hweightInertia * s.velocityy + this.xy[1];
 
         var maxSpeed = this.flock_speed * dt/1000;
         var mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
@@ -161,7 +162,6 @@ define(function() {
             s.velocityx = maxSpeed * s.velocityx/mag;
             s.velocityy = maxSpeed * s.velocityy/mag;
         }
-        s.move(s.velocityx, s.velocityy);
 
         return true;
     };
