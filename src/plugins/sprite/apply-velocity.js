@@ -9,6 +9,12 @@ define(function() {
 
     }
 
+    /* TODO: Stupid bug. This exists so that the flock plugin calculates all the
+     * velocities in place first, then the velocities are applied to the sprites
+     * afterwards. Of course this is stupid. This plugin is called immediately
+     * after the flock plugin on a per-sprite basis. Duh.
+     * To fix, we need to have post-update updates. Try not to make it look messy. */
+
     /*
      * Example options:
      *

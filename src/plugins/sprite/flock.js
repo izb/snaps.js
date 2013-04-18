@@ -45,6 +45,9 @@ define(function() {
      * This plugin supports phasers and will flock more efficiently, but with less
      * accuracy with phased updates.
      *
+     * Note that this plugin will not move the sprites, it only calculates velocity. To move the
+     * sprites you should add the apply-velocity plugin after this one.
+     *
      */
 
     function Flock() {
