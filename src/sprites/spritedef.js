@@ -64,7 +64,7 @@ define(function() {
     SpriteDef.prototype.aliasState = function(alias, state) {
         var s = this.states[s];
         /* TODO: Validate */
-        this.states[aliasState] = s;
+        this.states[alias] = s;
     };
 
     return SpriteDef;

@@ -164,16 +164,18 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             var storeSpriteSheet = function(image, tag){
 
+                var state;
+
                 var data = _this.game.spriteDefs[tag];
                 var sd = new SpriteDef(image, data.w, data.h, data.x, data.y);
                 _this.spriteDefs[tag] = sd;
 
-                for (var state in data.states) {
+                for (state in data.states) {
                     if (typeof(state)!=='string') {
                         sd.addState(state, data.states[state].seq, data.states[state].dur);
                     }
                 }
-                for (var state in data.states) {
+                for (state in data.states) {
                     if (typeof(state)==='string') {
                         sd.aliasState(state, data.states[state]);
                     }
@@ -503,7 +505,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 } else if (typeof(optUpdate.predicate==='string')) {
                     var pval = optUpdate.predicate;
                     /* TODO: Test this predicate type */
-                    updates[i].predicate = function() {
+                    return function() {
                         return s.stateName===pval;
                     };
                 } else if (typeof(optUpdate.predicate==='object')) {
@@ -514,12 +516,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                     }
 
                     /* TODO: Test this predicate type */
-                    updates[i].predicate = function() {
+                    return function() {
                         return pvals.hasOwnProperty(s.stateName);
                     };
                 } else if (typeof(optUpdate.predicate==='function')) {
                     /* TODO: Test this predicate type */
-                    updates[i].predicate = optUpdate.predicate;
+                    return optUpdate.predicate;
                 }
             };
 
@@ -551,7 +553,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                     }
                     commits[i] = new _this.spriteUpdaters[scname]();
                     copyProps(optCommit, commits[i]);
-                    commits[i].predicate = createPredicate(optUpdate);
+                    commits[i].predicate = createPredicate(optCommit);
                 }
             }
 
@@ -640,8 +642,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.updateSprites = function() {
             var epoch = +new Date();
             var keepsprites = [];
-            for (var i = 0; i < _this.sprites.length; i++) {
-                var s = _this.sprites[i];
+            var i, s;
+            for (i = 0; i < _this.sprites.length; i++) {
+                s = _this.sprites[i];
                 if (s.isActive(_this.now)) {
                     s.update(_this.now);
                     keepsprites.push(s);
@@ -652,8 +655,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
             _this.sprites = keepsprites;
 
-            for (var i = 0; i < _this.sprites.length; i++) {
-                var s = _this.sprites[i];
+            for (i = 0; i < _this.sprites.length; i++) {
+                s = _this.sprites[i];
                 s.commit(_this.now);
             }
             this.stats.count('updateSprites', (+new Date())-epoch);
