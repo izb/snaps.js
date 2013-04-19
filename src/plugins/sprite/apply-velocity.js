@@ -19,12 +19,20 @@ define(function() {
      * Example options:
      *
      * updates:[{
-     *     name:'applyvelocity'
+     *     name:'applyvelocity',
+     *     on_collision: function() {
+     *         // React to collision
+     *     }
      * }]
+     *
+     * TODO: Pass collision ratio to the collision callback
+     *
+     * on_collision is an optional collision callback, called with the sprite as the
+     * function context.
      *
      */
 
-    /** Called with the sprite as the 'this' context.
+    /** Called with the sprite as the function context.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
@@ -35,7 +43,9 @@ define(function() {
      */
     ApplyVelocity.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
-        s.move(s.velocityx, s.velocityy);
+        if(s.move(s.velocityx, s.velocityy) && this.on_collision!==undefined) {
+            this.on_collision.call(s);
+        }
         return true;
     };
 

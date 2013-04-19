@@ -22,7 +22,7 @@ define(function() {
      * is the current animation sequence duration.
      */
 
-    /** Called with the sprite as the 'this' context.
+    /** Called with the sprite as the function context.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false

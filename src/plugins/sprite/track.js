@@ -25,7 +25,7 @@ define(function() {
     function Track() {
     }
 
-    /** Called with the update options as the 'this' context, one of which
+    /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,

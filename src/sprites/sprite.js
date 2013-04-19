@@ -212,13 +212,14 @@ define(function() {
      * @param  {Number} tx Target x world position
      * @param  {Number} ty Target y world position
      * @param  {Number} th Optional; Target height
+     * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.moveTo = function(tx,ty,th,collide) {
         if (th!==undefined) {
             th=th-this.h;
         }
 
-        this.move(tx-this.x,ty-this.y,th, collide);
+        return this.move(tx-this.x,ty-this.y,th, collide);
     };
 
     /** Move a sprite by a given amount, taking collision into account.
@@ -226,11 +227,12 @@ define(function() {
      * @param  {Number} dx Amount to alter x position
      * @param  {Number} dy Amount to alter y position
      * @param  {Number} dh Optional; Amount to alter height
+     * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.move = function(dx,dy,dh, collide) {
 
         if (!(dx||dy||dh)) {
-            return;
+            return false;
         }
 
         collide = collide===undefined?true:collide;
@@ -248,15 +250,21 @@ define(function() {
 
         this.setDirection(this.x + dx, this.y + dy);
 
+        var collided = collide && collisionRatio<1;
+
         if (dh!==undefined) {
-            if (collide && collisionRatio<1 && !this.quantizedHeight) {
+            if (collided && !this.quantizedHeight) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;
+                return true;
             } else {
                 this.h+=dh;
+                return false;
             }
         }
+
+        return collided;
 
         /* TODO: Technically, if the height is adjusted upwards and we're not quantizing
          * height, then the path should be retraced at the new height to see if it got further,
