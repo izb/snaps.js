@@ -55,6 +55,7 @@ define(function() {
             this.maxloops = typeof opts.maxloops === 'function'?opts.maxloops():opts.maxloops;
         }
         this.updates = opts.updates;
+        this.commits = opts.commits;
         this.id = opts.id;
 
         if (typeof(this.id)==='number') {
@@ -165,10 +166,33 @@ define(function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];
-                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this, now);
-                if(!update.update(now, phaseOn)) {
-                    /* Return false from an update function to break the chain. */
-                    break;
+                if (update.predicate.call(this)) {
+                    var phaseOn = update.phaser===undefined?true:update.phaser.phase(this, now);
+                    if(!update.update(now, phaseOn)) {
+                        /* Return false from an update function to break the chain. */
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    Sprite.prototype.commit = function(now) {
+        /* TODO: Not sure if it's a bug or a feature, but we can't guarantee that an update and a commit
+         * that share the same phaser will share the same phase. We should test for that. */
+
+        /* TODO: Document that a sprite should not be removed from the stage during a commit; only an
+         * update. Can we enforce this? */
+
+        if (this.commits!==undefined) {
+            for (var i = 0; i < this.commits.length; i++) {
+                var commit = this.commits[i];
+                if (commit.predicate.call(this)) {
+                    var phaseOn = commit.phaser===undefined?true:commit.phaser.phase(this, now);
+                    if(!commit.update(now, phaseOn)) {
+                        /* Return false from an update function to break the chain. */
+                        break;
+                    }
                 }
             }
         }

@@ -169,9 +169,17 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 _this.spriteDefs[tag] = sd;
 
                 for (var state in data.states) {
-                    sd.addState(state, data.states[state].seq, data.states[state].dur);
+                    if (typeof(state)!=='string') {
+                        sd.addState(state, data.states[state].seq, data.states[state].dur);
+                    }
+                }
+                for (var state in data.states) {
+                    if (typeof(state)==='string') {
+                        sd.aliasState(state, data.states[state]);
+                    }
                 }
             };
+
             for(var spriteName in _this.game.spriteDefs) {
                 preloader.add(_this.game.spriteDefs[spriteName].path, spriteName, storeSpriteSheet);
             }
@@ -439,6 +447,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.camera = this.cameras[name];
         };
 
+        var troo = function() {
+            return true;
+        };
+
         /**
          * Spawn a new sprite in the world
          * @param defName The name of the sprite definition to use. These are
@@ -483,6 +495,36 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             var sd = _this.spriteDefs[defName];
 
+            /* TODO: Document predicate types. String matches state. Array of strings matches multiple states.
+             * Or custom function is called with sprite as 'this'. Defaults to 'true'. */
+            var createPredicate = function(optUpdate) {
+                if (optUpdate.predicate===undefined) {
+                    return troo;
+                } else if (typeof(optUpdate.predicate==='string')) {
+                    var pval = optUpdate.predicate;
+                    /* TODO: Test this predicate type */
+                    updates[i].predicate = function() {
+                        return s.stateName===pval;
+                    };
+                } else if (typeof(optUpdate.predicate==='object')) {
+                    /* Assume an array of strings */
+                    var pvals = {};
+                    for (var i = optUpdate.predicate.length - 1; i >= 0; i--) {
+                        pvals[optUpdate.predicate[i]] = true;
+                    }
+
+                    /* TODO: Test this predicate type */
+                    updates[i].predicate = function() {
+                        return pvals.hasOwnProperty(s.stateName);
+                    };
+                } else if (typeof(optUpdate.predicate==='function')) {
+                    /* TODO: Test this predicate type */
+                    updates[i].predicate = optUpdate.predicate;
+                }
+            };
+
+            /* TODO: The two following loops are very similar. Refactor them and inline the createPredicate part. */
+
             var updates = opts.updates;
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
@@ -490,15 +532,32 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                     var optUpdate = opts.updates[i];
                     var suname = optUpdate.name;
                     if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
-                        throw "Sprite plugin used but not registered: "+suname;
+                        throw "Sprite update plugin used in update but not registered: "+suname;
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
                     copyProps(optUpdate, updates[i]);
+                    updates[i].predicate = createPredicate(optUpdate);
+                }
+            }
+
+            var commits = opts.commits;
+            if (commits !== undefined) {
+                commits = new Array(opts.commits.length);
+                for (var i = 0; i < opts.commits.length; i++) {
+                    var optCommit = opts.commits[i];
+                    var scname = optCommit.name;
+                    if (!_this.spriteUpdaters.hasOwnProperty(scname)) {
+                        throw "Sprite update plugin used in commit but not registered: "+scname;
+                    }
+                    commits[i] = new _this.spriteUpdaters[scname]();
+                    copyProps(optCommit, commits[i]);
+                    commits[i].predicate = createPredicate(optUpdate);
                 }
             }
 
             opts = clone(opts);
             opts.updates = updates;
+            opts.commits = commits;
 
             var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);
@@ -592,6 +651,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
             _this.sprites = keepsprites;
+
+            for (var i = 0; i < _this.sprites.length; i++) {
+                var s = _this.sprites[i];
+                s.commit(_this.now);
+            }
             this.stats.count('updateSprites', (+new Date())-epoch);
         };
 
