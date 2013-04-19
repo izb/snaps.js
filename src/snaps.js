@@ -479,6 +479,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             /* TODO: 'createSprite' please, for consistency. */
 
+            var i;
+
             if (opts===undefined) {
                 opts = {};
             }
@@ -511,7 +513,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 } else if (typeof(optUpdate.predicate==='object')) {
                     /* Assume an array of strings */
                     var pvals = {};
-                    for (var i = optUpdate.predicate.length - 1; i >= 0; i--) {
+                    for (i = optUpdate.predicate.length - 1; i >= 0; i--) {
                         pvals[optUpdate.predicate[i]] = true;
                     }
 
@@ -530,7 +532,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var updates = opts.updates;
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
-                for (var i = 0; i < opts.updates.length; i++) {
+                for (i = 0; i < opts.updates.length; i++) {
                     var optUpdate = opts.updates[i];
                     var suname = optUpdate.name;
                     if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
@@ -545,7 +547,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var commits = opts.commits;
             if (commits !== undefined) {
                 commits = new Array(opts.commits.length);
-                for (var i = 0; i < opts.commits.length; i++) {
+                for (i = 0; i < opts.commits.length; i++) {
                     var optCommit = opts.commits[i];
                     var scname = optCommit.name;
                     if (!_this.spriteUpdaters.hasOwnProperty(scname)) {
