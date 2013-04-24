@@ -112,6 +112,7 @@ define(function() {
         this.actions = [];
         this.keys = [];
 
+        /* TODO: bind is reserved. Probably want to rename this. */
         this.bind = function(key, action) {
             _this.actions[action] = 0;
             _this.keys[_this.keymap[key]] = action;

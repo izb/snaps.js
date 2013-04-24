@@ -1,8 +1,7 @@
 /*global define*/
 define(function() {
 
-    /**
-     * This constructor is magically bound when exposed through the engine ref,
+    /** This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
      * new sn.ProximityTracker(myCellSize);
      */

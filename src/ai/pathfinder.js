@@ -1,12 +1,25 @@
 /*global define*/
 define(function() {
 
+    /** Internal structure representing a point of travel along a path.
+     * @param {Number} x X position of the node.
+     * @param {Number} y Y position of the node.
+     */
     function Node(x,y) {
         this.x = x;
         this.y = y;
         this.score = 0;
     }
 
+    /** This constructor is curried when exposed through the engine ref,
+     * so construct it without the first parameter, e.g.
+     * new sn.PathFinder(diagonals, solid);
+     * @param {Boolean} diagonals If true, the path will include diagonal
+     * movements (Along tile corners).
+     * @param {Function} solid A function that determines if a position is
+     * solid or not. Should accept an x,y position and return a boolean. True
+     * for solid.
+     */
     function PathFinder(sn, diagonals, solid) {
 
         this.sn = sn;
