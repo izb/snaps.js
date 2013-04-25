@@ -90,12 +90,24 @@ define(function() {
     }
 
     Sprite.prototype.init = function() {
+        var i;
+
         if (this.updates!==undefined) {
-            for (var i = 0; i < this.updates.length; i++) {
+            for (i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];
                 update.init(this);
                 if (update.hasOwnProperty('phaser')) {
                     update.phaser.addSprite(this);
+                }
+            }
+        }
+
+        if (this.commits!==undefined) {
+            for (i = 0; i < this.commits.length; i++) {
+                var commit = this.commits[i];
+                commit.init(this);
+                if (commit.hasOwnProperty('phaser')) {
+                    commit.phaser.addSprite(this);
                 }
             }
         }

@@ -171,12 +171,13 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 _this.spriteDefs[tag] = sd;
 
                 for (state in data.states) {
-                    if (typeof(state)!=='string') {
+                    if (typeof(data.states[state])!=='string') {
                         sd.addState(state, data.states[state].seq, data.states[state].dur);
                     }
                 }
+
                 for (state in data.states) {
-                    if (typeof(state)==='string') {
+                    if (typeof(data.states[state])==='string') {
                         sd.aliasState(state, data.states[state]);
                     }
                 }
@@ -502,28 +503,33 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             /* TODO: Document predicate types. String matches state. Array of strings matches multiple states.
              * Or custom function is called with sprite as 'this'. Defaults to 'true'. */
             var createPredicate = function(optUpdate) {
-                if (optUpdate.predicate===undefined) {
-                    return troo;
-                } else if (typeof(optUpdate.predicate==='string')) {
+                var t = typeof(optUpdate.predicate);
+                var i;
+
+                if (t==='string') {
                     var pval = optUpdate.predicate;
                     /* TODO: Test this predicate type */
                     return function() {
                         return s.stateName===pval;
                     };
-                } else if (typeof(optUpdate.predicate==='object')) {
+                } else if (t==='object') {
                     /* Assume an array of strings */
                     var pvals = {};
+
                     for (i = optUpdate.predicate.length - 1; i >= 0; i--) {
                         pvals[optUpdate.predicate[i]] = true;
                     }
+
 
                     /* TODO: Test this predicate type */
                     return function() {
                         return pvals.hasOwnProperty(s.stateName);
                     };
-                } else if (typeof(optUpdate.predicate==='function')) {
+                } else if (t==='function') {
                     /* TODO: Test this predicate type */
                     return optUpdate.predicate;
+                } else {
+                    return troo;
                 }
             };
 

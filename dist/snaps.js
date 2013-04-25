@@ -62,6 +62,12 @@ define('sprites/spritedef',[],function() {
         this.states[name] = new State(pos, dur, this);
     };
 
+    SpriteDef.prototype.aliasState = function(alias, state) {
+        var s = this.states[state];
+        /* TODO: Validate */
+        this.states[alias] = s;
+    };
+
     return SpriteDef;
 
 });
@@ -123,6 +129,7 @@ define('sprites/sprite',[],function() {
             this.maxloops = typeof opts.maxloops === 'function'?opts.maxloops():opts.maxloops;
         }
         this.updates = opts.updates;
+        this.commits = opts.commits;
         this.id = opts.id;
 
         if (typeof(this.id)==='number') {
@@ -157,12 +164,24 @@ define('sprites/sprite',[],function() {
     }
 
     Sprite.prototype.init = function() {
+        var i;
+
         if (this.updates!==undefined) {
-            for (var i = 0; i < this.updates.length; i++) {
+            for (i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];
                 update.init(this);
                 if (update.hasOwnProperty('phaser')) {
                     update.phaser.addSprite(this);
+                }
+            }
+        }
+
+        if (this.commits!==undefined) {
+            for (i = 0; i < this.commits.length; i++) {
+                var commit = this.commits[i];
+                commit.init(this);
+                if (commit.hasOwnProperty('phaser')) {
+                    commit.phaser.addSprite(this);
                 }
             }
         }
@@ -233,10 +252,33 @@ define('sprites/sprite',[],function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
                 var update = this.updates[i];
-                var phaseOn = update.phaser===undefined?true:update.phaser.phase(this, now);
-                if(!update.update(now, phaseOn)) {
-                    /* Return false from an update function to break the chain. */
-                    break;
+                if (update.predicate.call(this)) {
+                    var phaseOn = update.phaser===undefined?true:update.phaser.phase(this, now);
+                    if(!update.update(now, phaseOn)) {
+                        /* Return false from an update function to break the chain. */
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    Sprite.prototype.commit = function(now) {
+        /* TODO: Not sure if it's a bug or a feature, but we can't guarantee that an update and a commit
+         * that share the same phaser will share the same phase. We should test for that. */
+
+        /* TODO: Document that a sprite should not be removed from the stage during a commit; only an
+         * update. Can we enforce this? */
+
+        if (this.commits!==undefined) {
+            for (var i = 0; i < this.commits.length; i++) {
+                var commit = this.commits[i];
+                if (commit.predicate.call(this)) {
+                    var phaseOn = commit.phaser===undefined?true:commit.phaser.phase(this, now);
+                    if(!commit.update(now, phaseOn)) {
+                        /* Return false from an update function to break the chain. */
+                        break;
+                    }
                 }
             }
         }
@@ -256,13 +298,14 @@ define('sprites/sprite',[],function() {
      * @param  {Number} tx Target x world position
      * @param  {Number} ty Target y world position
      * @param  {Number} th Optional; Target height
+     * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.moveTo = function(tx,ty,th,collide) {
         if (th!==undefined) {
             th=th-this.h;
         }
 
-        this.move(tx-this.x,ty-this.y,th, collide);
+        return this.move(tx-this.x,ty-this.y,th, collide);
     };
 
     /** Move a sprite by a given amount, taking collision into account.
@@ -270,11 +313,12 @@ define('sprites/sprite',[],function() {
      * @param  {Number} dx Amount to alter x position
      * @param  {Number} dy Amount to alter y position
      * @param  {Number} dh Optional; Amount to alter height
+     * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.move = function(dx,dy,dh, collide) {
 
         if (!(dx||dy||dh)) {
-            return;
+            return false;
         }
 
         collide = collide===undefined?true:collide;
@@ -292,15 +336,21 @@ define('sprites/sprite',[],function() {
 
         this.setDirection(this.x + dx, this.y + dy);
 
+        var collided = collide && collisionRatio<1;
+
         if (dh!==undefined) {
-            if (collide && collisionRatio<1 && !this.quantizedHeight) {
+            if (collided && !this.quantizedHeight) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;
+                return true;
             } else {
                 this.h+=dh;
+                return false;
             }
         }
+
+        return collided;
 
         /* TODO: Technically, if the height is adjusted upwards and we're not quantizing
          * height, then the path should be retraced at the new height to see if it got further,
@@ -683,6 +733,7 @@ define('input/keyboard',[],function() {
         this.actions = [];
         this.keys = [];
 
+        /* TODO: bind is reserved. Probably want to rename this. */
         this.bind = function(key, action) {
             _this.actions[action] = 0;
             _this.keys[_this.keymap[key]] = action;
@@ -1680,7 +1731,7 @@ define('plugins/sprite/bounce',[],function() {
      * is the current animation sequence duration.
      */
 
-    /** Called with the sprite as the 'this' context.
+    /** Called with the sprite as the function context.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
@@ -1726,7 +1777,7 @@ define('plugins/sprite/follow-mouse',[],function() {
 
     }
 
-    /** Called with the update options as the 'this' context, one of which
+    /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
@@ -1790,7 +1841,7 @@ define('plugins/sprite/animate',[],function() {
      * maxloops lifespan of the sprite
      */
 
-    /** Called with the update options as the 'this' context, one of which
+    /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
@@ -1809,7 +1860,7 @@ define('plugins/sprite/animate',[],function() {
         return true;
     };
 
-    /** Called with the update options as the 'this' context, one of which
+    /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
      */
     Animate.prototype.init = function(s) {
@@ -1858,7 +1909,7 @@ define('plugins/sprite/8way',[],function() {
     function Face8Way() {
     }
 
-    /** Called with the update options as the 'this' context, one of which
+    /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
@@ -1957,7 +2008,7 @@ define('plugins/sprite/track',[],function() {
     function Track() {
     }
 
-    /** Called with the update options as the 'this' context, one of which
+    /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
@@ -2051,6 +2102,9 @@ define('plugins/sprite/flock',[],function() {
      * This plugin supports phasers and will flock more efficiently, but with less
      * accuracy with phased updates.
      *
+     * Note that this plugin will not move the sprites, it only calculates velocity. To move the
+     * sprites you should add the apply-velocity plugin after this one.
+     *
      */
 
     function Flock() {
@@ -2058,7 +2112,7 @@ define('plugins/sprite/flock',[],function() {
         this.xy2=[0,0];
     }
 
-    /** Called with the update options as the 'this' context, one of which
+    /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
@@ -2216,16 +2270,30 @@ define('plugins/sprite/apply-velocity',[],function() {
 
     }
 
+    /* TODO: Stupid bug. This exists so that the flock plugin calculates all the
+     * velocities in place first, then the velocities are applied to the sprites
+     * afterwards. Of course this is stupid. This plugin is called immediately
+     * after the flock plugin on a per-sprite basis. Duh.
+     * To fix, we need to have post-update updates. Try not to make it look messy. */
+
     /*
      * Example options:
      *
      * updates:[{
-     *     name:'applyvelocity'
+     *     name:'applyvelocity',
+     *     on_collision: function() {
+     *         // React to collision
+     *     }
      * }]
+     *
+     * TODO: Pass collision ratio to the collision callback
+     *
+     * on_collision is an optional collision callback, called with the sprite as the
+     * function context.
      *
      */
 
-    /** Called with the sprite as the 'this' context.
+    /** Called with the sprite as the function context.
      * @param  {Number} now The time of the current frame
      * @param  {Bool} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
@@ -2236,7 +2304,9 @@ define('plugins/sprite/apply-velocity',[],function() {
      */
     ApplyVelocity.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
-        s.move(s.velocityx, s.velocityy);
+        if(s.move(s.velocityx, s.velocityy) && this.on_collision!==undefined) {
+            this.on_collision.call(s);
+        }
         return true;
     };
 
@@ -3420,8 +3490,7 @@ define('animate/tween',[],function() {
 /*global define*/
 define('ai/proximity-tracker',[],function() {
 
-    /**
-     * This constructor is magically bound when exposed through the engine ref,
+    /** This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
      * new sn.ProximityTracker(myCellSize);
      */
@@ -3663,12 +3732,25 @@ define('ai/proximity-tracker',[],function() {
 /*global define*/
 define('ai/pathfinder',[],function() {
 
+    /** Internal structure representing a point of travel along a path.
+     * @param {Number} x X position of the node.
+     * @param {Number} y Y position of the node.
+     */
     function Node(x,y) {
         this.x = x;
         this.y = y;
         this.score = 0;
     }
 
+    /** This constructor is curried when exposed through the engine ref,
+     * so construct it without the first parameter, e.g.
+     * new sn.PathFinder(diagonals, solid);
+     * @param {Boolean} diagonals If true, the path will include diagonal
+     * movements (Along tile corners).
+     * @param {Function} solid A function that determines if a position is
+     * solid or not. Should accept an x,y position and return a boolean. True
+     * for solid.
+     */
     function PathFinder(sn, diagonals, solid) {
 
         this.sn = sn;
@@ -4024,14 +4106,25 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             var storeSpriteSheet = function(image, tag){
 
+                var state;
+
                 var data = _this.game.spriteDefs[tag];
                 var sd = new SpriteDef(image, data.w, data.h, data.x, data.y);
                 _this.spriteDefs[tag] = sd;
 
-                for (var state in data.states) {
-                    sd.addState(state, data.states[state].seq, data.states[state].dur);
+                for (state in data.states) {
+                    if (typeof(data.states[state])!=='string') {
+                        sd.addState(state, data.states[state].seq, data.states[state].dur);
+                    }
+                }
+
+                for (state in data.states) {
+                    if (typeof(data.states[state])==='string') {
+                        sd.aliasState(state, data.states[state]);
+                    }
                 }
             };
+
             for(var spriteName in _this.game.spriteDefs) {
                 preloader.add(_this.game.spriteDefs[spriteName].path, spriteName, storeSpriteSheet);
             }
@@ -4299,6 +4392,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.camera = this.cameras[name];
         };
 
+        var troo = function() {
+            return true;
+        };
+
         /**
          * Spawn a new sprite in the world
          * @param defName The name of the sprite definition to use. These are
@@ -4325,6 +4422,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             /* TODO: 'createSprite' please, for consistency. */
 
+            var i;
+
             if (opts===undefined) {
                 opts = {};
             }
@@ -4343,22 +4442,74 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             var sd = _this.spriteDefs[defName];
 
+            /* TODO: Document predicate types. String matches state. Array of strings matches multiple states.
+             * Or custom function is called with sprite as 'this'. Defaults to 'true'. */
+            var createPredicate = function(optUpdate) {
+                var t = typeof(optUpdate.predicate);
+                var i;
+
+                if (t==='string') {
+                    var pval = optUpdate.predicate;
+                    /* TODO: Test this predicate type */
+                    return function() {
+                        return s.stateName===pval;
+                    };
+                } else if (t==='object') {
+                    /* Assume an array of strings */
+                    var pvals = {};
+
+                    for (i = optUpdate.predicate.length - 1; i >= 0; i--) {
+                        pvals[optUpdate.predicate[i]] = true;
+                    }
+
+
+                    /* TODO: Test this predicate type */
+                    return function() {
+                        return pvals.hasOwnProperty(s.stateName);
+                    };
+                } else if (t==='function') {
+                    /* TODO: Test this predicate type */
+                    return optUpdate.predicate;
+                } else {
+                    return troo;
+                }
+            };
+
+            /* TODO: The two following loops are very similar. Refactor them and inline the createPredicate part. */
+
             var updates = opts.updates;
             if (updates !== undefined) {
                 updates = new Array(opts.updates.length);
-                for (var i = 0; i < opts.updates.length; i++) {
+                for (i = 0; i < opts.updates.length; i++) {
                     var optUpdate = opts.updates[i];
                     var suname = optUpdate.name;
                     if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
-                        throw "Sprite plugin used but not registered: "+suname;
+                        throw "Sprite update plugin used in update but not registered: "+suname;
                     }
                     updates[i] = new _this.spriteUpdaters[suname]();
                     copyProps(optUpdate, updates[i]);
+                    updates[i].predicate = createPredicate(optUpdate);
+                }
+            }
+
+            var commits = opts.commits;
+            if (commits !== undefined) {
+                commits = new Array(opts.commits.length);
+                for (i = 0; i < opts.commits.length; i++) {
+                    var optCommit = opts.commits[i];
+                    var scname = optCommit.name;
+                    if (!_this.spriteUpdaters.hasOwnProperty(scname)) {
+                        throw "Sprite update plugin used in commit but not registered: "+scname;
+                    }
+                    commits[i] = new _this.spriteUpdaters[scname]();
+                    copyProps(optCommit, commits[i]);
+                    commits[i].predicate = createPredicate(optCommit);
                 }
             }
 
             opts = clone(opts);
             opts.updates = updates;
+            opts.commits = commits;
 
             var s = new Sprite(_this, sd, x, y, h, opts);
             s.setState(stateName, stateExt);
@@ -4441,8 +4592,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.updateSprites = function() {
             var epoch = +new Date();
             var keepsprites = [];
-            for (var i = 0; i < _this.sprites.length; i++) {
-                var s = _this.sprites[i];
+            var i, s;
+            for (i = 0; i < _this.sprites.length; i++) {
+                s = _this.sprites[i];
                 if (s.isActive(_this.now)) {
                     s.update(_this.now);
                     keepsprites.push(s);
@@ -4452,6 +4604,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
             _this.sprites = keepsprites;
+
+            for (i = 0; i < _this.sprites.length; i++) {
+                s = _this.sprites[i];
+                s.commit(_this.now);
+            }
             this.stats.count('updateSprites', (+new Date())-epoch);
         };
 

@@ -14,12 +14,12 @@
     "bugs": {
         "url": "https://github.com/izb/snaps.js/issues"
     },
-    "version": "0.1.16",
+    "version": "0.1.18",
     "jam": {
         "dependencies": {
         },
-        "main": "dist/snaps-0.1.12.min.js",
-        "include": ["dist/snaps-*.js"]
+        "main": "dist/snaps.min.js",
+        "include": ["dist/snaps*.js"]
     },
     "dependencies": {
         "grunt": "0.4.1",
