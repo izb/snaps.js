@@ -9,25 +9,24 @@ define(function() {
      * responsive widgets. */
 
     /**
-     * @param {Object} opts Parameters for customizing the layer. Requires these properties:
-     * 'x' and 'y' The center of the scan.
+     * @param {Object} opts Parameters for customizing the layer.
      */
-    function UILayer(layerName, opts) {
+    function UI(layerName, opts) {
         this.opts = opts||{};
         this.name = layerName;
     }
 
-    UILayer.prototype.update = function(now) {
+    UI.prototype.update = function(now) {
     };
 
-    UILayer.prototype.draw = function(ctx, now) {
+    UI.prototype.draw = function(ctx, now) {
 
         /* TODO: Draw widgets */
     };
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('ui-layer', UILayer, function(){});
+        sn.registerLayerPlugin('ui', UI, function(){});
     };
 
 });

@@ -171,8 +171,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 _this.spriteDefs[tag] = sd;
 
                 for (state in data.states) {
-                    if (typeof(data.states[state])!=='string') {
+                    if (typeof(data.states[state])==='object') {
                         sd.addState(state, data.states[state].seq, data.states[state].dur);
+                    }
+
+                    if (typeof(data.states[state])==='number') {
+                        sd.addState(state, [data.states[state]], 1000);
                     }
                 }
 
@@ -231,7 +235,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.addLayer = function(name, type, opts, idx) {
-            /* TODO: index must be in range. name must be unique. */
+            /* TODO: name must be unique. */
+            /* TODO: Instead of index, we should say which layer to insert after or before, e.g.
+             * 'after ground' */
+
+            opts = opts||{};
 
             if (!_this.layerPlugins.hasOwnProperty(type)) {
                 throw "Can't create layer for unregistered layer type: " + type;
@@ -422,6 +430,27 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.worldToScreenPos(x,y, out);
         };
 
+        /** Get a tile by it's row and column position in the original map data.
+         * @param  {object} layer. The layer to search for tiles.
+         * @param  {Number} c The column, aka x position in the data.
+         * @param  {Number} r the row, aka y position in the data.
+         * @return {Tile} A tile, or null if the input was out of range.
+         */
+        this.getTile = function(layer, c, r) {
+            return this.map.getTile(layer, c, r);
+        };
+
+        this.getTileWorldPos = function(c, r, out) {
+            this.map.tileDimensions(out);
+            if ((r&1)===0) {
+                out[0] = (c+1)*out[0] - (out[0]/2);
+                out[1] = (r+1)*(out[1]/2);
+            } else {
+                out[0] = (c+1)*out[0];
+                out[1] = (r+1)*(out[1]/2);
+            }
+        };
+
         this.getTilePropAtWorldPos = function(prop, x, y) {
             return this.map.getTilePropAtWorldPos(prop, x,y);
         };
@@ -450,10 +479,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.camera = this.cameras[name];
         };
 
-        var troo = function() {
-            return true;
-        };
-
         /**
          * Spawn a new sprite in the world
          * @param defName The name of the sprite definition to use. These are
@@ -461,11 +486,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @param stateName The initial state. This too is defined in the
          * sprite's definition, in your game's spriteDefs data.
          * @param {Function/Number} x The world x coordinate. If a function, it should take
-         * no paremeters and return a number.
+         * no parameters and return a number.
          * @param {Function/Number} y The world y coordinate. If a function, it should take
-         * no paremeters and return a number.
+         * no parameters and return a number.
          * @param {Function/Number} h The height off the ground. If a function, it should take
-         * no paremeters and return a number.
+         * no parameters and return a number.
          * @param Optional parameter object, which can contain:
          * 'id' if you want to be able to find your sprite again.
          * 'maxloops' if your sprite should remove itself from the world
@@ -478,13 +503,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.spawnSprite = function(defName, stateName, stateExt, x, y, h, opts) {
 
-            /* TODO: 'createSprite' please, for consistency. */
-
-            var i;
-
-            if (opts===undefined) {
-                opts = {};
-            }
+            opts = opts||{};
 
             if (opts.id===undefined) {
                 opts.id = uid();
@@ -494,94 +513,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
 
-            if(!_this.spriteDefs.hasOwnProperty(defName)) {
-                throw "Error: Missing sprite definition when spawning sprite " + defName;
-            }
-
-            var sd = _this.spriteDefs[defName];
-
-            /* TODO: Document predicate types. String matches state. Array of strings matches multiple states.
-             * Or custom function is called with sprite as 'this'. Defaults to 'true'. */
-            var createPredicate = function(optUpdate) {
-                var t = typeof(optUpdate.predicate);
-                var i;
-
-                if (t==='string') {
-                    var pval = optUpdate.predicate;
-                    /* TODO: Test this predicate type */
-                    return function() {
-                        return s.stateName===pval;
-                    };
-                } else if (t==='object') {
-                    /* Assume an array of strings */
-                    var pvals = {};
-
-                    for (i = optUpdate.predicate.length - 1; i >= 0; i--) {
-                        pvals[optUpdate.predicate[i]] = true;
-                    }
-
-
-                    /* TODO: Test this predicate type */
-                    return function() {
-                        return pvals.hasOwnProperty(s.stateName);
-                    };
-                } else if (t==='function') {
-                    /* TODO: Test this predicate type */
-                    return optUpdate.predicate;
-                } else {
-                    return troo;
-                }
-            };
-
-            /* TODO: The two following loops are very similar. Refactor them and inline the createPredicate part. */
-
-            var updates = opts.updates;
-            if (updates !== undefined) {
-                updates = new Array(opts.updates.length);
-                for (i = 0; i < opts.updates.length; i++) {
-                    var optUpdate = opts.updates[i];
-                    var suname = optUpdate.name;
-                    if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
-                        throw "Sprite update plugin used in update but not registered: "+suname;
-                    }
-                    updates[i] = new _this.spriteUpdaters[suname]();
-                    copyProps(optUpdate, updates[i]);
-                    updates[i].predicate = createPredicate(optUpdate);
-                }
-            }
-
-            var commits = opts.commits;
-            if (commits !== undefined) {
-                commits = new Array(opts.commits.length);
-                for (i = 0; i < opts.commits.length; i++) {
-                    var optCommit = opts.commits[i];
-                    var scname = optCommit.name;
-                    if (!_this.spriteUpdaters.hasOwnProperty(scname)) {
-                        throw "Sprite update plugin used in commit but not registered: "+scname;
-                    }
-                    commits[i] = new _this.spriteUpdaters[scname]();
-                    copyProps(optCommit, commits[i]);
-                    commits[i].predicate = createPredicate(optCommit);
-                }
-            }
-
-            opts = clone(opts);
-            opts.updates = updates;
-            opts.commits = commits;
-
-            var s = new Sprite(_this, sd, x, y, h, opts);
-            s.setState(stateName, stateExt);
-
-            if (opts.opts !== undefined) {
-                for(var opt in opts.opts) {
-                    s[opt]=opts.opts[opt];
-                }
-            }
-
-            s.init();
+            var s = Sprite.construct(_this, defName, stateName, stateExt, x, y, h, opts);
 
             _this.sprites.push(s);
             _this.spriteMap[opts.id] = s;
+
             return s;
         };
 

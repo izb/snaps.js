@@ -8,8 +8,8 @@ define([
     'plugins/sprite/flock',
     'plugins/sprite/apply-velocity',
 
-    'plugins/layer/ui-layer',
-    'plugins/layer/demo-trace', /* TODO: Delete and remove */
+    'plugins/layer/ui',
+    'plugins/layer/ground-sprites',
 
     'plugins/fx/particles',
 

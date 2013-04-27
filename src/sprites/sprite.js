@@ -1,7 +1,10 @@
 /*global define*/
-define(function() {
+define(['util/js'], function(js) {
 
     'use strict';
+
+    var copyProps = js.copyProps;
+    var clone = js.clone;
 
     /** Creates a new sprite object.
      * @param {Object} sn Snaps engine ref
@@ -373,6 +376,105 @@ define(function() {
                 update.onSpriteRemoved();
             }
         }
+    };
+
+    var troo = function() {
+        return true;
+    };
+
+    /** See snaps.spawnSprite for parameter descriptions.
+     */
+    Sprite.construct = function(sn, defName, stateName, stateExt, x, y, h, opts) {
+
+        var i;
+
+        if(!sn.spriteDefs.hasOwnProperty(defName)) {
+            throw "Error: Missing sprite definition when spawning sprite " + defName;
+        }
+
+        var sd = sn.spriteDefs[defName];
+
+        /* TODO: Document predicate types. String matches state. Array of strings matches multiple states.
+         * Or custom function is called with sprite as 'this'. Defaults to 'true'. */
+        var createPredicate = function(optUpdate) {
+            var t = typeof(optUpdate.predicate);
+            var i;
+
+            if (t==='string') {
+                var pval = optUpdate.predicate;
+                /* TODO: Test this predicate type */
+                return function() {
+                    return s.stateName===pval;
+                };
+            } else if (t==='object') {
+                /* Assume an array of strings */
+                var pvals = {};
+
+                for (i = optUpdate.predicate.length - 1; i >= 0; i--) {
+                    pvals[optUpdate.predicate[i]] = true;
+                }
+
+
+                /* TODO: Test this predicate type */
+                return function() {
+                    return pvals.hasOwnProperty(s.stateName);
+                };
+            } else if (t==='function') {
+                /* TODO: Test this predicate type */
+                return optUpdate.predicate;
+            } else {
+                return troo;
+            }
+        };
+
+        /* TODO: The two following loops are very similar. Refactor them and inline the createPredicate part. */
+
+        var updates = opts.updates;
+        if (updates !== undefined) {
+            updates = new Array(opts.updates.length);
+            for (i = 0; i < opts.updates.length; i++) {
+                var optUpdate = opts.updates[i];
+                var suname = optUpdate.name;
+                if (!sn.spriteUpdaters.hasOwnProperty(suname)) {
+                    throw "Sprite update plugin used in update but not registered: "+suname;
+                }
+                updates[i] = new sn.spriteUpdaters[suname]();
+                copyProps(optUpdate, updates[i]);
+                updates[i].predicate = createPredicate(optUpdate);
+            }
+        }
+
+        var commits = opts.commits;
+        if (commits !== undefined) {
+            commits = new Array(opts.commits.length);
+            for (i = 0; i < opts.commits.length; i++) {
+                var optCommit = opts.commits[i];
+                var scname = optCommit.name;
+                if (!sn.spriteUpdaters.hasOwnProperty(scname)) {
+                    throw "Sprite update plugin used in commit but not registered: "+scname;
+                }
+                commits[i] = new sn.spriteUpdaters[scname]();
+                copyProps(optCommit, commits[i]);
+                commits[i].predicate = createPredicate(optCommit);
+            }
+        }
+
+        opts = clone(opts);
+        opts.updates = updates;
+        opts.commits = commits;
+
+        var s = new Sprite(sn, sd, x, y, h, opts);
+        s.setState(stateName, stateExt);
+
+        if (opts.opts !== undefined) {
+            for(var opt in opts.opts) {
+                s[opt]=opts.opts[opt];
+            }
+        }
+
+        s.init();
+
+        return s;
     };
 
     return Sprite;

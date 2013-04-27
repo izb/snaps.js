@@ -86,4 +86,5 @@ module.exports = function(grunt) {
     grunt.registerTask('test', ['mocha:all']);
 
     grunt.registerTask('start', ['clean', 'dev', 'watch']);
+    grunt.registerTask('dist', ['clean', 'production', 'dev']);
 };

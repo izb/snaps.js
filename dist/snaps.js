@@ -73,9 +73,53 @@ define('sprites/spritedef',[],function() {
 });
 
 /*global define*/
-define('sprites/sprite',[],function() {
+define('util/js',[],function() {
 
     
+
+    /** Convert a click event position (event.pageX/Y) into coords relative
+     * to a canvas.
+     */
+    HTMLCanvasElement.prototype.relCoords = function(x,y,out){
+
+        /* TODO: Doesn't the mouse handler do this too? Consolidate this code. */
+        var rect = this.getBoundingClientRect();
+        out[0] = x - rect.left - window.pageXOffset;
+        out[1] = y - rect.top - window.pageYOffset;
+    };
+
+    return {
+
+        copyProps: function(s,d) {
+            for (var prop in s) {
+                if (s.hasOwnProperty(prop)) {
+                    d[prop] = s[prop];
+                }
+            }
+            return d;
+        },
+
+        clone: function(s) {
+            var d = {};
+            for (var prop in s) {
+                if (s.hasOwnProperty(prop)) {
+                    d[prop] = s[prop];
+                }
+            }
+            return d;
+        }
+
+    };
+
+});
+
+/*global define*/
+define('sprites/sprite',['util/js'], function(js) {
+
+    
+
+    var copyProps = js.copyProps;
+    var clone = js.clone;
 
     /** Creates a new sprite object.
      * @param {Object} sn Snaps engine ref
@@ -449,48 +493,106 @@ define('sprites/sprite',[],function() {
         }
     };
 
-    return Sprite;
-
-});
-
-/*global define*/
-define('util/js',[],function() {
-
-    
-
-    /** Convert a click event position (event.pageX/Y) into coords relative
-     * to a canvas.
-     */
-    HTMLCanvasElement.prototype.relCoords = function(x,y,out){
-
-        /* TODO: Doesn't the mouse handler do this too? Consolidate this code. */
-        var rect = this.getBoundingClientRect();
-        out[0] = x - rect.left - window.pageXOffset;
-        out[1] = y - rect.top - window.pageYOffset;
+    var troo = function() {
+        return true;
     };
 
-    return {
+    /** See snaps.spawnSprite for parameter descriptions.
+     */
+    Sprite.construct = function(sn, defName, stateName, stateExt, x, y, h, opts) {
 
-        copyProps: function(s,d) {
-            for (var prop in s) {
-                if (s.hasOwnProperty(prop)) {
-                    d[prop] = s[prop];
-                }
-            }
-            return d;
-        },
+        var i;
 
-        clone: function(s) {
-            var d = {};
-            for (var prop in s) {
-                if (s.hasOwnProperty(prop)) {
-                    d[prop] = s[prop];
-                }
-            }
-            return d;
+        if(!sn.spriteDefs.hasOwnProperty(defName)) {
+            throw "Error: Missing sprite definition when spawning sprite " + defName;
         }
 
+        var sd = sn.spriteDefs[defName];
+
+        /* TODO: Document predicate types. String matches state. Array of strings matches multiple states.
+         * Or custom function is called with sprite as 'this'. Defaults to 'true'. */
+        var createPredicate = function(optUpdate) {
+            var t = typeof(optUpdate.predicate);
+            var i;
+
+            if (t==='string') {
+                var pval = optUpdate.predicate;
+                /* TODO: Test this predicate type */
+                return function() {
+                    return s.stateName===pval;
+                };
+            } else if (t==='object') {
+                /* Assume an array of strings */
+                var pvals = {};
+
+                for (i = optUpdate.predicate.length - 1; i >= 0; i--) {
+                    pvals[optUpdate.predicate[i]] = true;
+                }
+
+
+                /* TODO: Test this predicate type */
+                return function() {
+                    return pvals.hasOwnProperty(s.stateName);
+                };
+            } else if (t==='function') {
+                /* TODO: Test this predicate type */
+                return optUpdate.predicate;
+            } else {
+                return troo;
+            }
+        };
+
+        /* TODO: The two following loops are very similar. Refactor them and inline the createPredicate part. */
+
+        var updates = opts.updates;
+        if (updates !== undefined) {
+            updates = new Array(opts.updates.length);
+            for (i = 0; i < opts.updates.length; i++) {
+                var optUpdate = opts.updates[i];
+                var suname = optUpdate.name;
+                if (!sn.spriteUpdaters.hasOwnProperty(suname)) {
+                    throw "Sprite update plugin used in update but not registered: "+suname;
+                }
+                updates[i] = new sn.spriteUpdaters[suname]();
+                copyProps(optUpdate, updates[i]);
+                updates[i].predicate = createPredicate(optUpdate);
+            }
+        }
+
+        var commits = opts.commits;
+        if (commits !== undefined) {
+            commits = new Array(opts.commits.length);
+            for (i = 0; i < opts.commits.length; i++) {
+                var optCommit = opts.commits[i];
+                var scname = optCommit.name;
+                if (!sn.spriteUpdaters.hasOwnProperty(scname)) {
+                    throw "Sprite update plugin used in commit but not registered: "+scname;
+                }
+                commits[i] = new sn.spriteUpdaters[scname]();
+                copyProps(optCommit, commits[i]);
+                commits[i].predicate = createPredicate(optCommit);
+            }
+        }
+
+        opts = clone(opts);
+        opts.updates = updates;
+        opts.commits = commits;
+
+        var s = new Sprite(sn, sd, x, y, h, opts);
+        s.setState(stateName, stateExt);
+
+        if (opts.opts !== undefined) {
+            for(var opt in opts.opts) {
+                s[opt]=opts.opts[opt];
+            }
+        }
+
+        s.init();
+
+        return s;
     };
+
+    return Sprite;
 
 });
 
@@ -1292,6 +1394,11 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         this.stats = stats;
     }
 
+    StaggeredIsometric.prototype.tileDimensions = function(out) {
+        out[0] = this.data.tilewidth;
+        out[1] = this.data.tileheight;
+    };
+
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
 
         var map = this.data;
@@ -1341,6 +1448,28 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         return props;
     };
 
+    /** Get a tile by it's row and column position in the original map data.
+     * @param  {object} layer. The layer to search for tiles.
+     * @param  {Number} c The column, aka x position in the data.
+     * @param  {Number} r the row, aka y position in the data.
+     * @return {Tile} A tile, or null if the input was out of range.
+     */
+    StaggeredIsometric.prototype.getTile = function(layer, c, r) {
+        /* TODO: Validate that this is a tiled layer. */
+        var rows = layer.rows;
+        if (c<0||r<0 || r>=rows.length) {
+            return null;
+        }
+
+        var row = rows[r];
+
+        if (c>=row.length) {
+            return null;
+        }
+
+        return row[c];
+    };
+
     StaggeredIsometric.prototype.resolveTiles = function() {
 
         var i, j, k, ts, tileprops;
@@ -1369,7 +1498,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                         }
                     }
                     var t = d - ts.firstgid;
-                    var y = Math.floor(t / ts.xspan);
+                    var y = Math.floor(t / ts.xspan); /* TODO: Vague feeling that x,y are redundant here. May be calculable in the Tile ctor if needed. */
                     var x = t - ts.xspan * y;
 
                     var xoverdraw = ts.tilewidth - map.tilewidth;
@@ -1423,6 +1552,8 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         layerEndY = Math.min(endy, l.rows.length-1);
         layerEndX = Math.max(endx, 0);
 
+        var showRedGreen = false; /* Switch on here for odd/even region info */
+
         for (y = starty; y <= layerEndY; y++) {
             r = l.rows[y];
             var redgreen;
@@ -1435,13 +1566,17 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
             }
 
             for (x = startx; x >= layerEndX; x--) {
-                ctx.strokeStyle = redgreen;
+
                 var rx = Math.floor(-this.xoffset) + stagger + x * xstep;
                 var ry = Math.floor(-this.yoffset) + y * ystep;
                 var rw = map.tilewidth;
                 var rh = map.tileheight;
 
-                ctx.strokeRect(rx, ry, rw, rh);
+                if (showRedGreen) {
+                    ctx.strokeStyle = redgreen;
+                    ctx.strokeRect(rx, ry, rw, rh);
+                }
+
                 ctx.strokeStyle = '#aaa';
                 ctx.beginPath();
                 ctx.moveTo(rx, ry + rh/2);
@@ -1496,6 +1631,8 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
             be:this.maxyoffset+this.clientHeight
         };
     };
+
+    /* TODO: We really need to remove the whole 'out' 2-length array thing. */
 
     /** Takes a world position and tells you what tile it lies on. Take
      * care with the return value, the function signature is all backwards.
@@ -1591,7 +1728,6 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
     StaggeredIsometric.prototype.insertLayer = function(idx, layer) {
         this.data.layers.splice(idx,0,layer);
     };
-
 
     StaggeredIsometric.prototype.updateLayers = function(now) {
         var epoch = +new Date();
@@ -2325,7 +2461,7 @@ define('plugins/sprite/apply-velocity',[],function() {
 });
 
 /*global define*/
-define('plugins/layer/ui-layer',[],function() {
+define('plugins/layer/ui',[],function() {
 
     
 
@@ -2335,127 +2471,120 @@ define('plugins/layer/ui-layer',[],function() {
      * responsive widgets. */
 
     /**
-     * @param {Object} opts Parameters for customizing the layer. Requires these properties:
-     * 'x' and 'y' The center of the scan.
+     * @param {Object} opts Parameters for customizing the layer.
      */
-    function UILayer(layerName, opts) {
+    function UI(layerName, opts) {
         this.opts = opts||{};
         this.name = layerName;
     }
 
-    UILayer.prototype.update = function(now) {
+    UI.prototype.update = function(now) {
     };
 
-    UILayer.prototype.draw = function(ctx, now) {
+    UI.prototype.draw = function(ctx, now) {
 
         /* TODO: Draw widgets */
     };
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('ui-layer', UILayer, function(){});
+        sn.registerLayerPlugin('ui', UI, function(){});
     };
 
 });
 
 /*global define*/
-define('plugins/layer/demo-trace',['util/js'], function(js) {
+define('plugins/layer/ground-sprites',['sprites/sprite',
+        'util/uid'],
+
+function(Sprite, uid) {
 
     
 
-    var copyProps = js.copyProps;
-
     var sn;
 
-    /* A sample layer effect that shows collisions for testing. TODO: Delete this please */
+    /* A layer that holds flat sprites that are intended to be drawn after the ground, but
+     * before the buildings and other sprites. */
 
     /**
-     * @param {Object} opts Parameters for customizing the layer. Requires these properties:
-     * 'x' and 'y' The center of the scan.
+     * @param {Object} opts Parameters for customizing the layer.
      */
-    function DemoTrace(layerName, opts) {
+    function GroundSprites(layerName, opts) {
         this.opts = opts||{};
         this.name = layerName;
-        this.x = opts.x;
-        this.y = opts.y;
-
-        this.collider = sn.createCollider('circle-trace', {radius:opts.radius});
+        this.sprites = [];
+        this.spriteMap = {};
     }
 
-    DemoTrace.prototype.update = function(now) {
+    GroundSprites.prototype.update = function(now) {
     };
 
-    DemoTrace.prototype.draw = function(ctx, now) {
+    GroundSprites.prototype.draw = function(ctx, now) {
 
-        var endW = [0,0];
-        var startS = [0,0];
-        var limit = [0,0];
-        var i,dx,dy,collisionRatio;
-
-        for (i = -200; i < 200; i+=8) {
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'yellow';
-            ctx.beginPath();
-            sn.mouseWorldPos(endW);
-
-            dx = endW[0]+i - this.x;
-            dy = endW[1] - this.y;
-            collisionRatio = this.collider.test(
-                    Math.floor(this.x),
-                    Math.floor(this.y),
-                    Math.floor(dx),
-                    Math.floor(dy),
-                    0,
-                    limit);
-            sn.worldToScreenPos(limit[0], limit[1], limit);
-
-            sn.worldToScreenPos(this.x, this.y, startS);
-            ctx.moveTo(startS[0], startS[1]);
-            ctx.lineTo(limit[0], limit[1]);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.strokeStyle = collisionRatio<1?'red':'green';
-            ctx.arc(limit[0],limit[1],2.5,0,2*Math.PI);
-            ctx.stroke();
-        }
-
-        for (i = -200; i < 200; i+=8) {
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'yellow';
-            ctx.beginPath();
-            sn.mouseWorldPos(endW);
-
-            dx = endW[0] - this.x;
-            dy = endW[1]+i - this.y;
-            collisionRatio = this.collider.test(
-                    Math.floor(this.x),
-                    Math.floor(this.y),
-                    Math.floor(dx),
-                    Math.floor(dy),
-                    0,
-                    limit);
-            sn.worldToScreenPos(limit[0], limit[1], limit);
-
-            sn.worldToScreenPos(this.x, this.y, startS);
-            ctx.moveTo(startS[0], startS[1]);
-            ctx.lineTo(limit[0], limit[1]);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.strokeStyle = collisionRatio<1?'red':'green';
-            ctx.arc(limit[0],limit[1],2.5,0,2*Math.PI);
-            ctx.stroke();
+        var map = sn.map;
+        /* TODO: Sort sprites if sprites are not static. */
+        for (var i = this.sprites.length - 1; i >= 0; i--) {
+            this.sprites[i].draw(ctx, map.xoffset, map.yoffset, now);
         }
     };
 
-    DemoTrace.prototype.set = function(newconf) {
-        copyProps(newconf, this);
+    GroundSprites.prototype.purgeAll = function() {
+        for (var i = this.sprites.length - 1; i >= 0; i--) {
+            this.sprites[i].onRemove();
+        }
+        this.sprites = [];
+        this.spriteMap = {};
     };
+
+    /**
+     * Spawn a new sprite on the ground plane
+     * @param defName The name of the sprite definition to use. These are
+     * set up in your game's spriteDefs data.
+     * @param stateName The initial state. This too is defined in the
+     * sprite's definition, in your game's spriteDefs data.
+     * @param {Function/Number} x The world x coordinate. If a function, it should take
+     * no parameters and return a number.
+     * @param {Function/Number} y The world y coordinate. If a function, it should take
+     * no parameters and return a number.
+     * @param {Function/Number} h The height off the ground. If a function, it should take
+     * no parameters and return a number.
+     * @param Optional parameter object, which can contain:
+     * 'id' if you want to be able to find your sprite again.
+     * 'maxloops' if your sprite should remove itself from the world
+     * after it's looped around its animation a certain number of times. Can be a function, like
+     * the world position parameters.
+     * Normally you'd set this to 1 for things like explosions.
+     * 'update' An array of functions that are called in-order for this
+     * sprite.
+     * 'endCallback' A function called when the sprite naturally ends
+     */
+    GroundSprites.prototype.spawnSprite = function(defName, stateName, stateExt, x, y, opts) {
+
+        opts = opts||{};
+
+        if (opts.id===undefined) {
+            opts.id = uid();
+        } else {
+            if(sn.spriteMap.hasOwnProperty(opts.id)) {
+                throw "Error: duplicate sprite id " + opts.id;
+            }
+        }
+
+        var s = Sprite.construct(sn, defName, stateName, stateExt, x, y, 0, opts);
+
+        /* TODO: If static sprites are set, insert at a sorted screen y position. */
+
+        this.sprites.push(s);
+        this.spriteMap[opts.id] = s;
+
+        return s;
+    };
+
+    /* TODO: Spawn sprite on tile. */
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('demo-trace', DemoTrace, function(){});
+        sn.registerLayerPlugin('ground-sprites', GroundSprites, function(){});
     };
 
 });
@@ -3308,8 +3437,8 @@ define('plugins/default-plugins',[
     'plugins/sprite/flock',
     'plugins/sprite/apply-velocity',
 
-    'plugins/layer/ui-layer',
-    'plugins/layer/demo-trace', /* TODO: Delete and remove */
+    'plugins/layer/ui',
+    'plugins/layer/ground-sprites',
 
     'plugins/fx/particles',
 
@@ -4113,8 +4242,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 _this.spriteDefs[tag] = sd;
 
                 for (state in data.states) {
-                    if (typeof(data.states[state])!=='string') {
+                    if (typeof(data.states[state])==='object') {
                         sd.addState(state, data.states[state].seq, data.states[state].dur);
+                    }
+
+                    if (typeof(data.states[state])==='number') {
+                        sd.addState(state, [data.states[state]], 1000);
                     }
                 }
 
@@ -4173,7 +4306,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         this.addLayer = function(name, type, opts, idx) {
-            /* TODO: index must be in range. name must be unique. */
+            /* TODO: name must be unique. */
+            /* TODO: Instead of index, we should say which layer to insert after or before, e.g.
+             * 'after ground' */
+
+            opts = opts||{};
 
             if (!_this.layerPlugins.hasOwnProperty(type)) {
                 throw "Can't create layer for unregistered layer type: " + type;
@@ -4364,6 +4501,27 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.worldToScreenPos(x,y, out);
         };
 
+        /** Get a tile by it's row and column position in the original map data.
+         * @param  {object} layer. The layer to search for tiles.
+         * @param  {Number} c The column, aka x position in the data.
+         * @param  {Number} r the row, aka y position in the data.
+         * @return {Tile} A tile, or null if the input was out of range.
+         */
+        this.getTile = function(layer, c, r) {
+            return this.map.getTile(layer, c, r);
+        };
+
+        this.getTileWorldPos = function(c, r, out) {
+            this.map.tileDimensions(out);
+            if ((r&1)===0) {
+                out[0] = (c+1)*out[0] - (out[0]/2);
+                out[1] = (r+1)*(out[1]/2);
+            } else {
+                out[0] = (c+1)*out[0];
+                out[1] = (r+1)*(out[1]/2);
+            }
+        };
+
         this.getTilePropAtWorldPos = function(prop, x, y) {
             return this.map.getTilePropAtWorldPos(prop, x,y);
         };
@@ -4392,10 +4550,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.camera = this.cameras[name];
         };
 
-        var troo = function() {
-            return true;
-        };
-
         /**
          * Spawn a new sprite in the world
          * @param defName The name of the sprite definition to use. These are
@@ -4403,11 +4557,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @param stateName The initial state. This too is defined in the
          * sprite's definition, in your game's spriteDefs data.
          * @param {Function/Number} x The world x coordinate. If a function, it should take
-         * no paremeters and return a number.
+         * no parameters and return a number.
          * @param {Function/Number} y The world y coordinate. If a function, it should take
-         * no paremeters and return a number.
+         * no parameters and return a number.
          * @param {Function/Number} h The height off the ground. If a function, it should take
-         * no paremeters and return a number.
+         * no parameters and return a number.
          * @param Optional parameter object, which can contain:
          * 'id' if you want to be able to find your sprite again.
          * 'maxloops' if your sprite should remove itself from the world
@@ -4420,13 +4574,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.spawnSprite = function(defName, stateName, stateExt, x, y, h, opts) {
 
-            /* TODO: 'createSprite' please, for consistency. */
-
-            var i;
-
-            if (opts===undefined) {
-                opts = {};
-            }
+            opts = opts||{};
 
             if (opts.id===undefined) {
                 opts.id = uid();
@@ -4436,94 +4584,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
             }
 
-            if(!_this.spriteDefs.hasOwnProperty(defName)) {
-                throw "Error: Missing sprite definition when spawning sprite " + defName;
-            }
-
-            var sd = _this.spriteDefs[defName];
-
-            /* TODO: Document predicate types. String matches state. Array of strings matches multiple states.
-             * Or custom function is called with sprite as 'this'. Defaults to 'true'. */
-            var createPredicate = function(optUpdate) {
-                var t = typeof(optUpdate.predicate);
-                var i;
-
-                if (t==='string') {
-                    var pval = optUpdate.predicate;
-                    /* TODO: Test this predicate type */
-                    return function() {
-                        return s.stateName===pval;
-                    };
-                } else if (t==='object') {
-                    /* Assume an array of strings */
-                    var pvals = {};
-
-                    for (i = optUpdate.predicate.length - 1; i >= 0; i--) {
-                        pvals[optUpdate.predicate[i]] = true;
-                    }
-
-
-                    /* TODO: Test this predicate type */
-                    return function() {
-                        return pvals.hasOwnProperty(s.stateName);
-                    };
-                } else if (t==='function') {
-                    /* TODO: Test this predicate type */
-                    return optUpdate.predicate;
-                } else {
-                    return troo;
-                }
-            };
-
-            /* TODO: The two following loops are very similar. Refactor them and inline the createPredicate part. */
-
-            var updates = opts.updates;
-            if (updates !== undefined) {
-                updates = new Array(opts.updates.length);
-                for (i = 0; i < opts.updates.length; i++) {
-                    var optUpdate = opts.updates[i];
-                    var suname = optUpdate.name;
-                    if (!_this.spriteUpdaters.hasOwnProperty(suname)) {
-                        throw "Sprite update plugin used in update but not registered: "+suname;
-                    }
-                    updates[i] = new _this.spriteUpdaters[suname]();
-                    copyProps(optUpdate, updates[i]);
-                    updates[i].predicate = createPredicate(optUpdate);
-                }
-            }
-
-            var commits = opts.commits;
-            if (commits !== undefined) {
-                commits = new Array(opts.commits.length);
-                for (i = 0; i < opts.commits.length; i++) {
-                    var optCommit = opts.commits[i];
-                    var scname = optCommit.name;
-                    if (!_this.spriteUpdaters.hasOwnProperty(scname)) {
-                        throw "Sprite update plugin used in commit but not registered: "+scname;
-                    }
-                    commits[i] = new _this.spriteUpdaters[scname]();
-                    copyProps(optCommit, commits[i]);
-                    commits[i].predicate = createPredicate(optCommit);
-                }
-            }
-
-            opts = clone(opts);
-            opts.updates = updates;
-            opts.commits = commits;
-
-            var s = new Sprite(_this, sd, x, y, h, opts);
-            s.setState(stateName, stateExt);
-
-            if (opts.opts !== undefined) {
-                for(var opt in opts.opts) {
-                    s[opt]=opts.opts[opt];
-                }
-            }
-
-            s.init();
+            var s = Sprite.construct(_this, defName, stateName, stateExt, x, y, h, opts);
 
             _this.sprites.push(s);
             _this.spriteMap[opts.id] = s;
+
             return s;
         };
 

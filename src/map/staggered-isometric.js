@@ -29,6 +29,11 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.stats = stats;
     }
 
+    StaggeredIsometric.prototype.tileDimensions = function(out) {
+        out[0] = this.data.tilewidth;
+        out[1] = this.data.tileheight;
+    };
+
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
 
         var map = this.data;
@@ -78,6 +83,28 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         return props;
     };
 
+    /** Get a tile by it's row and column position in the original map data.
+     * @param  {object} layer. The layer to search for tiles.
+     * @param  {Number} c The column, aka x position in the data.
+     * @param  {Number} r the row, aka y position in the data.
+     * @return {Tile} A tile, or null if the input was out of range.
+     */
+    StaggeredIsometric.prototype.getTile = function(layer, c, r) {
+        /* TODO: Validate that this is a tiled layer. */
+        var rows = layer.rows;
+        if (c<0||r<0 || r>=rows.length) {
+            return null;
+        }
+
+        var row = rows[r];
+
+        if (c>=row.length) {
+            return null;
+        }
+
+        return row[c];
+    };
+
     StaggeredIsometric.prototype.resolveTiles = function() {
 
         var i, j, k, ts, tileprops;
@@ -106,7 +133,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                         }
                     }
                     var t = d - ts.firstgid;
-                    var y = Math.floor(t / ts.xspan);
+                    var y = Math.floor(t / ts.xspan); /* TODO: Vague feeling that x,y are redundant here. May be calculable in the Tile ctor if needed. */
                     var x = t - ts.xspan * y;
 
                     var xoverdraw = ts.tilewidth - map.tilewidth;
@@ -160,6 +187,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         layerEndY = Math.min(endy, l.rows.length-1);
         layerEndX = Math.max(endx, 0);
 
+        var showRedGreen = false; /* Switch on here for odd/even region info */
+
         for (y = starty; y <= layerEndY; y++) {
             r = l.rows[y];
             var redgreen;
@@ -172,13 +201,17 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             }
 
             for (x = startx; x >= layerEndX; x--) {
-                ctx.strokeStyle = redgreen;
+
                 var rx = Math.floor(-this.xoffset) + stagger + x * xstep;
                 var ry = Math.floor(-this.yoffset) + y * ystep;
                 var rw = map.tilewidth;
                 var rh = map.tileheight;
 
-                ctx.strokeRect(rx, ry, rw, rh);
+                if (showRedGreen) {
+                    ctx.strokeStyle = redgreen;
+                    ctx.strokeRect(rx, ry, rw, rh);
+                }
+
                 ctx.strokeStyle = '#aaa';
                 ctx.beginPath();
                 ctx.moveTo(rx, ry + rh/2);
@@ -233,6 +266,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             be:this.maxyoffset+this.clientHeight
         };
     };
+
+    /* TODO: We really need to remove the whole 'out' 2-length array thing. */
 
     /** Takes a world position and tells you what tile it lies on. Take
      * care with the return value, the function signature is all backwards.
@@ -328,7 +363,6 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
     StaggeredIsometric.prototype.insertLayer = function(idx, layer) {
         this.data.layers.splice(idx,0,layer);
     };
-
 
     StaggeredIsometric.prototype.updateLayers = function(now) {
         var epoch = +new Date();
