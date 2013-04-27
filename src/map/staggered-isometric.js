@@ -15,6 +15,9 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.maxYOverdraw = 0;
         this.clientWidth = clientWidth;
         this.clientHeight = clientHeight;
+        this.hideBuildings = false;
+
+        this.type = this.data.orientation;
 
         this.minxoffset = this.data.tilewidth/2;
         this.minyoffset = this.data.tileheight/2;
@@ -28,6 +31,14 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
         this.stats = stats;
     }
+
+    StaggeredIsometric.prototype.isStaggered = function() {
+        return this.type==='staggered';
+    };
+
+    StaggeredIsometric.prototype.isOrthogonal = function() {
+        return this.type==='orthogonal';
+    };
 
     StaggeredIsometric.prototype.tileDimensions = function(out) {
         out[0] = this.data.tilewidth;
@@ -311,15 +322,14 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
-    StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
-        /*(void)*/this.worldToTilePos(x, y, xy);
+    StaggeredIsometric.prototype.getTilePropAtTilePos = function(prop, x, y) {
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
             var rows = layers[i].rows;
             if (rows!==undefined) {
-                if (xy[1]>=0&&xy[1]<rows.length) {
-                    var t = rows[xy[1]][xy[0]];
+                if (y>=0&&y<rows.length) {
+                    var t = rows[y][x];
                     if (t) {
                         propval = t.getProperty(prop);
                         if (propval!==undefined) {
@@ -330,6 +340,11 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             }
         }
         return undefined;
+    };
+
+    StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
+        /*(void)*/this.worldToTilePos(x, y, xy);
+        return this.getTilePropAtTilePos(prop, xy[0], xy[1]);
     };
 
     /** Takes a screen position and tells you what tile it lies on. Take
@@ -430,6 +445,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         });
         this.stats.count('spriteSort', (+new Date())-epoch);
 
+
         epoch = +new Date();
         var spriteCursor = 0;
         var stagger = 0;
@@ -437,6 +453,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var top = map.layers.length-1;
         for (i = 0; i < map.layers.length; i++) {
             l = map.layers[i];
+            var showBuildings = !this.hideBuildings||i!==top;
 
             if ('draw' in l) {
                 l.draw(ctx, now);
@@ -455,7 +472,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 stagger = y&1?map.tilewidth/2:0;
                 for (x = startx; x >= layerEndX; x--) {
                     var t = r[x];
-                    if (t!==null) {
+                    if (t!==null&&showBuildings) {
                         t.draw(
                                 ctx,
                                 Math.floor(-this.xoffset) + stagger + x * xstep,

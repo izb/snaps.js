@@ -1380,6 +1380,9 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         this.maxYOverdraw = 0;
         this.clientWidth = clientWidth;
         this.clientHeight = clientHeight;
+        this.hideBuildings = false;
+
+        this.type = this.data.orientation;
 
         this.minxoffset = this.data.tilewidth/2;
         this.minyoffset = this.data.tileheight/2;
@@ -1393,6 +1396,14 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
         this.stats = stats;
     }
+
+    StaggeredIsometric.prototype.isStaggered = function() {
+        return this.type==='staggered';
+    };
+
+    StaggeredIsometric.prototype.isOrthogonal = function() {
+        return this.type==='orthogonal';
+    };
 
     StaggeredIsometric.prototype.tileDimensions = function(out) {
         out[0] = this.data.tilewidth;
@@ -1676,15 +1687,14 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         }
     };
 
-    StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
-        /*(void)*/this.worldToTilePos(x, y, xy);
+    StaggeredIsometric.prototype.getTilePropAtTilePos = function(prop, x, y) {
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
             var rows = layers[i].rows;
             if (rows!==undefined) {
-                if (xy[1]>=0&&xy[1]<rows.length) {
-                    var t = rows[xy[1]][xy[0]];
+                if (y>=0&&y<rows.length) {
+                    var t = rows[y][x];
                     if (t) {
                         propval = t.getProperty(prop);
                         if (propval!==undefined) {
@@ -1695,6 +1705,11 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
             }
         }
         return undefined;
+    };
+
+    StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
+        /*(void)*/this.worldToTilePos(x, y, xy);
+        return this.getTilePropAtTilePos(prop, xy[0], xy[1]);
     };
 
     /** Takes a screen position and tells you what tile it lies on. Take
@@ -1795,6 +1810,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         });
         this.stats.count('spriteSort', (+new Date())-epoch);
 
+
         epoch = +new Date();
         var spriteCursor = 0;
         var stagger = 0;
@@ -1802,6 +1818,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         var top = map.layers.length-1;
         for (i = 0; i < map.layers.length; i++) {
             l = map.layers[i];
+            var showBuildings = !this.hideBuildings||i!==top;
 
             if ('draw' in l) {
                 l.draw(ctx, now);
@@ -1820,7 +1837,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                 stagger = y&1?map.tilewidth/2:0;
                 for (x = startx; x >= layerEndX; x--) {
                     var t = r[x];
-                    if (t!==null) {
+                    if (t!==null&&showBuildings) {
                         t.draw(
                                 ctx,
                                 Math.floor(-this.xoffset) + stagger + x * xstep,
@@ -3874,29 +3891,75 @@ define('ai/pathfinder',[],function() {
     /** This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
      * new sn.PathFinder(diagonals, solid);
-     * @param {Boolean} diagonals If true, the path will include diagonal
-     * movements (Along tile corners).
-     * @param {Function} solid A function that determines if a position is
+     * @param {Boolean} diagonals Optinal; defaults to true. If set, the path will
+     * include diagonal movements (Along tile corners).
+     * @param {Function} solid Optional. A function that determines if a position is
      * solid or not. Should accept an x,y position and return a boolean. True
-     * for solid.
+     * for solid. If omitted, the default is to check the tile grid properties for
+     * height>0
      */
     function PathFinder(sn, diagonals, solid) {
 
         this.sn = sn;
-        this.ground = sn.map.groundLayer();
-        this.xcount = sn.map.data.width;
-        this.ycount = sn.map.data.height;
+        var map = sn.map;
+        this.ground = map.groundLayer();
+        this.xcount = map.data.width;
+        this.ycount = map.data.height;
         this.nodeRows = new Array(this.ycount);
+
+        if (diagonals===undefined) {
+            diagonals = true;
+        }
 
         for (var i = this.nodeRows.length - 1; i >= 0; i--) {
             this.nodeRows[i] = new Array(this.xcount);
         }
 
+        solid = solid || function(x, y) {
+            return sn.getTilePropAtTilePos('height', x, y) > 0;
+        };
+
         var r2=Math.sqrt(2);
 
-        this.xdirections = diagonals?[1,  1, 0, -1, -1, -1,  0,  1]:[1, 0, -1,  0];
-        this.ydirections = diagonals?[0,  1, 1,  1,  0, -1, -1, -1]:[0, 1,  0, -1];
-        this.distances   = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
+        if(map.isStaggered()) {
+
+            /* Staggered isometric map */
+
+            /* The direction offsets look very weird here. On a staggered isometric map, we assume
+             * the top of the screen is 'north'. If you move from tile to tile around the compass,
+             * the offset jumps in the original orthogonally arranged tile data looks peculiar and
+             * differs on odd and even rows. Trust me though, these values check out fine. */
+
+            /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
+            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0];
+            this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
+
+            /*                                E  SE   S  SW   W  NW   N  NE   E   S   W   N */
+            this.xdirectionsEven = diagonals?[1,  0,  0, -1, -1, -1,  0,  0]:[1,  0, -1,  0];
+            this.ydirectionsEven = diagonals?[0,  1,  2,  1,  0, -1, -2, -1]:[0,  2,  0, -2];
+
+            this.distances   = diagonals?[r2, 1, r2,  1, r2,  1, r2, 1]:[1, 1,  1, -1];
+
+            this.ndirections = this.xdirectionsOdd.length;
+
+        } else if (map.isOrthogonal()) {
+
+            /* Orthogonal map */
+
+            /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
+            this.xdirectionsOdd = diagonals?[1,  1, 0, -1, -1, -1,  0,  1]:[1, 0, -1,  0];
+            this.ydirectionsOdd = diagonals?[0,  1, 1,  1,  0, -1, -1, -1]:[0, 1,  0, -1];
+
+            this.xdirectionsEven = this.xdirectionsOdd;
+            this.ydirectionsEven = this.ydirectionsOdd;
+
+            this.distances   = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
+
+            this.ndirections = this.xdirectionsOdd.length;
+
+        } else {
+            throw "Unsupported map orientation in PathFinder: "+map.type;
+        }
 
         this.scoreHeap = new sn.MinHeap();
 
@@ -3934,6 +3997,8 @@ define('ai/pathfinder',[],function() {
                 current = current.cameFrom;
             }
 
+            path.push(this.startx,this.starty);
+
             return path;
         };
     }
@@ -3947,6 +4012,9 @@ define('ai/pathfinder',[],function() {
     PathFinder.prototype.route = function(x0,y0,x1,y1) {
 
         var i;
+
+        this.startx = x0;
+        this.starty = y0;
 
         /* Reset everything */
         for (i = this.nodeRows.length - 1; i >= 0; i--) {
@@ -3967,9 +4035,10 @@ define('ai/pathfinder',[],function() {
             this.scoreHeap.pop();
             current.closed = true;
 
-            for (i = this.xdirections.length - 1; i >= 0; i--) {
-                var xd = this.xdirections[i];
-                var yd = this.ydirections[i];
+            for (i = this.ndirections - 1; i >= 0; i--) {
+                var even = (current.y&1)===0;
+                var xd = even?this.xdirectionsEven[i]:this.xdirectionsOdd[i];
+                var yd = even?this.ydirectionsEven[i]:this.ydirectionsOdd[i];
                 var neighbour = this.node(current.x+xd,current.y+yd);
                 if (neighbour===null) {
                     /* Can't move that way. */
@@ -4168,6 +4237,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             /* Obviously we're assuming it's always a staggered isometric map.
              * We don't yet support anything else. */
             this.map = new StaggeredIsometric(game.map, game.hitTests, this.clientWidth, this.clientHeight, this.stats);
+            this.map.hideBuildings = !!settings.hideBuildings;
         }
 
         var draw = _this.game.draw;
@@ -4524,6 +4594,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.getTilePropAtWorldPos = function(prop, x, y) {
             return this.map.getTilePropAtWorldPos(prop, x,y);
+        };
+
+        this.getTilePropAtTilePos = function(prop, x, y) {
+            return this.map.getTilePropAtTilePos(prop, x,y);
         };
 
         this.createCollider = function(type, opts) {

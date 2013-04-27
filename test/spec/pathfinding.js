@@ -21,6 +21,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                 "x":0,
                 "y":0
             }],
+            orientation:'orthogonal',
             width:10,
             height:10
         };
@@ -97,7 +98,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
             }
 
             expect(routeGrid).to.equal(
-                ".........." +
+                "O........." +
                 ".O........" +
                 "..O......." +
                 "...O......" +
@@ -147,7 +148,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                 "......O..." +
                 ".......O.." +
                 "........O." +
-                "..........");
+                ".........O");
 
         });
 
@@ -179,7 +180,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
             }
 
             expect(routeGrid).to.equal(
-                ".........." +
+                "O........." +
                 "OOO......." +
                 "..OO......" +
                 "...OOO...." +
@@ -225,7 +226,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                 ".........." +
                 ".........." +
                 ".........." +
-                ".OOOOOOOOO" +
+                "OOOOOOOOOO" +
                 ".........." +
                 ".........." +
                 ".........." +
@@ -267,7 +268,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                 ".#.O...#O." +
                 ".#.O...#O." +
                 ".#.O...#O." +
-                ".#.....#O." +
+                ".#.O...#O." +
                 ".#######O." +
                 ".......O.." +
                 "......O...");
@@ -306,7 +307,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                 ".OOOO....." +
                 "O####O#..." +
                 "O#..O.#..." +
-                "O#.O..#..." +
+                "O#OO..#..." +
                 ".######..." +
                 ".........." +
                 ".........." +
@@ -386,7 +387,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
             }
 
             expect(routeGrid).to.equal(
-                ".#.#.#.#.O" +
+                "O#.#.#.#.O" +
                 "O#.#.O.#O#" +
                 "O#.#O#O#.O" +
                 "O#.#O#O#.O" +

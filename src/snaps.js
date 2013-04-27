@@ -97,6 +97,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             /* Obviously we're assuming it's always a staggered isometric map.
              * We don't yet support anything else. */
             this.map = new StaggeredIsometric(game.map, game.hitTests, this.clientWidth, this.clientHeight, this.stats);
+            this.map.hideBuildings = !!settings.hideBuildings;
         }
 
         var draw = _this.game.draw;
@@ -453,6 +454,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.getTilePropAtWorldPos = function(prop, x, y) {
             return this.map.getTilePropAtWorldPos(prop, x,y);
+        };
+
+        this.getTilePropAtTilePos = function(prop, x, y) {
+            return this.map.getTilePropAtTilePos(prop, x,y);
         };
 
         this.createCollider = function(type, opts) {
