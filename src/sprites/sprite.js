@@ -436,7 +436,7 @@ define(['util/js'], function(js) {
                 var optUpdate = opts.updates[i];
                 var suname = optUpdate.name;
                 if (!sn.spriteUpdaters.hasOwnProperty(suname)) {
-                    throw "Sprite update plugin used in update but not registered: "+suname;
+                    throw "Sprite plugin not registered: "+suname;
                 }
                 updates[i] = new sn.spriteUpdaters[suname]();
                 copyProps(optUpdate, updates[i]);
@@ -451,7 +451,7 @@ define(['util/js'], function(js) {
                 var optCommit = opts.commits[i];
                 var scname = optCommit.name;
                 if (!sn.spriteUpdaters.hasOwnProperty(scname)) {
-                    throw "Sprite update plugin used in commit but not registered: "+scname;
+                    throw "Sprite plugin not registered: "+scname;
                 }
                 commits[i] = new sn.spriteUpdaters[scname]();
                 copyProps(optCommit, commits[i]);

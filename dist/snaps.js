@@ -551,7 +551,7 @@ define('sprites/sprite',['util/js'], function(js) {
                 var optUpdate = opts.updates[i];
                 var suname = optUpdate.name;
                 if (!sn.spriteUpdaters.hasOwnProperty(suname)) {
-                    throw "Sprite update plugin used in update but not registered: "+suname;
+                    throw "Sprite plugin not registered: "+suname;
                 }
                 updates[i] = new sn.spriteUpdaters[suname]();
                 copyProps(optUpdate, updates[i]);
@@ -566,7 +566,7 @@ define('sprites/sprite',['util/js'], function(js) {
                 var optCommit = opts.commits[i];
                 var scname = optCommit.name;
                 if (!sn.spriteUpdaters.hasOwnProperty(scname)) {
-                    throw "Sprite update plugin used in commit but not registered: "+scname;
+                    throw "Sprite plugin not registered: "+scname;
                 }
                 commits[i] = new sn.spriteUpdaters[scname]();
                 copyProps(optCommit, commits[i]);
@@ -3921,6 +3921,9 @@ define('ai/pathfinder',[],function() {
 
         var r2=Math.sqrt(2);
 
+        /* TODO: Dynamic cost based on proximity of solid tiles. I.e. walk diagonally on open ground,
+         * but orthogonally around the edges of buildings. */
+
         if(map.isStaggered()) {
 
             /* Staggered isometric map */
@@ -4007,6 +4010,49 @@ define('ai/pathfinder',[],function() {
         var dx = x1-x0;
         var dy = y1-y0;
         return (dx*dx)+(dy*dy);
+    };
+
+    PathFinder.prototype.routeToVectors = function(route) {
+        /* TODO. See routeToDirections */
+    };
+
+    PathFinder.prototype.routeToDirections = function(route) {
+        var map = this.sn.map;
+        var newroute = [];
+        if(map.isStaggered()) {
+            /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
+             * 1 pair ahead of the current pair to determine direction. */
+            for (var i = route.length - 4; i >= 0; i-=2) {
+                var y0 = route[i+1];
+                var dx = route[i]-route[i+2];
+                var dy = y0-route[i+3];
+                /* If you're browsing this code and start to feel some sort of rage when you see
+                 * the logic wrapped up in these ternary operators wrapped up in a switch statement,
+                 * then I'm genuinely sorry. I do however find this sort of thing strangely beautiful.
+                 * If it helps, here's a top tip that explains that !== is the same as xor:
+                 * http://stackoverflow.com/a/4540443/974 */
+                switch(dy) {
+                    case -2:
+                        newroute.push('n');
+                        continue;
+                    case -1:
+                        newroute.push((((dx===0)!==((y0&1)!==0)))?'nw':'ne');
+                        continue;
+                    case 0:
+                        newroute.push((dx===1)?'e':'w');
+                        continue;
+                    case 1:
+                        newroute.push((((dx===0)!==((y0&1)!==0)))?'sw':'se');
+                        continue;
+                    default:
+                        newroute.push('s');
+                        continue;
+                }
+            }
+        } else {
+            throw "Unsupported map orientation in routeToDirections: "+map.type;
+        }
+        return newroute;
     };
 
     PathFinder.prototype.route = function(x0,y0,x1,y1) {
