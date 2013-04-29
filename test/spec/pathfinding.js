@@ -86,7 +86,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        "..........";
 
 
-            var pf = new sn.PathFinder(true, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
             var route = pf.route(0,0,9,9);
 
@@ -127,7 +127,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        "..........";
 
 
-            var pf = new sn.PathFinder(true, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
             var route = pf.route(9,9,0,0);
 
@@ -168,7 +168,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        "..........";
 
 
-            var pf = new sn.PathFinder(false, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid), false);
 
             var route = pf.route(0,0,9,9);
 
@@ -209,7 +209,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        "..........";
 
 
-            var pf = new sn.PathFinder(true, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
             var route = pf.route(0,5,9,5);
 
@@ -250,7 +250,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        "..........";
 
 
-            var pf = new sn.PathFinder(true, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
             var route = pf.route(3,6,6,9);
 
@@ -291,7 +291,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        "..........";
 
 
-            var pf = new sn.PathFinder(true, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
             var route = pf.route(2,4,0,4);
 
@@ -333,7 +333,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        "..........";
 
 
-            var pf = new sn.PathFinder(true, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
             var route = pf.route(3,0,6,9);
 
@@ -375,7 +375,7 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        ".#...#.#..";
 
 
-            var pf = new sn.PathFinder(true, isSolid.bind(this,grid));
+            var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
             var route = pf.route(0,0,9,0);
 

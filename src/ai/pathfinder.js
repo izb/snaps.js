@@ -14,14 +14,23 @@ define(function() {
     /** This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
      * new sn.PathFinder(diagonals, solid);
-     * @param {Boolean} diagonals Optinal; defaults to true. If set, the path will
-     * include diagonal movements (Along tile corners).
      * @param {Function} solid Optional. A function that determines if a position is
      * solid or not. Should accept an x,y position and return a boolean. True
      * for solid. If omitted, the default is to check the tile grid properties for
      * height>0
+     * @param {Boolean} diagonals Optional; defaults to true. If set, the path will
+     * include diagonal movements (Along tile corners).
+     * @param {Boolean} cutcorners Optional; defaults to true. Only has an effect if
+     * diagonals is true. If false, the path will move across tile edges when close to
+     * solid tiles, i.e. it will avoid the possibility of trying to cut across a solid
+     * corner.
+     * @param {Function} cost Optional. A function that determines the cost factor of moving
+     * into a tile. It should return 1 for a normal tile and a number >1 for a tile that has
+     * some extra cost associated with moving into it. E.g. if a tile is water, return some
+     * value >1 to make a route avoid water unless it has no easy option. The higher the cost,
+     * the more likely it is that the water will be avoided.
      */
-    function PathFinder(sn, diagonals, solid) {
+    function PathFinder(sn, solid, diagonals, cutcorners, cost) {
 
         this.sn = sn;
         var map = sn.map;
@@ -29,6 +38,10 @@ define(function() {
         this.xcount = map.data.width;
         this.ycount = map.data.height;
         this.nodeRows = new Array(this.ycount);
+
+        if (cutcorners===undefined) {
+            cutcorners = true;
+        }
 
         if (diagonals===undefined) {
             diagonals = true;
@@ -42,7 +55,12 @@ define(function() {
             return sn.getTilePropAtTilePos('height', x, y) > 0;
         };
 
-        var r2=Math.sqrt(2);
+        var r2=Math.sqrt(2); /* ~1.414 */
+
+        this.cost = cost || function(x,y) {
+            /* TODO: Test the overriding of this. */
+            return 1;
+        };
 
         /* TODO: Dynamic cost based on proximity of solid tiles. I.e. walk diagonally on open ground,
          * but orthogonally around the edges of buildings. */
@@ -57,7 +75,7 @@ define(function() {
              * differs on odd and even rows. Trust me though, these values check out fine. */
 
             /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
-            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0];
+            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal */
             this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
 
             /*                                E  SE   S  SW   W  NW   N  NE   E   S   W   N */
@@ -65,6 +83,32 @@ define(function() {
             this.ydirectionsEven = diagonals?[0,  1,  2,  1,  0, -1, -2, -1]:[0,  2,  0, -2];
 
             this.distances   = diagonals?[r2, 1, r2,  1, r2,  1, r2, 1]:[1, 1,  1, -1];
+
+            if (cutcorners) {
+                this.distance = function(idx) {
+                    return this.distances[idx];
+                };
+            } else {
+                this.distance = function(idx,x0,y0) {
+                    /* In the case where we are moving diagonally past a solid tile, we return the cost as 3, which is
+                     * > sqrt(2) */
+                    var even = (y0&1)===0;
+                    var dirsx = even?this.xdirectionsEven:this.xdirectionsOdd;
+                    var dirsy = even?this.ydirectionsEven:this.ydirectionsOdd;
+                    switch(idx) {
+                        case 0: /* E */
+                            return (solid(x0+dirsx[7], y0+dirsy[7]) || solid(x0+dirsx[1], y0+dirsy[1]))?3:this.distances[idx]; /* 7===NE, 1===SE*/
+                        case 2: /* S */
+                            return (solid(x0+dirsx[3], y0+dirsy[3]) || solid(x0+dirsx[1], y0+dirsy[1]))?3:this.distances[idx]; /* 3===SW, 1===SE*/
+                        case 4: /* W */
+                            return (solid(x0+dirsx[3], y0+dirsy[3]) || solid(x0+dirsx[5], y0+dirsy[5]))?3:this.distances[idx]; /* 3===SW, 5===NW*/
+                        case 6: /* N */
+                            return (solid(x0+dirsx[7], y0+dirsy[7]) || solid(x0+dirsx[5], y0+dirsy[5]))?3:this.distances[idx]; /* 7===NE, 5===NW*/
+                        default:
+                            return this.distances[idx];
+                    }
+                };
+            }
 
             this.ndirections = this.xdirectionsOdd.length;
 
@@ -80,6 +124,14 @@ define(function() {
             this.ydirectionsEven = this.ydirectionsOdd;
 
             this.distances   = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
+
+            if (cutcorners) {
+                this.distance = function(idx) {
+                    return this.distances[idx];
+                };
+            } else {
+                throw "Unsupported cutcorners===false in map of type: "+map.type;
+            }
 
             this.ndirections = this.xdirectionsOdd.length;
 
@@ -128,6 +180,11 @@ define(function() {
             return path;
         };
     }
+
+    /* TODO: Sweep the code and ensure that all functions are of the correct type as appropriate,
+     * i.e. this.functions where provate access to this is required, prototype where interface is
+     * exposed or there should be only one creation of the function and var functions where
+     * the function has module scope and does not require this access. */
 
     var distance2 = function(x0,y0,x1,y1) {
         var dx = x1-x0;
@@ -214,7 +271,7 @@ define(function() {
                     continue;
                 }
 
-                var tscore = current.score + this.distances[i];
+                var tscore = current.score + this.cost(current.x,current.y) * this.distance(i,current.x,current.y);
                 if (neighbour.closed && tscore>=neighbour.score) {
                     continue;
                 }
