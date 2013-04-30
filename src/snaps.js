@@ -369,8 +369,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         /** Sets the map position to centre on a given world coordinate.
-         * @param {[Number]} x World X position
-         * @param {[Number]} y World Y position
+         * @param {Number} x World X position
+         * @param {Number} y World Y position
          */
         this.scrollTo = function(x,y) {
             _this.map.scrollTo(x, y);

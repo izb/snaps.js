@@ -5,6 +5,9 @@ define(function() {
 
     var sn;
 
+    /** The bounce sprite plugin.
+     * @constructor
+     */
     function Bounce() {
 
     }

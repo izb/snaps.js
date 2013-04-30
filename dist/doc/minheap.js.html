@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: util/minheap.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: util/minheap.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/*global define*/
+define(function() {
+
+    'use strict';
+
+    /**
+     * Implementation of a min heap.
+     *
+     * http://www.digitaltsunami.net/projects/javascript/minheap/index.html
+     *
+     * Modified to expect only to contain objects that expose a 'score'
+     * value for comparison.
+     */
+
+    function MinHeap() {
+
+        this.heap = [];
+
+        /**
+         * Retrieve the index of the left child of the node at index i.
+         */
+        this.left = function(i) {
+            return 2 * i + 1;
+        };
+
+        /**
+         * Retrieve the index of the right child of the node at index i.
+         */
+        this.right = function(i) {
+            return 2 * i + 2;
+        };
+
+        /**
+         * Retrieve the index of the parent of the node at index i.
+         */
+        this.parent = function(i) {
+            return Math.ceil(i / 2) - 1;
+        };
+
+        /**
+         * Ensure that the contents of the heap don't violate the
+         * constraint.
+         */
+        this.heapify = function(i) {
+            var lIdx = this.left(i);
+            var rIdx = this.right(i);
+            var smallest;
+            if (lIdx &lt; this.heap.length && (this.heap[lIdx].score &lt; this.heap[i].score)) {
+                smallest = lIdx;
+            } else {
+                smallest = i;
+            }
+            if (rIdx &lt; this.heap.length && (this.heap[rIdx].score &lt; this.heap[smallest].score)) {
+                smallest = rIdx;
+            }
+            if (i !== smallest) {
+                var temp = this.heap[smallest];
+                this.heap[smallest] = this.heap[i];
+                this.heap[i] = temp;
+                this.heapify(smallest);
+            }
+        };
+
+        /**
+         * Starting with the node at index i, move up the heap until parent value
+         * is less than the node.
+         */
+        this.siftUp = function(i) {
+            var p = this.parent(i);
+            if (p >= 0 && (this.heap[p].score > this.heap[i].score)) {
+                var temp = this.heap[p];
+                this.heap[p] = this.heap[i];
+                this.heap[i] = temp;
+                this.siftUp(p);
+            }
+        };
+    }
+
+    /**
+     * Place an item in the heap.
+     * @param item
+     */
+    MinHeap.prototype.push = function(item) {
+        this.heap.push(item);
+        this.siftUp(this.heap.length - 1);
+    };
+
+    /**
+     * Pop the minimum valued item off of the heap. The heap is then updated
+     * to float the next smallest item to the top of the heap.
+     * @returns the minimum value contained within the heap.
+     */
+    MinHeap.prototype.pop = function() {
+        var value;
+        if (this.heap.length > 1) {
+            value = this.heap[0];
+            // Put the bottom element at the top and let it drift down.
+            this.heap[0] = this.heap.pop();
+            this.heapify(0);
+        } else {
+            value = this.heap.pop();
+        }
+        return value;
+    };
+
+
+    /**
+     * Returns the minimum value contained within the heap.  This will
+     * not remove the value from the heap.
+     * @returns the minimum value within the heap.
+     */
+    MinHeap.prototype.peek = function() {
+        return this.heap[0];
+    };
+
+    /**
+     * Return the current number of elements within the heap.
+     * @returns size of the heap.
+     */
+    MinHeap.prototype.size = function() {
+        return this.heap.length;
+    };
+
+    MinHeap.prototype.clear = function() {
+        this.heap.length = 0;
+        return this;
+    };
+
+    return MinHeap;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Global</h3><ul><li><a href="global.html#backInCubic">backInCubic</a></li><li><a href="global.html#backInQuartic">backInQuartic</a></li><li><a href="global.html#bounceIn">bounceIn</a></li><li><a href="global.html#bounceOut">bounceOut</a></li><li><a href="global.html#easeOutInCubic">easeOutInCubic</a></li><li><a href="global.html#fastRand">fastRand</a></li><li><a href="global.html#outBackCubic">outBackCubic</a></li><li><a href="global.html#outBackQuartic">outBackQuartic</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a> on Tue Apr 30 2013 16:47:47 GMT+0100 (BST)
+</footer>
+
+<script> prettyPrint(); </script>
+</body>
+</html>
