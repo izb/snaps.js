@@ -11,6 +11,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-mocha');
+    grunt.loadNpmTasks('grunt-jsdoc');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -68,6 +69,14 @@ module.exports = function(grunt) {
                 src: ["test/*.html"]
             }
         },
+        jsdoc : {
+            dist : {
+                src: ['src/**/*.js'],
+                options: {
+                    destination: 'dist/doc'
+                }
+            }
+        },
         watch: {
             js: {
                 files: ['src/**/*.js'],
@@ -84,6 +93,7 @@ module.exports = function(grunt) {
     grunt.registerTask('production', ['jshint:production','requirejs:snaps','copy:dist','closurecompiler:dist']);
     grunt.registerTask('default', ['production']);
     grunt.registerTask('test', ['mocha:all']);
+    grunt.registerTask('doc', ['jsdoc:dist']);
 
     grunt.registerTask('start', ['clean', 'dev', 'watch']);
     grunt.registerTask('dist', ['clean', 'production', 'test', 'dev']);
