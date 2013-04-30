@@ -91,331 +91,6 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="backInCubic"><span class="type-signature"></span>backInCubic<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Moves back first before easing in.
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tween.js.html">animate/tween.js</a>, line 98
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="backInQuartic"><span class="type-signature"></span>backInQuartic<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Moves back first before easing in.
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tween.js.html">animate/tween.js</a>, line 107
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="bounceIn"><span class="type-signature"></span>bounceIn<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Bounces around the start point, then moves quickly to the target.
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tween.js.html">animate/tween.js</a>, line 143
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="bounceOut"><span class="type-signature"></span>bounceOut<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Bounces around the target point, then settles.
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tween.js.html">animate/tween.js</a>, line 134
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="easeOutInCubic"><span class="type-signature"></span>easeOutInCubic<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Opposite of easing in and out. Starts and ends linearly, butcomes to a pause in the middle.
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tween.js.html">animate/tween.js</a>, line 89
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
     <h4 class="name" id="fastRand"><span class="type-signature"></span>fastRand<span class="signature">(min, max, setsize)</span><span class="type-signature"></span></h4>
     
     
@@ -424,7 +99,15 @@
     
     
     <div class="description">
-        Generates a function that returns a faster random numbergenerator, but which has a setup cost. If you're using a very largenumber of random numbers, this is significantly faster.http://jsperf.com/precalc-random-numberse.g.var nextRand = rnd.fastRand(1, 10); // The slow bitvar n = nextRand(); // The fast bit
+        Generates a function that returns a faster random number
+generator, but which has a setup cost. If you're using a very large
+number of random numbers, this is significantly faster.
+
+http://jsperf.com/precalc-random-numbers
+
+e.g.
+var nextRand = rnd.fastRand(1, 10); // The slow bit
+var n = nextRand(); // The fast bit
     </div>
     
 
@@ -510,7 +193,8 @@
             
             
             
-            <td class="description last">Optional. The number of values toprecalculate.</td>
+            <td class="description last">Optional. The number of values to
+precalculate.</td>
         </tr>
 	
 	
@@ -562,136 +246,6 @@
     
 </dd>
 
-        
-            
-<dt>
-    <h4 class="name" id="outBackCubic"><span class="type-signature"></span>outBackCubic<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Overshoots, then eases back
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tween.js.html">animate/tween.js</a>, line 116
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="outBackQuartic"><span class="type-signature"></span>outBackQuartic<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Overshoots, then eases back
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="tween.js.html">animate/tween.js</a>, line 125
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
         </dl>
     
     
@@ -708,13 +262,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Global</h3><ul><li><a href="global.html#backInCubic">backInCubic</a></li><li><a href="global.html#backInQuartic">backInQuartic</a></li><li><a href="global.html#bounceIn">bounceIn</a></li><li><a href="global.html#bounceOut">bounceOut</a></li><li><a href="global.html#easeOutInCubic">easeOutInCubic</a></li><li><a href="global.html#fastRand">fastRand</a></li><li><a href="global.html#outBackCubic">outBackCubic</a></li><li><a href="global.html#outBackQuartic">outBackQuartic</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="pathfinder.html">ai/pathfinder</a></li><li><a href="tween.html">animate/tween</a></li></ul><h3>Classes</h3><ul><li><a href="pathfinder.PathFinder.html">PathFinder</a></li></ul><h3>Global</h3><ul><li><a href="global.html#fastRand">fastRand</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a> on Tue Apr 30 2013 16:47:47 GMT+0100 (BST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a> on Tue Apr 30 2013 22:41:04 GMT+0100 (BST)
 </footer>
 
 <script> prettyPrint(); </script>

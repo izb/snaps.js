@@ -1867,6 +1867,9 @@ define('plugins/sprite/bounce',[],function() {
 
     var sn;
 
+    /** The bounce sprite plugin.
+     * @constructor
+     */
     function Bounce() {
 
     }
@@ -3488,25 +3491,36 @@ define('animate/tween',[],function() {
 
     /* Via http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm */
 
-    /*
-     * In all tween functions:
-     * t = Current time passed since the beginning of the animation. Must be >=0.
-     * Will be clamped to the duration.
-     * b = The start value of the property being tweened
-     * c = The desired delta. E.g. if b = 10, and you want to tween it to 30, c
-     * should be 20
-     * d = The duration in the same units as t.
-     *
-     * For the effects you should know that quintic is softer than quadratic,
-     * which is softer than cubic.
+    /**
+     * @module animate/tween
      */
-
     return {
+
+        /**
+         * Simple linear tween.
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         linear: function(t, b, c, d)
         {
             return b+c*Math.min(1,t/d);
         },
 
+        /**
+         * Eases in and out of the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeInOutCubic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
@@ -3514,6 +3528,16 @@ define('animate/tween',[],function() {
             return b+c*(-2*tc + 3*ts);
         },
 
+        /**
+         * Eases softly in and out of the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeInOutQuintic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
@@ -3521,6 +3545,16 @@ define('animate/tween',[],function() {
             return b+c*(6*tc*ts + -15*ts*ts + 10*tc);
         },
 
+        /**
+         * Eases very softly into the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeInQuintic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
@@ -3528,23 +3562,63 @@ define('animate/tween',[],function() {
             return b+c*(tc*ts);
         },
 
+        /**
+         * Eases softly into the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeInQuartic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
             return b+c*(ts*ts);
         },
 
+        /**
+         * Eases into the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeInCubic: function(t, b, c, d) {
             t=Math.min(d,t);
             var tc=(t/=d)*t*t;
             return b+c*(tc);
         },
 
+        /**
+         * Eases quickly into the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeInQuadratic: function(t, b, c, d) {
             t=Math.min(d,t);
             return b+c*(t*t/d);
         },
 
+        /**
+         * Eases very softly out of the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeOutQuintic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
@@ -3552,6 +3626,16 @@ define('animate/tween',[],function() {
             return b+c*(tc*ts + -5*ts*ts + 10*tc + -10*ts + 5*t);
         },
 
+        /**
+         * Eases softly out of the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeOutQuartic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
@@ -3559,6 +3643,16 @@ define('animate/tween',[],function() {
             return b+c*(-1*ts*ts + 4*tc + -6*ts + 4*t);
         },
 
+        /**
+         * Eases out of the animation
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
+         */
         easeOutCubic: function(t, b, c, d) {
             t=Math.min(d,t);
             var ts=(t/=d)*t;
@@ -3568,6 +3662,13 @@ define('animate/tween',[],function() {
 
         /** Opposite of easing in and out. Starts and ends linearly, but
          * comes to a pause in the middle.
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
          */
         easeOutInCubic: function(t, b, c, d) {
             t=Math.min(d,t);
@@ -3577,6 +3678,13 @@ define('animate/tween',[],function() {
         },
 
         /** Moves back first before easing in.
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
          */
         backInCubic: function(t, b, c, d) {
             t=Math.min(d,t);
@@ -3586,6 +3694,13 @@ define('animate/tween',[],function() {
         },
 
         /** Moves back first before easing in.
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
          */
         backInQuartic: function(t, b, c, d) {
             t=Math.min(d,t);
@@ -3595,6 +3710,13 @@ define('animate/tween',[],function() {
         },
 
         /** Overshoots, then eases back
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
          */
         outBackCubic: function(t, b, c, d) {
             t=Math.min(d,t);
@@ -3604,6 +3726,13 @@ define('animate/tween',[],function() {
         },
 
         /** Overshoots, then eases back
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
          */
         outBackQuartic: function(t, b, c, d) {
             t=Math.min(d,t);
@@ -3613,6 +3742,13 @@ define('animate/tween',[],function() {
         },
 
         /** Bounces around the target point, then settles.
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
          */
         bounceOut: function(t, b, c, d) {
             t=Math.min(d,t);
@@ -3622,6 +3758,13 @@ define('animate/tween',[],function() {
         },
 
         /** Bounces around the start point, then moves quickly to the target.
+         * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
+         * Will be clamped to the duration.
+         * @param  {Number} b The start value of the property being tweened
+         * @param  {Number} c The desired delta. E.g. if b = 10, and you want to tween it to 30, c
+         * should be 20
+         * @param  {Number} d The duration in the same units as t.
+         * @return {Number} Current value at the given time.
          */
         bounceIn: function(t, b, c, d) {
             t=Math.min(d,t);
@@ -3876,9 +4019,16 @@ define('ai/proximity-tracker',[],function() {
 });
 
 /*global define*/
+
 define('ai/pathfinder',[],function() {
 
+    /**
+     * @module ai/pathfinder
+     */
+
     /** Internal structure representing a point of travel along a path.
+     * @constructor module:ai/pathfinder.Node
+     * @private
      * @param {Number} x X position of the node.
      * @param {Number} y Y position of the node.
      */
@@ -3888,20 +4038,22 @@ define('ai/pathfinder',[],function() {
         this.score = 0;
     }
 
+
     /** This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
-     * new sn.PathFinder(diagonals, solid);
-     * @param {Function} solid Optional. A function that determines if a position is
+     * new sn.PathFinder(solid, diagonals, ...);
+     * @constructor module:ai/pathfinder.PathFinder
+     * @param {Function} [solid] A function that determines if a position is
      * solid or not. Should accept an x,y position and return a boolean. True
      * for solid. If omitted, the default is to check the tile grid properties for
      * height>0
-     * @param {Boolean} diagonals Optional; defaults to true. If set, the path will
+     * @param {Boolean} [diagonals=true] If set, the path will
      * include diagonal movements (Along tile corners).
-     * @param {Boolean} cutcorners Optional; defaults to true. Only has an effect if
+     * @param {Boolean} [cutcorners=true] Only has an effect if
      * diagonals is true. If false, the path will move across tile edges when close to
      * solid tiles, i.e. it will avoid the possibility of trying to cut across a solid
      * corner.
-     * @param {Function} cost Optional. A function that determines the cost factor of moving
+     * @param {Function} [cost] A function that determines the cost factor of moving
      * into a tile. It should return 1 for a normal tile and a number >1 for a tile that has
      * some extra cost associated with moving into it. E.g. if a tile is water, return some
      * value >1 to make a route avoid water unless it has no easy option. The higher the cost,
@@ -4112,6 +4264,17 @@ define('ai/pathfinder',[],function() {
         return newroute;
     };
 
+    /** Calculates a route from one position to another
+     * @memberof module:ai/pathfinder.PathFinder
+     * @method route
+     * @instance
+     * @param  {Number} x0 X position of starting point
+     * @param  {Number} y0 X position of ending point
+     * @param  {Number} x1 Y position of starting point
+     * @param  {Number} y1 Y position of ending point
+     * @return {Array} An array of points as a 1d spanned array
+     * of the form x,y,x,y,x,y...
+     */
     PathFinder.prototype.route = function(x0,y0,x1,y1) {
 
         var i;
@@ -4612,8 +4775,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         /** Sets the map position to centre on a given world coordinate.
-         * @param {[Number]} x World X position
-         * @param {[Number]} y World Y position
+         * @param {Number} x World X position
+         * @param {Number} y World Y position
          */
         this.scrollTo = function(x,y) {
             _this.map.scrollTo(x, y);

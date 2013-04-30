@@ -73,7 +73,8 @@ module.exports = function(grunt) {
             dist : {
                 src: ['src/**/*.js'],
                 options: {
-                    destination: 'dist/doc'
+                    destination: 'dist/doc',
+                    private: false
                 }
             }
         },
@@ -96,5 +97,5 @@ module.exports = function(grunt) {
     grunt.registerTask('doc', ['jsdoc:dist']);
 
     grunt.registerTask('start', ['clean', 'dev', 'watch']);
-    grunt.registerTask('dist', ['clean', 'production', 'test', 'dev']);
+    grunt.registerTask('dist', ['clean', 'production', 'test', 'dev', 'doc']);
 };
