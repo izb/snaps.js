@@ -3,11 +3,28 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     'use strict';
 
+    /**
+     * @module map/staggered-isometric
+     */
+
     var debugText = debug.debugText;
     var copyProps = js.copyProps;
 
     var xy = [0,0]; // work area
 
+    /** Represents a map of type 'staggered' created with the
+     * {@link http://www.mapeditor.org/|tiled} map editor.
+     * @constructor module:map/staggered-isometric.StaggeredIsometric
+     * @param {Object} tileData The map's data, parsed from the JSON exported
+     * map data.
+     * @param {Object} hitTests An object of keys and values where the keys are
+     * image names and the values are image paths that should be preloaded. These are
+     * the hit test image maps.
+     * @param {Number} clientWidth The width of the canvas client area
+     * @param {Number} clientHeight The height of the canvas client area
+     * @param {Object} [stats] An object that will receive new properties representing
+     * runtime statistics, for debug purposes.
+     */
     function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight, stats) {
         this.data = tileData;
         this.hitTests = hitTests;
@@ -32,20 +49,50 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.stats = stats;
     }
 
+    /**
+     * @private
+     * @method module:map/staggered-isometric.StaggeredIsometric#isStaggered
+     * @return {Boolean} True if the map type is staggered isometric.
+     */
     StaggeredIsometric.prototype.isStaggered = function() {
+        /* TODO: Why in heck would a StaggeredIsometric class be managing
+         * non-staggered map data? This exists only for the benefit of naive
+         * unit tests in the pathfinder. */
         return this.type==='staggered';
     };
 
+    /**
+     * @private
+     * @method module:map/staggered-isometric.StaggeredIsometric#isOrthogonal
+     * @return {Boolean} True if the map type is orthogonal.
+     */
     StaggeredIsometric.prototype.isOrthogonal = function() {
+        /* TODO: Why in heck would a StaggeredIsometric class be managing
+         * orthogonal map data? This exists only for the benefit of naive
+         * unit tests in the pathfinder. */
         return this.type==='orthogonal';
     };
 
+    /**
+     * Returns the dimensions of one tile. Return value is via a 2-length
+     * spanned array passed in as an output parameter.
+     * @method module:map/staggered-isometric.StaggeredIsometric#tileDimensions
+     * @param {Array} out An array of length 2 that will receive the tile dimensions,
+     * x then y.
+     */
     StaggeredIsometric.prototype.tileDimensions = function(out) {
         out[0] = this.data.tilewidth;
         out[1] = this.data.tileheight;
     };
 
+    /**
+     * Primes a preloader with the images required for a map (I.e. the tiles).
+     * @method module:map/staggered-isometric.StaggeredIsometric#primePreloader
+     * @param {Object} preloader A preloader object.
+     */
     StaggeredIsometric.prototype.primePreloader = function(preloader) {
+
+        /* TODO Docs link to preloader class. */
 
         var map = this.data;
         var _this = this;
@@ -95,12 +142,14 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
     };
 
     /** Get a tile by it's row and column position in the original map data.
-     * @param  {object} layer. The layer to search for tiles.
+     * @method module:map/staggered-isometric.StaggeredIsometric#getTile
+     * @param  {Object} layer. The layer to search for tiles.
      * @param  {Number} c The column, aka x position in the data.
      * @param  {Number} r the row, aka y position in the data.
-     * @return {Tile} A tile, or null if the input was out of range.
+     * @return {Object} A tile, or null if the input was out of range.
      */
     StaggeredIsometric.prototype.getTile = function(layer, c, r) {
+        /* TODO: Link to Tile class in documentation. */
         /* TODO: Validate that this is a tiled layer. */
         var rows = layer.rows;
         if (c<0||r<0 || r>=rows.length) {
@@ -116,6 +165,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         return row[c];
     };
 
+    /**
+     * @method module:map/staggered-isometric.StaggeredIsometric#resolveTiles
+     * @private
+     */
     StaggeredIsometric.prototype.resolveTiles = function() {
 
         var i, j, k, ts, tileprops;
@@ -179,6 +232,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    /**
+     * @method module:map/staggered-isometric.StaggeredIsometric#drawDebugRegions
+     * @private
+     */
     StaggeredIsometric.prototype.drawDebugRegions = function(ctx) {
 
         var map = this.data;
@@ -248,6 +305,12 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    /** Scrolls the map to the given world coordinate, limited to the set map
+     * bounds.
+     * @method module:map/staggered-isometric.StaggeredIsometric#scrollTo
+     * @param  {Number} x The X world position to scroll to
+     * @param  {Number} y The Y world position to scroll to
+     */
     StaggeredIsometric.prototype.scrollTo = function(x, y) {
         this.xoffset=x;
         this.yoffset=y;
@@ -265,10 +328,21 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    /** Scrolls the map by a given amound in pixels, limited to the set map
+     * bounds.
+     * @method module:map/staggered-isometric.StaggeredIsometric#scroll
+     * @param  {Number} dx The X amount to scroll by
+     * @param  {Number} dy The Y amount to scroll by
+     */
     StaggeredIsometric.prototype.scroll = function(dx,dy) {
         this.scrollTo(this.xoffset+dx, this.yoffset+dy);
     };
 
+    /** Gets an object describing the pixel limits of the world edges.
+     * @method module:map/staggered-isometric.StaggeredIsometric#getWorldEdges
+     * @return {Object} Contains 4 properties, le, te, re and be which hold
+     * the left, top, right and bottom edges respectively.
+     */
     StaggeredIsometric.prototype.getWorldEdges = function() {
         return {
             le:this.minxoffset,
@@ -282,6 +356,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     /** Takes a world position and tells you what tile it lies on. Take
      * care with the return value, the function signature is all backwards.
+     * @method module:map/staggered-isometric.StaggeredIsometric#worldToTilePos
      * @param {Number} x A world x position
      * @param {Number} y A world y position
      * @param {Array} out A 2-length array that will recieve the tile x/y
@@ -322,6 +397,16 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         }
     };
 
+    /** Takes a tile position and returns a property value as defined by the tiles.
+     * Tiles are checked from the top-most layer down until a tile is found that
+     * holds that property. This means that top-most tiles can override property
+     * values from lower tiles.
+     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropAtTilePos
+     * @param {String} prop The property to get
+     * @param {Number} x A world x position
+     * @param {Number} y A world y position
+     * @return {String} The property value, or <code>undefined</code> if not found.
+     */
     StaggeredIsometric.prototype.getTilePropAtTilePos = function(prop, x, y) {
         var layers = this.data.layers;
         var propval;
@@ -342,6 +427,17 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         return undefined;
     };
 
+    /** Takes a world position and returns a property value as defined by the tiles
+     * underneath that coordinate.
+     * Tiles are checked from the top-most layer down until a tile is found that
+     * holds that property. This means that top-most tiles can override property
+     * values from lower tiles.
+     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropAtWorldPos
+     * @param {String} prop The property to get
+     * @param {Number} x A world x position
+     * @param {Number} y A world y position
+     * @return {String} The property value, or <code>undefined</code> if not found.
+     */
     StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
         /*(void)*/this.worldToTilePos(x, y, xy);
         return this.getTilePropAtTilePos(prop, xy[0], xy[1]);
@@ -349,6 +445,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     /** Takes a screen position and tells you what tile it lies on. Take
      * care with the return value, the function signature is all backwards.
+     * @method module:map/staggered-isometric.StaggeredIsometric#screenToTilePos
      * @param {Number} x A screen x position
      * @param {Number} y A screen y position
      * @param {Array} out A 2-length array that will recieve the tile x/y
@@ -357,28 +454,46 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      * closest tile edge, capped at 127px.
      */
     StaggeredIsometric.prototype.screenToTilePos = function(x, y, out) {
-        this.worldToTilePos(x+this.xoffset, y+this.yoffset, out);
+        return this.worldToTilePos(x+this.xoffset, y+this.yoffset, out);
     };
 
     /** Convert a screen coordinate to a world coordinate.
+     * @method module:map/staggered-isometric.StaggeredIsometric#screenToWorldPos
      * @param {Array} out Returned values via passed-in array. Must be 2-length.
      * Order is x,y
-     * @return {undefined} See 'out'
      */
     StaggeredIsometric.prototype.screenToWorldPos = function(x,y,out) {
         out[0] = x+this.xoffset;
         out[1] = y+this.yoffset;
     };
 
+
+    /** Convert a world coordinate to a screen coordinate.
+     * @method module:map/staggered-isometric.StaggeredIsometric#worldToScreenPos
+     * @param {Array} out Returned values via passed-in array. Must be 2-length.
+     * Order is x,y
+     */
     StaggeredIsometric.prototype.worldToScreenPos = function(x, y, out) {
         out[0] = x-this.xoffset;
         out[1] = y-this.yoffset;
     };
 
+    /** Inserts a new layer into the layer list.
+     * @method module:map/staggered-isometric.StaggeredIsometric#insertLayer
+     * @param {Number} idx The index to insert the layer at.
+     * @param {Object} layer The layer to insert. Normally created via a
+     * layer plugin.
+     */
     StaggeredIsometric.prototype.insertLayer = function(idx, layer) {
         this.data.layers.splice(idx,0,layer);
     };
 
+    /* TODO: Find all private marked functions and make sure they're actually private. */
+
+    /**
+     * @method module:map/staggered-isometric.StaggeredIsometric#updateLayers
+     * @private
+     */
     StaggeredIsometric.prototype.updateLayers = function(now) {
         var epoch = +new Date();
         var map = this.data;
@@ -391,6 +506,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.stats.count('updateLayers', (+new Date())-epoch);
     };
 
+    /** Finds the index of the ground layer.
+     * @method module:map/staggered-isometric.StaggeredIsometric#groundLayer
+     * @return {Number} The index of the ground layer.
+     */
     StaggeredIsometric.prototype.groundLayer = function() {
         var map = this.data;
         for (var i = 0; i < map.layers.length; i++) {
@@ -407,6 +526,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     };
 
+    /**
+     * @method module:map/staggered-isometric.StaggeredIsometric#onResize
+     * @private
+     */
     StaggeredIsometric.prototype.onResize = function(w, h) {
         this.clientWidth = w;
         this.clientHeight = h;
@@ -416,7 +539,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
     };
 
 
-
+    /**
+     * @method module:map/staggered-isometric.StaggeredIsometric#drawWorld
+     * @private
+     */
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
 
         var map = this.data;
