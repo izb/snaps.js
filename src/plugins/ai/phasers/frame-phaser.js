@@ -1,9 +1,27 @@
 /*global define*/
 define(function() {
 
+    'use strict';
+
+    /**
+     * @module plugins/ai/phasers/frame-phaser
+     */
+
     var sn;
 
+    /** Construct a phaser that performs a set number of sprite updates per frame. Note that this
+     * should not be constructed directly, but rather via the plugin factory method
+     * <code>sn.createPhaser('frame-phaser')</code> on the engine.
+     * @constructor module:plugins/ai/phasers/frame-phaser.FramePhaser
+     * @param {String} id A unique ID
+     * @param {Object} [opts] An object with assorted options set in it.
+     * <dl>
+     *  <dt>phases</dt><dd>How many sprites should be updated on each frame? Must be at least 2.</dd>
+     * </dl>
+     */
     function FramePhaser(id, opts) {
+        /* TODO: All plugins should link to their factory methods via doc link tags */
+        /* TODO: All plgins: Passing IDs into things and promising it's unique is a bit smelly. */
         this.id = id;
         opts = opts || {};
         if (opts.phases===undefined || opts.phases<2) {
@@ -15,12 +33,25 @@ define(function() {
         this.sprites = [];
     }
 
+    /**
+     * Determines if a sprite should be updated on this phase
+     * @method module:plugins/ai/phasers/frame-phaser.FramePhaser#phase
+     * @private
+     */
     FramePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
         return data.phase===0;
     };
 
+
+    /**
+     * Adds a sprite to this phaser. The phaser will reschedule the sprites
+     * but cannot guarantee the first frame of update the sprite will receive.
+     * @method module:plugins/ai/phasers/frame-phaser.FramePhaser#addSprite
+     * @param {Object} s The sprite to add
+     */
     FramePhaser.prototype.addSprite = function(s) {
+        /* TODO: Docs - link to the sprite class */
         if (s.phaserData===undefined) {
             s.phaserData = {};
         }
@@ -28,6 +59,12 @@ define(function() {
         this.sprites.push(s);
     };
 
+    /**
+     * Removes a sprite from this phaser.
+     * @method module:plugins/ai/phasers/frame-phaser.FramePhaser#removeSprite
+     * @private
+     * @param {Object} s The sprite to remove
+     */
     FramePhaser.prototype.removeSprite = function(s) {
         /* To remove a sprite, we just remove the data for this
          * phaser. Later, when we rebalance, we look for this state
@@ -35,6 +72,11 @@ define(function() {
         delete s.phaserData[this.id];
     };
 
+    /**
+     * Rebalance the schedule to account for recent sprite additions or deletions.
+     * @method module:plugins/ai/phasers/frame-phaser.FramePhaser#rebalance
+     * @private
+     */
     FramePhaser.prototype.rebalance = function(now) {
         var i, s, data, max = 0;
         var buckets = this.buckets;

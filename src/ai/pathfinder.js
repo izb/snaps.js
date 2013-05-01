@@ -2,6 +2,8 @@
 
 define(function() {
 
+    'use strict';
+
     /**
      * @module ai/pathfinder
      */

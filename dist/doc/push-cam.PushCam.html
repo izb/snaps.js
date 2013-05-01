@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: input/keyboard</title>
+    <title>JSDoc: Class: PushCam</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: input/keyboard</h1>
+    <h1 class="page-title">Class: PushCam</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    input/keyboard
+        <span class="ancestors"><a href="push-cam.html">plugins/ai/camera/push-cam</a>.</span>
+    
+    PushCam
     </h2>
     
 </header>  
@@ -38,8 +40,91 @@
     
     
         
+<dt>
+    <h4 class="name" id="PushCam"><span class="type-signature"></span>new PushCam<span class="signature">(<span class="optional">opts</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Constructs a camera that follows a sprite. Called a push cam because the player seems to
+"push" the camera around. Note that this should not be constructed directly, but rather
+via the plugin factory method <code>sn.createCamera('pushcam')</code> on the engine.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
         
-        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">An object with assorted options set in it.
+<dl>
+ <dt>follow</dt><dd>The ID of the sprite to follow, e.g. <code>follow:"player1"</code></dd>
+</dl></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
 <dl class="details">
     
 
@@ -66,8 +151,16 @@
     
 </dl>
 
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
     
@@ -77,13 +170,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Classes</h3>
-        
-        <dl>
-            <dt><a href="keyboard.Keyboard.html">Keyboard</a></dt>
-            <dd></dd>
-        </dl>
     
     
     

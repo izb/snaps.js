@@ -1,8 +1,29 @@
 /*global define*/
 define(function() {
 
+    'use strict';
+
+    /**
+     * @module plugins/ai/phasers/time-phaser
+     */
+
     var sn;
 
+    /** Construct a phaser that performs a set number of sprite updates per second. Note that this
+     * should not be constructed directly, but rather via the plugin factory method
+     * <code>sn.createPhaser('time-phaser')</code> on the engine.
+     * @constructor module:plugins/ai/phasers/time-phaser.TimePhaser
+     * @param {String} id A unique ID
+     * @param {Object} [opts] An object with assorted options set in it.
+     * <dl>
+     *  <dt>updatesPerSecond</dt><dd>How many sprites should be updated each second? Must be >0.</dd>
+     *  <dt>frameCap</dt><dd>On slow devices where the frame time exceeds 1s, every sprite will be in phase.
+     *    To combat this, we cap the possible measured frame time to something <1s.
+     *    This sacrifices update quality in order to give all sprites a change to have
+     *    some off-phase updates. This is based on the reasoning that you should
+     *    not expect things to run perfectly if your frame rate is that low.</dd>
+     * </dl>
+     */
     function TimePhaser(id, opts) {
         this.id = id;
         opts = opts || {};
@@ -14,11 +35,6 @@ define(function() {
         this.updatesThisFrame = 0;
         this.sprites = [];
 
-        /* On slow devices where the frame time exceeds 1s, every sprite will be in phase.
-         * To combat this, we cap the possible measured frame time to something <1s.
-         * This sacrifices update quality in order to give all sprites a change to have
-         * some off-phase updates. This is based on the reasoning that you should
-         * not expect things to run perfectly if your frame rate is that low. */
         if (opts.frameCap===undefined) {
             this.frameCap = 750; /* Frames will pretend they took no more than 750ms */
         } else {
@@ -26,6 +42,11 @@ define(function() {
         }
     }
 
+    /**
+     * Determines if a sprite should be updated on this phase
+     * @method module:plugins/ai/phasers/time-phaser.TimePhaser#phase
+     * @private
+     */
     TimePhaser.prototype.phase = function(sprite, now) {
         var data = sprite.phaserData[this.id];
         if(data.phaseOn) {
@@ -34,6 +55,12 @@ define(function() {
         return data.phaseOn;
     };
 
+    /**
+     * Adds a sprite to this phaser. The phaser will reschedule the sprites
+     * but cannot guarantee the first frame of update the sprite will receive.
+     * @method module:plugins/ai/phasers/time-phaser.TimePhaser#addSprite
+     * @param {Object} s The sprite to add
+     */
     TimePhaser.prototype.addSprite = function(s) {
         if (s.phaserData===undefined) {
             s.phaserData = {};
@@ -42,6 +69,12 @@ define(function() {
         this.sprites.push(s);
     };
 
+    /**
+     * Removes a sprite from this phaser.
+     * @method module:plugins/ai/phasers/time-phaser.TimePhaser#removeSprite
+     * @private
+     * @param {Object} s The sprite to remove
+     */
     TimePhaser.prototype.removeSprite = function(s) {
         /* To remove a sprite, we just remove the data for this
          * phaser. Later, when we rebalance, we look for this state
@@ -49,6 +82,11 @@ define(function() {
         delete s.phaserData[this.id];
     };
 
+    /**
+     * Rebalance the schedule to account for recent sprite additions or deletions.
+     * @method module:plugins/ai/phasers/time-phaser.TimePhaser#rebalance
+     * @private
+     */
     TimePhaser.prototype.rebalance = function(now) {
         var timeSinceLastFrame = Math.min(this.frameCap, now - this.lastUpdate);
         this.lastUpdate = now;

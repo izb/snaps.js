@@ -3,18 +3,23 @@ define(function() {
 
     'use strict';
 
-    var sn;
+    /* TODO: Consistency: camera vs cameras */
 
-    /*
-     * Example options:
-     *
-     * opts:{
-     *     follow:"player1",
-     * }
-     *
-     * Camera follows the player1 sprite
+    /**
+     * @module plugins/ai/camera/push-cam
      */
 
+    var sn;
+
+    /** Constructs a camera that follows a sprite. Called a push cam because the player seems to
+     * "push" the camera around. Note that this should not be constructed directly, but rather
+     * via the plugin factory method <code>sn.createCamera('pushcam')</code> on the engine.
+     * @constructor module:plugins/ai/camera/push-cam.PushCam
+     * @param {Object} [opts] An object with assorted options set in it.
+     * <dl>
+     *  <dt>follow</dt><dd>The ID of the sprite to follow, e.g. <code>follow:"player1"</code></dd>
+     * </dl>
+     */
     function PushCam(opts) {
         this.follow = sn.sprite(opts.follow);
         if (!this.follow) {
@@ -22,6 +27,11 @@ define(function() {
         }
     }
 
+    /**
+     * Called per frame
+     * @method module:plugins/ai/camera/push-cam.PushCam#update
+     * @private
+     */
     PushCam.prototype.update = function(now) {
         sn.scrollTo(this.follow.x-sn.clientWidth/2, this.follow.y-sn.clientHeight/2);
     };

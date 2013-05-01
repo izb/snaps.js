@@ -6,7 +6,7 @@ html
 
 body
 {
-	font: 14px "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans serif;
+	font: 14px Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans serif;
 	line-height: 130%;
 	color: #000;
 	background-color: #fff;
@@ -41,7 +41,7 @@ header
 
 #main {
     float: left;
-    width: 100%;
+    margin-right: 80px;
 }
 
 section
@@ -69,10 +69,10 @@ section
 nav
 {
 	display: block;
-	float: left;
-    margin-left: -230px;
+	float: right;
+    margin-left: -300px;
     margin-top: 28px;
-    width: 220px;
+    width: 290px;
     border-left: 1px solid #ccc;
     padding-left: 9px;
 }
@@ -288,4 +288,16 @@ dd.oneline {
 
 .disabled {
     color: #454545;
+}
+
+.description dt {
+    display: block;
+    font-weight: bold;
+}
+.description dd {
+    display: block;
+}
+code {
+    border: 1px solid #bbb;
+    background-color: #ddd;
 }
