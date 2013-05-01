@@ -3,6 +3,33 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @module plugins/collision/lib/prop-scanner
+     * @private
+     */
+
+    /**
+     * Trace along a path in a line, sampling a given property until it breaches
+     * some limit. AKA a linear collision trace.
+     * @function module:plugins/collision/lib/prop-scanner#traceProp
+     * @param  {Object} sn Engine reference
+     * @param  {String} prop  The property to sample. Normally 'height'
+     * @param  {Object} edges A description of the world edges. See
+     * {@link module:map/staggered-isometric.StaggeredIsometric#getWorldEdges|getWorldEdges}
+     * @param  {Number} x0    Starting point x world coordinate
+     * @param  {Number} y0    Starting point y world coordinate
+     * @param  {Number} dx    Desired X movement
+     * @param  {Number} dy    Desired Y movement
+     * @param  {Number} h     Property limit. If prop is > h, it's a collision
+     * @param  {Array} out   Spanned array of length 2 that will receive the colllision point.
+     * Point will be written as <code>[x,y]</code>. If there is no collision, the output point
+     * will be the destination point.
+     * @param  {Array} route A spanned array in the form <code>[x,y,x,y,x,y...]</code> that
+     * will receive the pixels traced along the line up to the point of collision. If the array had
+     * any contents before being passed in, it will be destroyed.
+     * @return {Number} The ratio of the path completed before collision. 1 indicates no collision.
+     * <1 indicates a collision, e.g. 0.8 means it got 80% along the desired path before colliding.
+     */
     var traceProp = function(sn, prop, edges, x0, y0, dx, dy, h, out, route){
 
         var i;
@@ -31,7 +58,6 @@ define(function() {
         if (dx === 0 && dy === 0) {
             out[0] = x0;
             out[1] = y0;
-            sampleHeight = sn.getTilePropAtWorldPos(prop,x0,y0);
             return 1;
         }
 

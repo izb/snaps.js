@@ -2,10 +2,16 @@
 define(function() {
 
     /**
+     * @module plugins/collision/lib/circle
+     * @private
+     */
+
+    /**
      * Returns an array of 0-centered sample points for a circle
      * using the midpoint circle algorithm.
+     * @function module:plugins/collision/lib/circle#circle
      * @param  {Number} r The radius. Pass an integer please.
-     * @return {Array} In the form [x0,y0,x1,y1...]. The points do
+     * @return {Array} In the form <code>[x0,y0,x1,y1...]</code>. The points do
      * not describe a continuous path, but is complete.
      */
     return function(r) {

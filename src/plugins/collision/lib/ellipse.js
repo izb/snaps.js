@@ -2,12 +2,19 @@
 define(function() {
 
     /**
+     * @module plugins/collision/lib/ellipse
+     * @private
+     */
+
+
+    /**
      * Returns an array of 0-centered sample points for an ellipse
      * using a variant of the midpoint circle algorithm.
-     * HT http://geofhagopian.net/sablog/Slog-october/slog-10-25-05.htm
+     * HT {@link http://geofhagopian.net/sablog/Slog-october/slog-10-25-05.htm}
+     * @function module:plugins/collision/lib/ellipse#ellipse
      * @param  {Number} rx The x radius. Pass an integer please.
      * @param  {Number} ry The y radius. Pass an integer please.
-     * @return {Array} In the form [x0,y0,x1,y1...]. The points do
+     * @return {Array} In the form <code>[x0,y0,x1,y1...]</code>. The points do
      * not describe a continuous path, but is complete.
      */
     return function(rx,ry) {

@@ -3268,6 +3268,33 @@ define('plugins/collision/lib/prop-scanner',[],function() {
 
     
 
+    /**
+     * @module plugins/collision/lib/prop-scanner
+     * @private
+     */
+
+    /**
+     * Trace along a path in a line, sampling a given property until it breaches
+     * some limit. AKA a linear collision trace.
+     * @function module:plugins/collision/lib/prop-scanner#traceProp
+     * @param  {Object} sn Engine reference
+     * @param  {String} prop  The property to sample. Normally 'height'
+     * @param  {Object} edges A description of the world edges. See
+     * {@link module:map/staggered-isometric.StaggeredIsometric#getWorldEdges|getWorldEdges}
+     * @param  {Number} x0    Starting point x world coordinate
+     * @param  {Number} y0    Starting point y world coordinate
+     * @param  {Number} dx    Desired X movement
+     * @param  {Number} dy    Desired Y movement
+     * @param  {Number} h     Property limit. If prop is > h, it's a collision
+     * @param  {Array} out   Spanned array of length 2 that will receive the colllision point.
+     * Point will be written as <code>[x,y]</code>. If there is no collision, the output point
+     * will be the destination point.
+     * @param  {Array} route A spanned array in the form <code>[x,y,x,y,x,y...]</code> that
+     * will receive the pixels traced along the line up to the point of collision. If the array had
+     * any contents before being passed in, it will be destroyed.
+     * @return {Number} The ratio of the path completed before collision. 1 indicates no collision.
+     * <1 indicates a collision, e.g. 0.8 means it got 80% along the desired path before colliding.
+     */
     var traceProp = function(sn, prop, edges, x0, y0, dx, dy, h, out, route){
 
         var i;
@@ -3296,7 +3323,6 @@ define('plugins/collision/lib/prop-scanner',[],function() {
         if (dx === 0 && dy === 0) {
             out[0] = x0;
             out[1] = y0;
-            sampleHeight = sn.getTilePropAtWorldPos(prop,x0,y0);
             return 1;
         }
 
@@ -3400,6 +3426,25 @@ define('plugins/collision/lib/local-scanner',[],function() {
 
     
 
+    /**
+     * @module plugins/collision/lib/local-scanner
+     * @private
+     */
+
+    /**
+     * For a given point and angle of movement, this function determines whether
+     * the start point should be nudged up or down a pixel in order to compensate
+     * for the possibility of getting caught on jagged pixel edges. The nudged value
+     * should be passed into a collision tracer instead of the true value.
+     * @function module:plugins/collision/lib/local-scanner#ySlip
+     * @param  {Object} sn Engine reference
+     * @param  {Number} x  Start point x world position
+     * @param  {Number} y  Start point y world position
+     * @param  {Number} h  Level height. Anything above this is solid.
+     * @param  {Number} dx Amount we'd like to move in x direction
+     * @param  {Number} dy Amount we'd like to move in y direction
+     * @return {Number} 0, 1 or -1 as the amount to nudge the starting y position.
+     */
     var ySlip = function(sn, x, y, h, dx, dy) {
         var localmask;
         var r = dx/dy;
@@ -3527,12 +3572,19 @@ function(traceProp, localScan) {
 define('plugins/collision/lib/ellipse',[],function() {
 
     /**
+     * @module plugins/collision/lib/ellipse
+     * @private
+     */
+
+
+    /**
      * Returns an array of 0-centered sample points for an ellipse
      * using a variant of the midpoint circle algorithm.
-     * HT http://geofhagopian.net/sablog/Slog-october/slog-10-25-05.htm
+     * HT {@link http://geofhagopian.net/sablog/Slog-october/slog-10-25-05.htm}
+     * @function module:plugins/collision/lib/ellipse#ellipse
      * @param  {Number} rx The x radius. Pass an integer please.
      * @param  {Number} ry The y radius. Pass an integer please.
-     * @return {Array} In the form [x0,y0,x1,y1...]. The points do
+     * @return {Array} In the form <code>[x0,y0,x1,y1...]</code>. The points do
      * not describe a continuous path, but is complete.
      */
     return function(rx,ry) {
