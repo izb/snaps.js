@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Global</title>
+    <title>JSDoc: Class: Mouse</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Global</h1>
+    <h1 class="page-title">Class: Mouse</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
+        <span class="ancestors"><a href="mouse.html">input/mouse</a>.</span>
     
+    Mouse
     </h2>
     
 </header>  
@@ -38,60 +40,8 @@
     
     
         
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
 <dt>
-    <h4 class="name" id="fastRand"><span class="type-signature"></span>fastRand<span class="signature">(min, max, setsize)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Mouse"><span class="type-signature"></span>new Mouse<span class="signature">(canvas)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -99,7 +49,7 @@
     
     
     <div class="description">
-        Generates a function that returns a faster random numbergenerator, but which has a setup cost. If you're using a very largenumber of random numbers, this is significantly faster.http://jsperf.com/precalc-random-numberse.g.var nextRand = rnd.fastRand(1, 10); // The slow bitvar n = nextRand(); // The fast bit
+        Creates a mouse input handler and starts listening formouse events.
     </div>
     
 
@@ -133,49 +83,13 @@
 	
         <tr>
             
-                <td class="name"><code>min</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">Lowest possible value</td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>max</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">Highest possible value</td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>setsize</code></td>
+                <td class="name"><code>canvas</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type"><a href="HTMLCanvasElement.html">HTMLCanvasElement</a></span>
 
 
             
@@ -185,7 +99,7 @@
             
             
             
-            <td class="description last">Optional. The number of values toprecalculate.</td>
+            <td class="description last">Mouse position will berelative to and constrained to the limits of the given canvas.</td>
         </tr>
 	
 	
@@ -216,7 +130,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        util/rnd.js, line 56
+        input/mouse.js, line 10
     </li></ul></dd>
     
     
@@ -237,7 +151,129 @@
     
 </dd>
 
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl>
+            
+<dt>
+    <h4 class="name" id="x"><span class="type-signature"></span>x<span class="type-signature"> :Number</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        The mouse X position, relative to the left-hand-edge of the canvas.
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        input/mouse.js, line 20
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="y"><span class="type-signature"></span>y<span class="type-signature"> :Number</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        The mouse Y position, relative to the top of the canvas.
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        input/mouse.js, line 27
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
         </dl>
+    
+    
     
     
     

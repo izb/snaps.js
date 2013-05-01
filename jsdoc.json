@@ -1,0 +1,17 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "includePattern": "src/.+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "destination": "./dist/doc/",
+    "plugins": [],
+    "private": false,
+    "templates": {
+        "cleverLinks": true,
+        "monospaceLinks": false
+    },
+    "jsVersion": 180
+}

@@ -1,9 +1,16 @@
 /*global define*/
 define(function() {
 
+    /**
+     * @module ai/proximity-tracker
+     */
+
     /** This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
      * new sn.ProximityTracker(myCellSize);
+     * @constructor module:ai/proximity-tracker.ProximityTracker
+     * @param {Number} cellSize The width of each cell in the regular grid
+     * tracking the map contents.
      */
     function ProximityTracker(sn, cellSize) {
 
@@ -103,13 +110,17 @@ define(function() {
         };
     };
 
+    /* TODO: Search for return tags in jsdoc and link them all to the classes
+     * for those returns if they're snaps classes. */
+
     /** Finds the sprites nearest a point. Ignores height.
+     * @method module:ai/proximity-tracker.ProximityTracker#find
      * @param {Number} x The x world position of the test point
      * @param {Number} y The y world position of the test point
      * @param {Number} r The radius to search. Note that although this is
      * in pixels, it is horizontal pixels. The search area will be an ellipse
      * to account for the isometric projection.
-     * @param {Bool} sort Optional. Pass true to have the results sorted in
+     * @param {Boolean} sort Pass true to have the results sorted in
      * ascending distance from the test point.
      * @return {Array} An array of sprites that fall within the search area.
      */

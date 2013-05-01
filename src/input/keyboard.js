@@ -1,12 +1,24 @@
 /*global define*/
 define(function() {
 
+    /**
+     * @module input/keyboard
+     */
+
     'use strict';
 
+    /** Creates a keyboard input handler and starts listening for
+     * keyboard events.
+     * @constructor module:input/keyboard.Keyboard
+     */
     function Keyboard() {
 
         var _this = this;
 
+        /**
+         * A map of keycodes that you can use to set up keybindings.
+         * @member module:input/keyboard.Keyboard#keymap
+         */
         this.keymap = {
             backspace: 8,
             tab: 9,
@@ -113,6 +125,13 @@ define(function() {
         this.keys = [];
 
         /* TODO: bind is reserved. Probably want to rename this. */
+
+        /**
+         * Binds a key to an action.
+         * @method module:input/keyboard.Keyboard#bind
+         * @param  {Number} key    A keycode from {@link module:input/keyboard.Keyboard#keymap|keymap}
+         * @param  {String} action An arbitrary action you want to bind to the key.
+         */
         this.bind = function(key, action) {
             _this.actions[action] = 0;
             _this.keys[_this.keymap[key]] = action;
@@ -147,6 +166,13 @@ define(function() {
             }
         };
 
+        /**
+         * Tests to see if any actions were pressed since the last check.
+         * @method module:input/keyboard.Keyboard#actionPressed
+         * @param  {String} action The action to test, previously set up with
+         * {@link module:input/keyboard.Keyboard#bind|bind}
+         * @return {Boolean} true if the action was pressed.
+         */
         this.actionPressed = function(action) {
             return !!_this.actions[action];
         };

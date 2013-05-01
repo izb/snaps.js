@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Global</title>
+    <title>JSDoc: Class: ProximityTracker</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Global</h1>
+    <h1 class="page-title">Class: ProximityTracker</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
+        <span class="ancestors"><a href="proximity-tracker.html">ai/proximity-tracker</a>.</span>
     
+    ProximityTracker
     </h2>
     
 </header>  
@@ -38,60 +40,8 @@
     
     
         
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
 <dt>
-    <h4 class="name" id="fastRand"><span class="type-signature"></span>fastRand<span class="signature">(min, max, setsize)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="ProximityTracker"><span class="type-signature"></span>new ProximityTracker<span class="signature">(cellSize)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -99,7 +49,7 @@
     
     
     <div class="description">
-        Generates a function that returns a faster random numbergenerator, but which has a setup cost. If you're using a very largenumber of random numbers, this is significantly faster.http://jsperf.com/precalc-random-numberse.g.var nextRand = rnd.fastRand(1, 10); // The slow bitvar n = nextRand(); // The fast bit
+        This constructor is curried when exposed through the engine ref,so construct it without the first parameter, e.g.new sn.ProximityTracker(myCellSize);
     </div>
     
 
@@ -133,43 +83,7 @@
 	
         <tr>
             
-                <td class="name"><code>min</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">Lowest possible value</td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>max</code></td>
-            
-            
-            <td class="type">
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">Highest possible value</td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>setsize</code></td>
+                <td class="name"><code>cellSize</code></td>
             
             
             <td class="type">
@@ -185,7 +99,7 @@
             
             
             
-            <td class="description last">Optional. The number of values toprecalculate.</td>
+            <td class="description last">The width of each cell in the regular gridtracking the map contents.</td>
         </tr>
 	
 	
@@ -216,7 +130,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        util/rnd.js, line 56
+        ai/proximity-tracker.js, line 6
     </li></ul></dd>
     
     
@@ -233,6 +147,229 @@
     
     
     
+    
+    
+</dd>
+
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl>
+            
+<dt>
+    <h4 class="name" id="find"><span class="type-signature"></span>find<span class="signature">(x, y, r, sort)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Finds the sprites nearest a point. Ignores height.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The x world position of the test point</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The y world position of the test point</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>r</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The radius to search. Note that although this isin pixels, it is horizontal pixels. The search area will be an ellipseto account for the isometric projection.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>sort</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">Pass true to have the results sorted inascending distance from the test point.</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        ai/proximity-tracker.js, line 115
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    An array of sprites that fall within the search area.
+</div>
+
+
+
+<dl>
+	<dt class="oneline">
+		Type
+	</dt>
+	<dd class="oneline">
+		
+<span class="param-type">Array</span>
+
+
+	</dd>
+</dl>
+
+
+        
     
     
 </dd>
