@@ -105,7 +105,9 @@ define([
     };
 
     /** FX plugin callbacks should return true to continue, or false if complete.
+     * @method module:plugins/fx/particles.Particles#update
      * @return {Boolean} See description
+     * @private
      */
     Particles.prototype.update = function(now) {
         this.comp.update(now, updateSprite.bind(this));

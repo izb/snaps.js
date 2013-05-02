@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: CircleTrace</title>
+    <title>JSDoc: Class: GroundSprites</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: CircleTrace</h1>
+    <h1 class="page-title">Class: GroundSprites</h1>
 
     
 
@@ -27,9 +27,9 @@
     
 <header>
     <h2>
-        <span class="ancestors"><a href="circle-trace.html">plugins/collision/sprite-with-map/circle-trace</a>.</span>
+        <span class="ancestors"><a href="ground-sprites.html">plugins/layer/ground-sprites</a>.</span>
     
-    CircleTrace
+    GroundSprites
     </h2>
     
 </header>  
@@ -41,7 +41,7 @@
     
         
 <dt>
-    <h4 class="name" id="CircleTrace"><span class="type-signature"></span>new CircleTrace<span class="signature">(opts)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="GroundSprites"><span class="type-signature"></span>new GroundSprites<span class="signature">(layerName, opts)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -49,7 +49,7 @@
     
     
     <div class="description">
-        Creates a circle tracer that traces a circle (An on-screen elipse in isometric-land)along a path to detect collision.Note that this should not be constructed directly, but rather via the plugin factory method<code>sn.createCollider('circle-trace')</code> on the engine.
+        A layer that holds normally flat sprites that are intended to be drawn after theground, but before the buildings and other sprites.Note that this should not be constructed directly, but rather via the plugin factory method<code>sn.addLayer('ground-sprites')</code> on the engine.
     </div>
     
 
@@ -83,6 +83,29 @@
 	
         <tr>
             
+                <td class="name"><code>layerName</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">A name for the layer. You might see it later on inerror messages.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>opts</code></td>
             
             
@@ -99,7 +122,7 @@
             
             
             
-            <td class="description last">An object with assorted options set in it.<dl> <dt>radius</dt><dd>The radius must be >0 and describes the x radius of the elipse as projected on-screen.</dd> <dt>autoSlip</dt><dd>Defaults to true for isometric maps. If set, the collision trace will 'slip' away from jagged pixel edges to prevent sprites from being caught up in jaggies when moving at isometric angles. In unsure, omit this property to use the default.</dd></dl></td>
+            <td class="description last">Parameters for customizing the layer. There are no parametersfor this layer plugin though, so feel free not to pass any in.</td>
         </tr>
 	
 	
@@ -165,7 +188,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="test"><span class="type-signature"></span>test<span class="signature">(x0, y0, dx, dy, h, out)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="purgeAll"><span class="type-signature"></span>purgeAll<span class="signature">()</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -173,7 +196,65 @@
     
     
     <div class="description">
-        Perform a trace to test for collision along a line with radius.Effectively traces an ellipse  from one point to another, with someimportant performance compromises in accuracy.
+        Remove all sprites from the layer.
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="spawnSprite"><span class="type-signature"></span>spawnSprite<span class="signature">(defName, stateName, stateExt, x, y, <span class="optional">opts</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Spawn a new sprite on the ground plane
     </div>
     
 
@@ -195,6 +276,8 @@
 		<th>Type</th>
 		
 		
+		<th>Argument</th>
+		
 		
 		
 		
@@ -207,138 +290,173 @@
 	
         <tr>
             
-                <td class="name"><code>x0</code></td>
+                <td class="name"><code>defName</code></td>
             
             
             <td class="type">
             
-                
-<span class="param-type">Number</span>
-
-
-            
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
             
             
             
-            <td class="description last">World X position of the starting point</td>
+            
+            <td class="description last">The name of the sprite definition to use. These areset up in your game's spriteDefs data.</td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>y0</code></td>
+                <td class="name"><code>stateName</code></td>
             
             
             <td class="type">
             
-                
-<span class="param-type">Number</span>
-
-
-            
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
             
             
             
-            <td class="description last">World Y position of the starting point</td>
+            
+            <td class="description last">The initial state. This too is defined in thesprite's definition, in your game's spriteDefs data.</td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>dx</code></td>
+                <td class="name"><code>stateExt</code></td>
             
             
             <td class="type">
             
-                
-<span class="param-type">Number</span>
-
-
-            
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
             
             
             
-            <td class="description last">Amount to move in the X axis</td>
+            
+            <td class="description last">The initial state extension. This too is defined in thesprite's definition, in your game's spriteDefs data.</td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>dy</code></td>
+                <td class="name"><code>x</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Function/Number</span>
 
 
             
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
             
             
             
-            <td class="description last">Amount to move in the Y axis</td>
+            
+            <td class="description last">The world x coordinate. If a function, it should takeno parameters and return a number.</td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>h</code></td>
+                <td class="name"><code>y</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Function/Number</span>
 
 
             
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
             
             
             
-            <td class="description last">Tile pixel height considered the ground (non-collision)</td>
+            
+            <td class="description last">The world y coordinate. If a function, it should takeno parameters and return a number.</td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>out</code></td>
+                <td class="name"><code>opts</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">Object</span>
 
 
             
             </td>
             
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
             
             
             
-            <td class="description last">An optional 2-length array which will recieve thepoint of contact. You can interpret this as the position to which thecharacter can go along its path at which it will be touching a solidobject. If there is no collision, the output position will be thedesired new position.</td>
+            
+            <td class="description last">Optional parameter object. See sn.spawnSprite for spritespawn option values.</td>
         </tr>
 	
 	
@@ -379,29 +497,6 @@
     
     
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    A number from 0-1 representing how far along the routethe trace managed to get. 1 means no collision.
-</div>
-
-
-
-<dl>
-	<dt class="oneline">
-		Type
-	</dt>
-	<dd class="oneline">
-		
-<span class="param-type">Number</span>
-
-
-	</dd>
-</dl>
-
-
-        
     
     
 </dd>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: TimePhaser</title>
+    <title>JSDoc: Class: UI</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: TimePhaser</h1>
+    <h1 class="page-title">Class: UI</h1>
 
     
 
@@ -27,9 +27,9 @@
     
 <header>
     <h2>
-        <span class="ancestors"><a href="time-phaser.html">plugins/ai/phasers/time-phaser</a>.</span>
+        <span class="ancestors"><a href="ui.html">plugins/layer/ui</a>.</span>
     
-    TimePhaser
+    UI
     </h2>
     
 </header>  
@@ -41,7 +41,7 @@
     
         
 <dt>
-    <h4 class="name" id="TimePhaser"><span class="type-signature"></span>new TimePhaser<span class="signature">(id, <span class="optional">opts</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="UI"><span class="type-signature"></span>new UI<span class="signature">(layerName, opts)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -49,7 +49,7 @@
     
     
     <div class="description">
-        Construct a phaser that performs a set number of sprite updates per second. Note that thisshould not be constructed directly, but rather via the plugin factory method<code>sn.createPhaser('time-phaser')</code> on the engine.
+        A layer that provides user interface features in the form of mouse or touchresponsive widgets.Note that this should not be constructed directly, but rather via the plugin factory method<code>sn.addLayer('ui')</code> on the engine.
     </div>
     
 
@@ -71,8 +71,6 @@
 		<th>Type</th>
 		
 		
-		<th>Argument</th>
-		
 		
 		
 		
@@ -85,7 +83,7 @@
 	
         <tr>
             
-                <td class="name"><code>id</code></td>
+                <td class="name"><code>layerName</code></td>
             
             
             <td class="type">
@@ -98,18 +96,10 @@
             </td>
             
             
-                <td class="attributes">
-                
-                    
-                
-                    
-                
-                </td>
             
             
             
-            
-            <td class="description last">A unique ID</td>
+            <td class="description last">A name for the layer. You might see it later on inerror messages.</td>
         </tr>
 	
 	
@@ -129,20 +119,10 @@
             </td>
             
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-                    
-                
-                    
-                
-                </td>
             
             
             
-            
-            <td class="description last">An object with assorted options set in it.<dl> <dt>updatesPerSecond</dt><dd>How many sprites should be updated each second? Must be >0.</dd> <dt>frameCap</dt><dd>On slow devices where the frame time exceeds 1s, every sprite will be in phase.   To combat this, we cap the possible measured frame time to something <1s.   This sacrifices update quality in order to give all sprites a change to have   some off-phase updates. This is based on the reasoning that you should   not expect things to run perfectly if your frame rate is that low.</dd></dl></td>
+            <td class="description last">Parameters for customizing the layer. There are no parametersfor this layer plugin though, so feel free not to pass any in.</td>
         </tr>
 	
 	
@@ -202,116 +182,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
-<dt>
-    <h4 class="name" id="addSprite"><span class="type-signature"></span>addSprite<span class="signature">(s)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Adds a sprite to this phaser. The phaser will reschedule the spritesbut cannot guarantee the first frame of update the sprite will receive.
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>s</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">The sprite to add</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        </dl>
     
     
     
