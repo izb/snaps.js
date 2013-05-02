@@ -7,10 +7,30 @@ function(traceProp, midPtEllipse, localScan) {
 
     'use strict';
 
+    /**
+     * @module plugins/collision/sprite-with-map/circle-trace
+     */
+
     var sn;
 
     var ySlip = localScan.ySlip;
 
+    /**
+     * Creates a circle tracer that traces a circle (An on-screen elipse in isometric-land)
+     * along a path to detect collision.
+     * Note that this should not be constructed directly, but rather via the plugin factory method
+     * <code>sn.createCollider('circle-trace')</code> on the engine.
+     * @constructor module:plugins/collision/sprite-with-map/circle-trace.CircleTrace
+     * @param {Object} opts An object with assorted options set in it.
+     * <dl>
+     *  <dt>radius</dt><dd>The radius must be >0 and describes the x radius of the elipse as
+     *  projected on-screen.</dd>
+     *  <dt>autoSlip</dt><dd>Defaults to true for isometric maps. If set, the collision trace
+     *  will 'slip' away from jagged pixel edges to prevent sprites from being caught up in
+     *  jaggies when moving at isometric angles. In unsure, omit this property to use the
+     *  default.</dd>
+     * </dl>
+     */
     function CircleTrace(opts) {
 
         opts = opts||{};
@@ -46,13 +66,19 @@ function(traceProp, midPtEllipse, localScan) {
     /** Perform a trace to test for collision along a line with radius.
      * Effectively traces an ellipse  from one point to another, with some
      * important performance compromises in accuracy.
+     * @method module:plugins/collision/sprite-with-map/circle-trace.CircleTrace#test
+     * @param  {Number} x0  World X position of the starting point
+     * @param  {Number} y0  World Y position of the starting point
+     * @param  {Number} dx  Amount to move in the X axis
+     * @param  {Number} dy  Amount to move in the Y axis
+     * @param  {Number} h   Tile pixel height considered the ground (non-collision)
      * @param  {Array} out An optional 2-length array which will recieve the
      * point of contact. You can interpret this as the position to which the
      * character can go along its path at which it will be touching a solid
      * object. If there is no collision, the output position will be the
      * desired new position.
      * @return {Number} A number from 0-1 representing how far along the route
-     * the trace managed to get.
+     * the trace managed to get. 1 means no collision.
      */
     CircleTrace.prototype.test = function(x0, y0, dx, dy, h, out){
 

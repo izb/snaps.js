@@ -402,7 +402,6 @@ define(['util/js'], function(js) {
 
             if (t==='string') {
                 var pval = optUpdate.predicate;
-                /* TODO: Test this predicate type */
                 return function() {
                     return s.stateName===pval;
                 };
@@ -414,13 +413,10 @@ define(['util/js'], function(js) {
                     pvals[optUpdate.predicate[i]] = true;
                 }
 
-
-                /* TODO: Test this predicate type */
                 return function() {
                     return pvals.hasOwnProperty(s.stateName);
                 };
             } else if (t==='function') {
-                /* TODO: Test this predicate type */
                 return optUpdate.predicate;
             } else {
                 return troo;

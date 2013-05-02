@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: TimePhaser</title>
+    <title>JSDoc: Class: CircleTrace</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: TimePhaser</h1>
+    <h1 class="page-title">Class: CircleTrace</h1>
 
     
 
@@ -27,9 +27,9 @@
     
 <header>
     <h2>
-        <span class="ancestors"><a href="time-phaser.html">plugins/ai/phasers/time-phaser</a>.</span>
+        <span class="ancestors"><a href="circle-trace.html">plugins/collision/sprite-with-map/circle-trace</a>.</span>
     
-    TimePhaser
+    CircleTrace
     </h2>
     
 </header>  
@@ -41,7 +41,7 @@
     
         
 <dt>
-    <h4 class="name" id="TimePhaser"><span class="type-signature"></span>new TimePhaser<span class="signature">(id, <span class="optional">opts</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="CircleTrace"><span class="type-signature"></span>new CircleTrace<span class="signature">(opts)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -49,7 +49,7 @@
     
     
     <div class="description">
-        Construct a phaser that performs a set number of sprite updates per second. Note that thisshould not be constructed directly, but rather via the plugin factory method<code>sn.createPhaser('time-phaser')</code> on the engine.
+        Creates a circle tracer that traces a circle (An on-screen elipse in isometric-land)along a path to detect collision.Note that this should not be constructed directly, but rather via the plugin factory method<code>sn.createCollider('circle-trace')</code> on the engine.
     </div>
     
 
@@ -71,8 +71,6 @@
 		<th>Type</th>
 		
 		
-		<th>Argument</th>
-		
 		
 		
 		
@@ -81,37 +79,6 @@
 	</thead>
 	
 	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-            
-            
-                <td class="attributes">
-                
-                    
-                
-                    
-                
-                </td>
-            
-            
-            
-            
-            <td class="description last">A unique ID</td>
-        </tr>
-	
 	
 	
         <tr>
@@ -129,20 +96,10 @@
             </td>
             
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-                    
-                
-                    
-                
-                </td>
             
             
             
-            
-            <td class="description last">An object with assorted options set in it.<dl> <dt>updatesPerSecond</dt><dd>How many sprites should be updated each second? Must be >0.</dd> <dt>frameCap</dt><dd>On slow devices where the frame time exceeds 1s, every sprite will be in phase.   To combat this, we cap the possible measured frame time to something <1s.   This sacrifices update quality in order to give all sprites a change to have   some off-phase updates. This is based on the reasoning that you should   not expect things to run perfectly if your frame rate is that low.</dd></dl></td>
+            <td class="description last">An object with assorted options set in it.<dl> <dt>radius</dt><dd>The radius must be >0 and describes the x radius of the elipse as projected on-screen.</dd> <dt>autoSlip</dt><dd>Defaults to true for isometric maps. If set, the collision trace will 'slip' away from jagged pixel edges to prevent sprites from being caught up in jaggies when moving at isometric angles. In unsure, omit this property to use the default.</dd></dl></td>
         </tr>
 	
 	
@@ -208,7 +165,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="addSprite"><span class="type-signature"></span>addSprite<span class="signature">(s)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="test"><span class="type-signature"></span>test<span class="signature">(x0, y0, dx, dy, h, out)</span><span class="type-signature"> &rarr; {Number}</span></h4>
     
     
 </dt>
@@ -216,7 +173,7 @@
     
     
     <div class="description">
-        Adds a sprite to this phaser. The phaser will reschedule the spritesbut cannot guarantee the first frame of update the sprite will receive.
+        Perform a trace to test for collision along a line with radius.Effectively traces an ellipse  from one point to another, with someimportant performance compromises in accuracy.
     </div>
     
 
@@ -250,13 +207,13 @@
 	
         <tr>
             
-                <td class="name"><code>s</code></td>
+                <td class="name"><code>x0</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">Number</span>
 
 
             
@@ -266,7 +223,122 @@
             
             
             
-            <td class="description last">The sprite to add</td>
+            <td class="description last">World X position of the starting point</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>y0</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">World Y position of the starting point</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>dx</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">Amount to move in the X axis</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>dy</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">Amount to move in the Y axis</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>h</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">Tile pixel height considered the ground (non-collision)</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>out</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">An optional 2-length array which will recieve thepoint of contact. You can interpret this as the position to which thecharacter can go along its path at which it will be touching a solidobject. If there is no collision, the output position will be thedesired new position.</td>
         </tr>
 	
 	
@@ -307,6 +379,29 @@
     
     
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A number from 0-1 representing how far along the routethe trace managed to get. 1 means no collision.
+</div>
+
+
+
+<dl>
+	<dt class="oneline">
+		Type
+	</dt>
+	<dd class="oneline">
+		
+<span class="param-type">Number</span>
+
+
+	</dd>
+</dl>
+
+
+        
     
     
 </dd>
