@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: TimePhaser</title>
+    <title>JSDoc: Class: Particles</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: TimePhaser</h1>
+    <h1 class="page-title">Class: Particles</h1>
 
     
 
@@ -27,9 +27,9 @@
     
 <header>
     <h2>
-        <span class="ancestors"><a href="time-phaser.html">plugins/ai/phasers/time-phaser</a>.</span>
+        <span class="ancestors"><a href="particles.html">plugins/fx/particles</a>.</span>
     
-    TimePhaser
+    Particles
     </h2>
     
 </header>  
@@ -41,7 +41,7 @@
     
         
 <dt>
-    <h4 class="name" id="TimePhaser"><span class="type-signature"></span>new TimePhaser<span class="signature">(id, <span class="optional">opts</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Particles"><span class="type-signature"></span>new Particles<span class="signature">(opts)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -49,7 +49,7 @@
     
     
     <div class="description">
-        Construct a phaser that performs a set number of sprite updates per second. Note that thisshould not be constructed directly, but rather via the plugin factory method<code>sn.createPhaser('time-phaser')</code> on the engine.
+        Spawns particles in a composite sprite.Note that this should not be constructed directly, but rather via the plugin factory method<code>sn.fx('particles')</code> on the engine.
     </div>
     
 
@@ -71,8 +71,6 @@
 		<th>Type</th>
 		
 		
-		<th>Argument</th>
-		
 		
 		
 		
@@ -81,37 +79,6 @@
 	</thead>
 	
 	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-            
-            
-                <td class="attributes">
-                
-                    
-                
-                    
-                
-                </td>
-            
-            
-            
-            
-            <td class="description last">A unique ID</td>
-        </tr>
-	
 	
 	
         <tr>
@@ -129,20 +96,10 @@
             </td>
             
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-                    
-                
-                    
-                
-                </td>
             
             
             
-            
-            <td class="description last">An object with assorted options set in it.<dl> <dt>updatesPerSecond</dt><dd>How many sprites should be updated each second? Must be >0.</dd> <dt>frameCap</dt><dd>On slow devices where the frame time exceeds 1s, every sprite will be in phase.   To combat this, we cap the possible measured frame time to something <1s.   This sacrifices update quality in order to give all sprites a change to have   some off-phase updates. This is based on the reasoning that you should   not expect things to run perfectly if your frame rate is that low.</dd></dl></td>
+            <td class="description last">Options, in the following format<dl> <dt>number</dt><dd>The number of particles to spawn, either a number or a function   returning a number</dd> <dt>id</dt><dd>An optional ID for the new composite sprite</dd> <dt>def</dt><dd>The name of the sprite definition to spawn</dd> <dt>state</dt><dd>The sprite state to spawn</dd> <dt>duration</dt><dd>The time cap on the particle animation. Individual sprites may outlive this.   Either a number or a function returning a number</dd> <dt>x</dt><dd>X world position to spawn particles   Either a number or a function returning a number</dd> <dt>y</dt><dd>Y world position to spawn particles   Either a number or a function returning a number</dd> <dt>endCallback</dt><dd>Called once the particles effect expires, or the composite sprite expires.</dd></dl><p>Note there is no height spec. Height is the domain of the individual sprite within the composite.<p>An example of how to pass a random range into any Function/Number parameters would be to bindthe rnd function in util/rnd. E.g.<pre>// Random range between -20 and 20:var smallRange = rnd.bind(rnd,-20,20);// Random range between 500 and 2000:var largeRange = rnd.bind(rnd,500,2000);// Fast cached random number set:var fastRand = rnd.fastRand(10,20);sn.fx('particles', {    number: 15,    duration: largeRange,    x:smallRange,    y:smallRange    // etc});</pre><p>Alternatively of course, you could provide your own custom parameterless numbergenerator and pass it in.</td>
         </tr>
 	
 	
@@ -202,116 +159,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
-<dt>
-    <h4 class="name" id="addSprite"><span class="type-signature"></span>addSprite<span class="signature">(s)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Adds a sprite to this phaser. The phaser will reschedule the spritesbut cannot guarantee the first frame of update the sprite will receive.
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>s</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">The sprite to add</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        </dl>
     
     
     

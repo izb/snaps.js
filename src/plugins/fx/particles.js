@@ -7,40 +7,59 @@ define([
 
     'use strict';
 
+    /**
+     * @module plugins/fx/particles
+     */
+
     var sn;
 
     var rnd = utilRnd.rnd;
 
     /** Spawns particles in a composite sprite.
+     * Note that this should not be constructed directly, but rather via the plugin factory method
+     * <code>sn.fx('particles')</code> on the engine.
+     * @constructor module:plugins/fx/particles.Particles
      * @param {Object} opts Options, in the following format
-     * {
-     *     number: {Function/Number}, // The number of particles to spawn, either a number or a function
-     *     def: {String}, // The sprite definition to spawn
-     *     state: {String}, // The sprite state to spawn
-     *     duration: {Function/Number}, // The time cap on the particle animation. Individual sprites may outlive this.
-     *     x: {Function/Number}, // X world position to spawn particles
-     *     y: {Function/Number}, // Y world position to spawn particles
-     *     endCallback: Called once the particles effect expires, or the composite sprite expires.
-     * }
+     * <dl>
+     *  <dt>number</dt><dd>The number of particles to spawn, either a number or a function
+     *    returning a number</dd>
+     *  <dt>id</dt><dd>An optional ID for the new composite sprite</dd>
+     *  <dt>def</dt><dd>The name of the sprite definition to spawn</dd>
+     *  <dt>state</dt><dd>The sprite state to spawn</dd>
+     *  <dt>duration</dt><dd>The time cap on the particle animation. Individual sprites may outlive this.
+     *    Either a number or a function returning a number</dd>
+     *  <dt>x</dt><dd>X world position to spawn particles
+     *    Either a number or a function returning a number</dd>
+     *  <dt>y</dt><dd>Y world position to spawn particles
+     *    Either a number or a function returning a number</dd>
+     *  <dt>endCallback</dt><dd>Called once the particles effect expires, or the composite sprite expires.</dd>
+     * </dl>
      *
+     * <p>
      * Note there is no height spec. Height is the domain of the individual sprite within the composite.
      *
+     * <p>
      * An example of how to pass a random range into any Function/Number parameters would be to bind
      * the rnd function in util/rnd. E.g.
      *
-     * var smallRange = rnd.bind(rnd,-20,20); // Random range between -20 and 20
+     * <pre>
+     * // Random range between -20 and 20:
+     * var smallRange = rnd.bind(rnd,-20,20);
+     * // Random range between 500 and 2000:
      * var largeRange = rnd.bind(rnd,500,2000);
-     * var fastRand = rnd.fastRand(10,20); // Fast cached random number set
+     * // Fast cached random number set:
+     * var fastRand = rnd.fastRand(10,20);
      *
      * sn.fx('particles', {
      *     number: 15,
      *     duration: largeRange,
-     *     id: (optional) A unique identifier for the particles composite
      *     x:smallRange,
      *     y:smallRange
      *     // etc
      * });
+     * </pre>
      *
+     * <p>
      * Alternatively of course, you could provide your own custom parameterless number
      * generator and pass it in.
      */
