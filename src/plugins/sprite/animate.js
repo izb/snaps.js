@@ -5,34 +5,49 @@ define(function() {
 
     var sn;
 
-    function Animate() {
+    /**
+     * @module plugins/sprite/animate
+     */
 
-    }
-
-    /*
-     * Example options:
-     *
-     * updates:[{
-     *     name:'animate'
-     *     tween:'easeInOutCubic',
+    /**
+     * A sprite updater that animates one or more properties on the sprite. Properties are modified
+     * directly, so handle with care. Be aware that property updates on things such as position will bypass
+     * the automatic direction setting you'd get if you had called Sprite#move.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>tween</dt><dd>The name of the tween function. See the tweens module for a full list of options.</dd>
+     *  <dt>props</dt><dd>An object describing the properties to adjust. Values are relative adjustments, not
+     *     absolute values. E.g.
+     *     <pre>
      *     props: {
      *         x: 20,
      *         y: 30
-     *     },
-     *     duration: 1000
-     * }]
-     *
-     * Means the x and y properties of the sprite will adjusted by 20,30
-     * over 1000ms with the easing in and out.
-     *
-     * If duration is omited, it will be calculated automatically from the
-     * maxloops lifespan of the sprite
+     *     }
+     *     </pre>
+     *     Will increase x by 20 and y by 30.
+     *     </dd>
+     *  <dt>duration</dt><dd>The duration of the tween in milliseconds. If omitted, the duration will
+     *      be automatically calculated from the maxloops lifespan of the sprite. The tweener assumes
+     *      from this that the state will not change.</dd>
+     * </dl>
+     * @constructor module:plugins/sprite/animate.Animate
      */
+    function Animate() {
+        /* TODO: Docs - link to tweens functions. */
+        /* TODO: Docs - link to sprite move function. */
+    }
+
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/animate.Animate#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -48,8 +63,9 @@ define(function() {
         return true;
     };
 
-    /** Called with the update options as the function context, one of which
-     * is this.sprite, which refers to the sprite being updated.
+    /**
+     * @method module:plugins/sprite/animate.Animate#init
+     * @private
      */
     Animate.prototype.init = function(s) {
         this.sprite = s;
@@ -77,6 +93,10 @@ define(function() {
         this.epoch = sn.getNow();
     };
 
+    /**
+     * @method module:plugins/sprite/animate.Animate#onSpriteRemoved
+     * @private
+     */
     Animate.prototype.onSpriteRemoved = function() {
     };
 

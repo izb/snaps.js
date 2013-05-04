@@ -2066,29 +2066,37 @@ define('plugins/sprite/bounce',[],function() {
 
     var sn;
 
-    /** The bounce sprite plugin.
-     * @constructor
+    /**
+     * @module plugins/sprite/bounce
+     */
+
+    /**
+     * A simple way to make a sprite bounce by adjusting its height property. The sprite will bounce
+     * with a duration matching the current state's animation.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>update:[{name:'bounce'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>bounce_height</dt><dd>How high it should bounce in pixels.</dd>
+     *  <dt>bounce_base</dt><dd>Where is the 'floor'? E.g. a bounce_base of 25 and an bounce height
+     *  of 100 will bounce up 100px on top of the floor level of 25. The height value will
+     *  be 125 at its apex, midway through the state animation.</dd>
+     * </dl>
+     * @constructor module:plugins/sprite/bounce.Bounce
      */
     function Bounce() {
 
     }
 
-    /*
-     * Example options:
-     *
-     * updates:[{
-     *     name:'bounce',
-     *     bounce_height:100,
-     *     bounce_base:64,
-     * }]
-     *
-     * Bounces up 100px from a 'floor' height of 64px. Bounce duration
-     * is the current animation sequence duration.
-     */
+    /* TODO: All docs. Search for {Bool} and make it Boolean */
 
     /** Called with the sprite as the function context.
+     * @method module:plugins/sprite/bounce.Bounce#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -2097,7 +2105,7 @@ define('plugins/sprite/bounce',[],function() {
      */
     Bounce.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
-        var b = s.state.jogPos(s.epoch, sn.getNow());
+        var b = s.state.jogPos(s.epoch, sn.getNow()); /* 0..1 */
         b*=2;
         b-=1;
         b*=b;
@@ -2106,10 +2114,18 @@ define('plugins/sprite/bounce',[],function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/bounce.Bounce#init
+     * @private
+     */
     Bounce.prototype.init = function(sprite) {
         this.sprite = sprite;
     };
 
+    /**
+     * @method module:plugins/sprite/bounce.Bounce#onSpriteRemoved
+     * @private
+     */
     Bounce.prototype.onSpriteRemoved = function() {
     };
 
@@ -2128,14 +2144,29 @@ define('plugins/sprite/follow-mouse',[],function() {
     var pos = [0,0];
     var sn;
 
+    /**
+     * @module plugins/sprite/follow-mouse
+     */
+
+    /**
+     * A simple way to make a sprite track the mouse position.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>update:[{name:'follow_mouse'}]</code>.
+     * <p>
+     * This plugin takes no options.
+     * @constructor module:plugins/sprite/follow-mouse.FollowMouse
+     */
     function FollowMouse() {
 
     }
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/follow-mouse.FollowMouse#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -2151,16 +2182,24 @@ define('plugins/sprite/follow-mouse',[],function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/follow-mouse.FollowMouse#init
+     * @private
+     */
     FollowMouse.prototype.init = function(sprite) {
         this.sprite = sprite;
     };
 
+    /**
+     * @method module:plugins/sprite/follow-mouse.FollowMouse#onSpriteRemoved
+     * @private
+     */
     FollowMouse.prototype.onSpriteRemoved = function() {
     };
 
     return function(snaps) {
         sn = snaps;
-        sn.registerSpriteUpdater('follow_mouse', FollowMouse);
+        sn.registerSpriteUpdater('follow_mouse', FollowMouse); /* TODO: Underscores are inconsistent */
     };
 
 });
@@ -2172,34 +2211,49 @@ define('plugins/sprite/animate',[],function() {
 
     var sn;
 
-    function Animate() {
+    /**
+     * @module plugins/sprite/animate
+     */
 
-    }
-
-    /*
-     * Example options:
-     *
-     * updates:[{
-     *     name:'animate'
-     *     tween:'easeInOutCubic',
+    /**
+     * A sprite updater that animates one or more properties on the sprite. Properties are modified
+     * directly, so handle with care. Be aware that property updates on things such as position will bypass
+     * the automatic direction setting you'd get if you had called Sprite#move.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>tween</dt><dd>The name of the tween function. See the tweens module for a full list of options.</dd>
+     *  <dt>props</dt><dd>An object describing the properties to adjust. Values are relative adjustments, not
+     *     absolute values. E.g.
+     *     <pre>
      *     props: {
      *         x: 20,
      *         y: 30
-     *     },
-     *     duration: 1000
-     * }]
-     *
-     * Means the x and y properties of the sprite will adjusted by 20,30
-     * over 1000ms with the easing in and out.
-     *
-     * If duration is omited, it will be calculated automatically from the
-     * maxloops lifespan of the sprite
+     *     }
+     *     </pre>
+     *     Will increase x by 20 and y by 30.
+     *     </dd>
+     *  <dt>duration</dt><dd>The duration of the tween in milliseconds. If omitted, the duration will
+     *      be automatically calculated from the maxloops lifespan of the sprite. The tweener assumes
+     *      from this that the state will not change.</dd>
+     * </dl>
+     * @constructor module:plugins/sprite/animate.Animate
      */
+    function Animate() {
+        /* TODO: Docs - link to tweens functions. */
+        /* TODO: Docs - link to sprite move function. */
+    }
+
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/animate.Animate#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -2215,8 +2269,9 @@ define('plugins/sprite/animate',[],function() {
         return true;
     };
 
-    /** Called with the update options as the function context, one of which
-     * is this.sprite, which refers to the sprite being updated.
+    /**
+     * @method module:plugins/sprite/animate.Animate#init
+     * @private
      */
     Animate.prototype.init = function(s) {
         this.sprite = s;
@@ -2244,6 +2299,10 @@ define('plugins/sprite/animate',[],function() {
         this.epoch = sn.getNow();
     };
 
+    /**
+     * @method module:plugins/sprite/animate.Animate#onSpriteRemoved
+     * @private
+     */
     Animate.prototype.onSpriteRemoved = function() {
     };
 
@@ -2261,17 +2320,39 @@ define('plugins/sprite/8way',[],function() {
 
     var sn;
 
+    /* TODO: Docs - in all docs, add a description to the module tag */
+
+    /**
+     * @module plugins/sprite/8way
+     */
+
+    /**
+     * A sprite updater that sets the sprite's state extension to a compass direction
+     * ('n', 'ne', 'e', 'se'...)
+     * based on the direction values in the sprite. Direction updates automatically when the sprite
+     * moves but can be overridden with setDirection. The compass direction takes into account the
+     * isometric projection.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.
+     * <p>
+     * This plugin takes no options.
+     * @constructor module:plugins/sprite/8way.Face8Way
+     */
     function Face8Way() {
+        /* TODO: Docs. Link to Sprite#setDirection, and also spawnSprite(s) or composite sprites */
     }
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/8way.Face8Way#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
-     * @return true normally, or false to prevent any further
+     * @return {Boolean} true normally, or false to prevent any further
      * plugins being called on this sprite for this frame.
      */
     Face8Way.prototype.update = function(now, phaseOn) {
@@ -2321,11 +2402,19 @@ define('plugins/sprite/8way',[],function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/8way.Face8Way#init
+     * @private
+     */
     Face8Way.prototype.init = function(sprite) {
         this.sprite = sprite;
         this.direction = 'e';
     };
 
+    /**
+     * @method module:plugins/sprite/8way.Face8Way#onSpriteRemoved
+     * @private
+     */
     Face8Way.prototype.onSpriteRemoved = function() {
     };
 
@@ -2343,30 +2432,60 @@ define('plugins/sprite/track',[],function() {
 
     var sn;
 
-    /*
-     * The track plugin will call a callback function only whenever a
-     * sprite's position changes.
-     *
-     * Example options:
-     *
-     * updates:[{
-     *     name:'track',
-     *     fn: function(sprite) { // track sprite // }
-     * }]
-     *
-     * updates:[{
-     *     name:'track',
-     *     fn: myProximityTracker.track.bind(myProximityTracker)
-     * }]
+    /**
+     * @module plugins/sprite/track
      */
 
+    /**
+     * A plugin that gets triggered whenever a sprite's position changes.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>update:[{name:'track'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>fn</dt><dd>A function to call whenever the position changes. If the position hasn't
+     *    changed since the last frame, this function will not be called. The function is of the
+     *    form
+     *    <pre>
+     *    function(sprite) {
+     *        // track sprite
+     *    }
+     *    </pre>
+     *    </dd>
+     *  <dt>register</dt><dd>A function to call when the sprite is registered with this plugin.
+     *  The function is of the form
+     *    <pre>
+     *    function(sprite) {
+     *        // register sprite
+     *    }
+     *    </pre>
+     *    </dd>
+     *  <dt>deregister</dt><dd>A function to call when the sprite is removed from the stage.
+     *  The function is of the form
+     *    <pre>
+     *    function(sprite) {
+     *        // deregister sprite
+     *    }
+     *    </pre>
+     *    </dd>
+     * </dl>
+     * The register and deregister functions are useful when combined with the ProximityTracker
+     * to track large numbers of autonomous sprites. See
+     * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker.track} for
+     * an example of how to set that up.
+     * @constructor module:plugins/sprite/track.Track
+     */
     function Track() {
+        /* TODO: Docs - link to ProximityTracker */
     }
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/track.Track#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -2387,12 +2506,20 @@ define('plugins/sprite/track',[],function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/track.Track#onSpriteRemoved
+     * @private
+     */
     Track.prototype.onSpriteRemoved = function() {
         if (this.deregister) {
             this.deregister(this.sprite);
         }
     };
 
+    /**
+     * @method module:plugins/sprite/track.Track#init
+     * @private
+     */
     Track.prototype.init = function(s) {
         this.sprite = s;
         this.x=s.x;
@@ -2417,60 +2544,69 @@ define('plugins/sprite/flock',[],function() {
 
     var sn;
 
-    /*
-     * The track plugin will call a callback function only whenever a
-     * sprite's position changes.
-     *
-     * Example options:
-     *
-     * var tracker = new _this.sn.ProximityTracker(100);
-     *
-     * updates:[{
-     *     name:'flock',
-     *     tracker: tracker,
-     *     flock_speed: 120,
-     *     flock_neighborhood: 50,
-     *     flock_separation: 20,
-     *     flock_neighbor_limit: 5,
-     *     flock_steering: function(s, out) {
-     *         out[0]=1;
-     *         out[1]=0;
-     *     }
-     * }]
-     *
-     * flock_speed is in pixels/second. Initial sprite orientation should be set on the
-     * sprite with setDirection.
-     *
-     * flock_neighborhood is in pixels and defines the radius that defines the influential
-     * flockmates. Larger is generally better but slower, dependant on the tracker.
-     *
-     * flock_neighbor_limit is the number of neighbors that will contribute to the influence.
-     * E.g. if set to 5, only the 5 closest flockmates will influence the sprite. Larger is
-     * better, but slower. Set to a very large number to include all flockmates in the
-     * neighborhood.
-     *
-     * flock_steering is a function that should provide a normalized vector determining the general
-     * direction for a particular sprite.
-     *
-     * Sprites that flock with the same tracker will belong to the same flock.
-     *
-     * This plugin supports phasers and will flock more efficiently, but with less
-     * accuracy with phased updates.
-     *
-     * Note that this plugin will not move the sprites, it only calculates velocity. To move the
-     * sprites you should add the apply-velocity plugin after this one.
-     *
+    /**
+     * @module plugins/sprite/flock
      */
 
+    /**
+     * This plugin tracks groups of sprites and moves them together using the boids flocking
+     * algorithm.
+     * <p>
+     * This plugin supports phasers and will flock more efficiently, but with less
+     * accuracy with phased updates.
+     * <p>
+     * Note that this plugin will not move the sprites, it only calculates velocity. To move the
+     * sprites you should add the apply-velocity plugin after this one as a commit update. In this way
+     * the sprites accurately update based on their positions at the same moment in time.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>update:[{name:'flock'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>tracker</dt><dd>Pass a tracker object here. See ProximityTracker. Sprites that flock
+     *  with the same tracker will belong to the same flock. You should also apply the track
+     *  plugin to track the sprite in the proximity tracker.</dd>
+     *  <dt>flock_speed</dt><dd>In pixels/second. This is the maximum speed for any flockmate.</dd>
+     *  <dt>flock_neighborhood</dt><dd>The radius that defines the influential
+     *  flockmates, in pixels. Larger is generally better but slower, dependant on the tracker.</dd>
+     *  <dt>flock_separation</dt><dd>This is the desired distance between flockmates. Flock pressure
+     *  may force them closer together, but you can increase this to try to force them further apart.</dd>
+     *  <dt>flock_neighbor_limit</dt><dd>If you're experiencing slow performance, try setting a neighbor
+     *  limit. This limits the flockmates that can influence a sprite to a set number of closest neighbors.
+     *  This degrades the quality of the flocking behavior. To include all flockmates, set this to a very
+     *  high number.</dd>
+     *  <dt>flock_steering</dt><dd>Pass a function here to control the flock. The function should be of the form
+     *  <pre>
+     *  flock_steering: function(sprite, out) {
+     *      out[0]=1;
+     *      out[1]=0;
+     *  }
+     *  </pre>
+     *  And should steer each flockmate accordingly by populating the passed in spanned 2-length array with x,y
+     *  values. In the above example, the values 1,0 will guide the sprite eastwards. In a real example, your code
+     *  might determine the map tile that a sprite is on and guide it along a path, or simply move it on a
+     *  vector towards some known point.
+     *  </dd>
+     * </dl>
+     * @constructor module:plugins/sprite/flock.Flock
+     */
     function Flock() {
+        /* TODO: Docs - link to proximity tracker */
+        /* TODO: Docs - link to apply velocity plugin */
+        /* TODO: Docs - link to track plugin. Also show an example of a complete flocked sprite with
+         * all required plugins. */
+        /* TODO: Add support for phased updates */
         this.xy=[0,0];
         this.xy2=[0,0];
     }
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/flock.Flock#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -2581,9 +2717,17 @@ define('plugins/sprite/flock',[],function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/flock.Flock#init
+     * @private
+     */
     Flock.prototype.onSpriteRemoved = function() {
     };
 
+    /**
+     * @method module:plugins/sprite/flock.Flock#init
+     * @private
+     */
     Flock.prototype.init = function(s) {
         this.sprite = s;
 
@@ -2621,36 +2765,41 @@ define('plugins/sprite/apply-velocity',[],function() {
 
     var sn;
 
-    function ApplyVelocity() {
-
-    }
-
-    /* TODO: Stupid bug. This exists so that the flock plugin calculates all the
-     * velocities in place first, then the velocities are applied to the sprites
-     * afterwards. Of course this is stupid. This plugin is called immediately
-     * after the flock plugin on a per-sprite basis. Duh.
-     * To fix, we need to have post-update updates. Try not to make it look messy. */
-
-    /*
-     * Example options:
-     *
-     * updates:[{
-     *     name:'applyvelocity',
-     *     on_collision: function() {
-     *         // React to collision
-     *     }
-     * }]
-     *
-     * TODO: Pass collision ratio to the collision callback
-     *
-     * on_collision is an optional collision callback, called with the sprite as the
-     * function context.
-     *
+    /**
+     * @module plugins/sprite/apply-velocity
      */
 
+    /**
+     * A sprite updater that simply takes the velocityx and velocityy properties on the sprite and
+     * applies it to the position via move. This is useful in situations where another plugin is
+     * updating valocities but those velocities depend upon the momentary positions of sprites. E.g.
+     * you have a flock update which updates velocity. In that case you would have this plugin as
+     * a commit to apply the velocity calculated by flock.
+     * <p>
+     * Snaps runs all sprite updates first, then runs all sprite commits.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>commit:[{name:'apply-velocity'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>on_collision</dt><dd>An optional function that is called if the sprite could not
+     *  be moved to it's target position due to collision. This function will be called with the
+     *  sprite as the function context.</dd>
+     * </dl>
+     * @constructor module:plugins/sprite/apply-velocity.ApplyVelocity
+     */
+    function ApplyVelocity() {
+        /* TODO: Docs - link to sprite move method in description. */
+        /* TODO: Pass collision ratio to the collision callback */
+    }
+
+
     /** Called with the sprite as the function context.
+     * @method module:plugins/sprite/apply-velocity.ApplyVelocity#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -2665,10 +2814,18 @@ define('plugins/sprite/apply-velocity',[],function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/apply-velocity.ApplyVelocity#init
+     * @private
+     */
     ApplyVelocity.prototype.init = function(sprite) {
         this.sprite = sprite;
     };
 
+    /**
+     * @method module:plugins/sprite/apply-velocity.ApplyVelocity#onSpriteRemoved
+     * @private
+     */
     ApplyVelocity.prototype.onSpriteRemoved = function() {
     };
 
@@ -2684,22 +2841,39 @@ define('plugins/layer/ui',[],function() {
 
     
 
+    /**
+     * @module plugins/layer/ui
+     */
+
     var sn;
 
-    /* A layer that provides user interface features in the form of mouse or touch
-     * responsive widgets. */
-
     /**
-     * @param {Object} opts Parameters for customizing the layer.
+     * A layer that provides user interface features in the form of mouse or touch
+     * responsive widgets.
+     * Note that this should not be constructed directly, but rather via the plugin factory method
+     * <code>sn.addLayer('ui')</code> on the engine.
+     * @constructor module:plugins/layer/ui.UI
+     * @param {String} layerName A name for the layer. You might see it later on in
+     * error messages.
+     * @param {Object} opts Parameters for customizing the layer. There are no parameters
+     * for this layer plugin though, so feel free not to pass any in.
      */
     function UI(layerName, opts) {
         this.opts = opts||{};
         this.name = layerName;
     }
 
+    /**
+     * @method module:plugins/layer/ui.UI#update
+     * @private
+     */
     UI.prototype.update = function(now) {
     };
 
+    /**
+     * @method module:plugins/layer/ui.UI#draw
+     * @private
+     */
     UI.prototype.draw = function(ctx, now) {
 
         /* TODO: Draw widgets */
@@ -2720,13 +2894,22 @@ function(Sprite, uid) {
 
     
 
+    /**
+     * @module plugins/layer/ground-sprites
+     */
+
     var sn;
 
-    /* A layer that holds flat sprites that are intended to be drawn after the ground, but
-     * before the buildings and other sprites. */
-
     /**
-     * @param {Object} opts Parameters for customizing the layer.
+     * A layer that holds normally flat sprites that are intended to be drawn after the
+     * ground, but before the buildings and other sprites.
+     * Note that this should not be constructed directly, but rather via the plugin factory method
+     * <code>sn.addLayer('ground-sprites')</code> on the engine.
+     * @constructor module:plugins/layer/ground-sprites.GroundSprites
+     * @param {String} layerName A name for the layer. You might see it later on in
+     * error messages.
+     * @param {Object} opts Parameters for customizing the layer. There are no parameters
+     * for this layer plugin though, so feel free not to pass any in.
      */
     function GroundSprites(layerName, opts) {
         this.opts = opts||{};
@@ -2735,9 +2918,17 @@ function(Sprite, uid) {
         this.spriteMap = {};
     }
 
+    /**
+     * @method module:plugins/layer/ground-sprites.GroundSprites#update
+     * @private
+     */
     GroundSprites.prototype.update = function(now) {
     };
 
+    /**
+     * @method module:plugins/layer/ground-sprites.GroundSprites#draw
+     * @private
+     */
     GroundSprites.prototype.draw = function(ctx, now) {
 
         var map = sn.map;
@@ -2747,6 +2938,10 @@ function(Sprite, uid) {
         }
     };
 
+    /**
+     * Remove all sprites from the layer.
+     * @method module:plugins/layer/ground-sprites.GroundSprites#purgeAll
+     */
     GroundSprites.prototype.purgeAll = function() {
         for (var i = this.sprites.length - 1; i >= 0; i--) {
             this.sprites[i].onRemove();
@@ -2757,27 +2952,23 @@ function(Sprite, uid) {
 
     /**
      * Spawn a new sprite on the ground plane
+     * @method module:plugins/layer/ground-sprites.GroundSprites#spawnSprite
      * @param defName The name of the sprite definition to use. These are
      * set up in your game's spriteDefs data.
      * @param stateName The initial state. This too is defined in the
+     * sprite's definition, in your game's spriteDefs data.
+     * @param stateExt The initial state extension. This too is defined in the
      * sprite's definition, in your game's spriteDefs data.
      * @param {Function/Number} x The world x coordinate. If a function, it should take
      * no parameters and return a number.
      * @param {Function/Number} y The world y coordinate. If a function, it should take
      * no parameters and return a number.
-     * @param {Function/Number} h The height off the ground. If a function, it should take
-     * no parameters and return a number.
-     * @param Optional parameter object, which can contain:
-     * 'id' if you want to be able to find your sprite again.
-     * 'maxloops' if your sprite should remove itself from the world
-     * after it's looped around its animation a certain number of times. Can be a function, like
-     * the world position parameters.
-     * Normally you'd set this to 1 for things like explosions.
-     * 'update' An array of functions that are called in-order for this
-     * sprite.
-     * 'endCallback' A function called when the sprite naturally ends
+     * @param {Object} [opts] Optional parameter object. See sn.spawnSprite for sprite
+     * spawn option values.
      */
     GroundSprites.prototype.spawnSprite = function(defName, stateName, stateExt, x, y, opts) {
+
+        /* TODO: Docs - link to spawnSprite in opts param */
 
         opts = opts||{};
 
@@ -2817,40 +3008,59 @@ define('plugins/fx/particles',[
 
     
 
+    /**
+     * @module plugins/fx/particles
+     */
+
     var sn;
 
     var rnd = utilRnd.rnd;
 
     /** Spawns particles in a composite sprite.
+     * Note that this should not be constructed directly, but rather via the plugin factory method
+     * <code>sn.fx('particles')</code> on the engine.
+     * @constructor module:plugins/fx/particles.Particles
      * @param {Object} opts Options, in the following format
-     * {
-     *     number: {Function/Number}, // The number of particles to spawn, either a number or a function
-     *     def: {String}, // The sprite definition to spawn
-     *     state: {String}, // The sprite state to spawn
-     *     duration: {Function/Number}, // The time cap on the particle animation. Individual sprites may outlive this.
-     *     x: {Function/Number}, // X world position to spawn particles
-     *     y: {Function/Number}, // Y world position to spawn particles
-     *     endCallback: Called once the particles effect expires, or the composite sprite expires.
-     * }
+     * <dl>
+     *  <dt>number</dt><dd>The number of particles to spawn, either a number or a function
+     *    returning a number</dd>
+     *  <dt>id</dt><dd>An optional ID for the new composite sprite</dd>
+     *  <dt>def</dt><dd>The name of the sprite definition to spawn</dd>
+     *  <dt>state</dt><dd>The sprite state to spawn</dd>
+     *  <dt>duration</dt><dd>The time cap on the particle animation. Individual sprites may outlive this.
+     *    Either a number or a function returning a number</dd>
+     *  <dt>x</dt><dd>X world position to spawn particles
+     *    Either a number or a function returning a number</dd>
+     *  <dt>y</dt><dd>Y world position to spawn particles
+     *    Either a number or a function returning a number</dd>
+     *  <dt>endCallback</dt><dd>Called once the particles effect expires, or the composite sprite expires.</dd>
+     * </dl>
      *
+     * <p>
      * Note there is no height spec. Height is the domain of the individual sprite within the composite.
      *
+     * <p>
      * An example of how to pass a random range into any Function/Number parameters would be to bind
      * the rnd function in util/rnd. E.g.
      *
-     * var smallRange = rnd.bind(rnd,-20,20); // Random range between -20 and 20
+     * <pre>
+     * // Random range between -20 and 20:
+     * var smallRange = rnd.bind(rnd,-20,20);
+     * // Random range between 500 and 2000:
      * var largeRange = rnd.bind(rnd,500,2000);
-     * var fastRand = rnd.fastRand(10,20); // Fast cached random number set
+     * // Fast cached random number set:
+     * var fastRand = rnd.fastRand(10,20);
      *
      * sn.fx('particles', {
      *     number: 15,
      *     duration: largeRange,
-     *     id: (optional) A unique identifier for the particles composite
      *     x:smallRange,
      *     y:smallRange
      *     // etc
      * });
+     * </pre>
      *
+     * <p>
      * Alternatively of course, you could provide your own custom parameterless number
      * generator and pass it in.
      */
@@ -2896,7 +3106,9 @@ define('plugins/fx/particles',[
     };
 
     /** FX plugin callbacks should return true to continue, or false if complete.
+     * @method module:plugins/fx/particles.Particles#update
      * @return {Boolean} See description
+     * @private
      */
     Particles.prototype.update = function(now) {
         this.comp.update(now, updateSprite.bind(this));
@@ -3865,6 +4077,11 @@ function() {
 
     
 
+    /**
+     * @module plugins/default-plugins
+     * @private
+     */
+
     var plugins = arguments;
 
     return function(sn) {
@@ -4174,7 +4391,16 @@ define('ai/proximity-tracker',[],function() {
      * @module ai/proximity-tracker
      */
 
-    /** This constructor is curried when exposed through the engine ref,
+    /**
+     * The proximity tracker tracks sprites and allows you to perform fast queries
+     * to find what sprites are closest to a given point.
+     * <p>
+     * The proximity tracker must be informed when a sprite moves. The easiest way to
+     * do this is via the <code>track</code> sprite plugin. See
+     * {@link module:ai/proximity-tracker.ProximityTracker|track} for implementation
+     * details.
+     * <p>
+     * This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
      * new sn.ProximityTracker(myCellSize);
      * @constructor module:ai/proximity-tracker.ProximityTracker
@@ -4360,14 +4586,18 @@ define('ai/proximity-tracker',[],function() {
     /** Use this in conjunction with the track plugin. Add it to the list of sprite
      * updaters on your tracked sprites, after the sprite has moved. E.g.
      *
+     * <pre>
      * updates:[{
-     *     name: 'some-sprite-moving-plugin'
+     *   name: 'some-sprite-moving-plugin'
      * }, {
-     *     name:'track',
-     *     fn: myProximityTracker.track.bind(myProximityTracker),
-     *     register: myProximityTracker.register.bind(myProximityTracker),
-     *     deregister: myProximityTracker.unregister.bind(myProximityTracker)
+     *   name:'track',
+     *   fn: myTracker.track.bind(myProximityTracker),
+     *   register: myTracker.register.bind(myProximityTracker),
+     *   deregister: myTracker.unregister.bind(myProximityTracker)
      * }]
+     * </pre>
+     * @param {Object} sprite The sprite to update tracking information for.
+     * @method module:ai/proximity-tracker.ProximityTracker#track
      */
     ProximityTracker.prototype.track = function(sprite) {
         var pd = sprite.proximityData[this.id];
@@ -4392,6 +4622,12 @@ define('ai/proximity-tracker',[],function() {
 
     };
 
+    /** Register a sprite with this tracker.
+     * See {@link module:ai/proximity-tracker.ProximityTracker|track} for
+     * an example of how this is used with the track sprite plugin.
+     * @method module:ai/proximity-tracker.ProximityTracker#register
+     * @param {Object} sprite The sprite to register.
+     */
     ProximityTracker.prototype.register = function(sprite) {
 
         var x = (sprite.x/this.cellw)|0;
@@ -4411,6 +4647,12 @@ define('ai/proximity-tracker',[],function() {
         this.track(sprite);
     };
 
+    /** Unregister a sprite with this tracker.
+     * See {@link module:ai/proximity-tracker.ProximityTracker|track} for
+     * an example of how this is used with the track sprite plugin.
+     * @method module:ai/proximity-tracker.ProximityTracker#unregister
+     * @param {Object} sprite The sprite to unregister.
+     */
     ProximityTracker.prototype.unregister = function(sprite) {
         removeFromItsCell.call(this, sprite);
         delete sprite.proximityData[this.id];
@@ -4761,6 +5003,13 @@ define('polyfills/requestAnimationFrame',[],function() {
 
     
 
+    /**
+     * @module polyfills/requestAnimationFrame
+     * @private
+     */
+
+    /* TODO: Camel case filename is inconsistent */
+
     // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
     // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
 
@@ -4800,6 +5049,11 @@ define('polyfills/bind',[],function() {
     /* https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind */
 
     
+
+    /**
+     * @module polyfills/bind
+     * @private
+     */
 
     if (!Function.prototype.bind) {
         Function.prototype.bind = function (oThis) {

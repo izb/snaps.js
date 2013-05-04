@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: plugins/ai/phasers/frame-phaser</title>
+    <title>JSDoc: Class: Bounce</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: plugins/ai/phasers/frame-phaser</h1>
+    <h1 class="page-title">Class: Bounce</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    plugins/ai/phasers/frame-phaser
+        <span class="ancestors"><a href="bounce.html">plugins/sprite/bounce</a>.</span>
+    
+    Bounce
     </h2>
     
 </header>  
@@ -38,8 +40,38 @@
     
     
         
-        
-        
+<dt>
+    <h4 class="name" id="Bounce"><span class="type-signature"></span>new Bounce<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        A simple way to make a sprite bounce by adjusting its height property. The sprite will bounce
+with a duration matching the current state's animation.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>update:[{name:'bounce'}]</code>.
+<p>
+Alongside the name, you can pass the following options
+<dl>
+ <dt>bounce_height</dt><dd>How high it should bounce in pixels.</dd>
+ <dt>bounce_base</dt><dd>Where is the 'floor'? E.g. a bounce_base of 25 and an bounce height
+ of 100 will bounce up 100px on top of the floor level of 25. The height value will
+ be 125 at its apex, midway through the state animation.</dd>
+</dl>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
     
 
@@ -66,8 +98,16 @@
     
 </dl>
 
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
     
@@ -77,13 +117,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Classes</h3>
-        
-        <dl>
-            <dt><a href="frame-phaser.FramePhaser.html">FramePhaser</a></dt>
-            <dd></dd>
-        </dl>
     
     
     

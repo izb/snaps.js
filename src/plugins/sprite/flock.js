@@ -5,60 +5,69 @@ define(function() {
 
     var sn;
 
-    /*
-     * The track plugin will call a callback function only whenever a
-     * sprite's position changes.
-     *
-     * Example options:
-     *
-     * var tracker = new _this.sn.ProximityTracker(100);
-     *
-     * updates:[{
-     *     name:'flock',
-     *     tracker: tracker,
-     *     flock_speed: 120,
-     *     flock_neighborhood: 50,
-     *     flock_separation: 20,
-     *     flock_neighbor_limit: 5,
-     *     flock_steering: function(s, out) {
-     *         out[0]=1;
-     *         out[1]=0;
-     *     }
-     * }]
-     *
-     * flock_speed is in pixels/second. Initial sprite orientation should be set on the
-     * sprite with setDirection.
-     *
-     * flock_neighborhood is in pixels and defines the radius that defines the influential
-     * flockmates. Larger is generally better but slower, dependant on the tracker.
-     *
-     * flock_neighbor_limit is the number of neighbors that will contribute to the influence.
-     * E.g. if set to 5, only the 5 closest flockmates will influence the sprite. Larger is
-     * better, but slower. Set to a very large number to include all flockmates in the
-     * neighborhood.
-     *
-     * flock_steering is a function that should provide a normalized vector determining the general
-     * direction for a particular sprite.
-     *
-     * Sprites that flock with the same tracker will belong to the same flock.
-     *
-     * This plugin supports phasers and will flock more efficiently, but with less
-     * accuracy with phased updates.
-     *
-     * Note that this plugin will not move the sprites, it only calculates velocity. To move the
-     * sprites you should add the apply-velocity plugin after this one.
-     *
+    /**
+     * @module plugins/sprite/flock
      */
 
+    /**
+     * This plugin tracks groups of sprites and moves them together using the boids flocking
+     * algorithm.
+     * <p>
+     * This plugin supports phasers and will flock more efficiently, but with less
+     * accuracy with phased updates.
+     * <p>
+     * Note that this plugin will not move the sprites, it only calculates velocity. To move the
+     * sprites you should add the apply-velocity plugin after this one as a commit update. In this way
+     * the sprites accurately update based on their positions at the same moment in time.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>update:[{name:'flock'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>tracker</dt><dd>Pass a tracker object here. See ProximityTracker. Sprites that flock
+     *  with the same tracker will belong to the same flock. You should also apply the track
+     *  plugin to track the sprite in the proximity tracker.</dd>
+     *  <dt>flock_speed</dt><dd>In pixels/second. This is the maximum speed for any flockmate.</dd>
+     *  <dt>flock_neighborhood</dt><dd>The radius that defines the influential
+     *  flockmates, in pixels. Larger is generally better but slower, dependant on the tracker.</dd>
+     *  <dt>flock_separation</dt><dd>This is the desired distance between flockmates. Flock pressure
+     *  may force them closer together, but you can increase this to try to force them further apart.</dd>
+     *  <dt>flock_neighbor_limit</dt><dd>If you're experiencing slow performance, try setting a neighbor
+     *  limit. This limits the flockmates that can influence a sprite to a set number of closest neighbors.
+     *  This degrades the quality of the flocking behavior. To include all flockmates, set this to a very
+     *  high number.</dd>
+     *  <dt>flock_steering</dt><dd>Pass a function here to control the flock. The function should be of the form
+     *  <pre>
+     *  flock_steering: function(sprite, out) {
+     *      out[0]=1;
+     *      out[1]=0;
+     *  }
+     *  </pre>
+     *  And should steer each flockmate accordingly by populating the passed in spanned 2-length array with x,y
+     *  values. In the above example, the values 1,0 will guide the sprite eastwards. In a real example, your code
+     *  might determine the map tile that a sprite is on and guide it along a path, or simply move it on a
+     *  vector towards some known point.
+     *  </dd>
+     * </dl>
+     * @constructor module:plugins/sprite/flock.Flock
+     */
     function Flock() {
+        /* TODO: Docs - link to proximity tracker */
+        /* TODO: Docs - link to apply velocity plugin */
+        /* TODO: Docs - link to track plugin. Also show an example of a complete flocked sprite with
+         * all required plugins. */
+        /* TODO: Add support for phased updates */
         this.xy=[0,0];
         this.xy2=[0,0];
     }
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/flock.Flock#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -169,9 +178,17 @@ define(function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/flock.Flock#init
+     * @private
+     */
     Flock.prototype.onSpriteRemoved = function() {
     };
 
+    /**
+     * @method module:plugins/sprite/flock.Flock#init
+     * @private
+     */
     Flock.prototype.init = function(s) {
         this.sprite = s;
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: plugins/ai/phasers/frame-phaser</title>
+    <title>JSDoc: Class: ApplyVelocity</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: plugins/ai/phasers/frame-phaser</h1>
+    <h1 class="page-title">Class: ApplyVelocity</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    plugins/ai/phasers/frame-phaser
+        <span class="ancestors"><a href="apply-velocity.html">plugins/sprite/apply-velocity</a>.</span>
+    
+    ApplyVelocity
     </h2>
     
 </header>  
@@ -38,8 +40,42 @@
     
     
         
-        
-        
+<dt>
+    <h4 class="name" id="ApplyVelocity"><span class="type-signature"></span>new ApplyVelocity<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        A sprite updater that simply takes the velocityx and velocityy properties on the sprite and
+applies it to the position via move. This is useful in situations where another plugin is
+updating valocities but those velocities depend upon the momentary positions of sprites. E.g.
+you have a flock update which updates velocity. In that case you would have this plugin as
+a commit to apply the velocity calculated by flock.
+<p>
+Snaps runs all sprite updates first, then runs all sprite commits.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>commit:[{name:'apply-velocity'}]</code>.
+<p>
+Alongside the name, you can pass the following options
+<dl>
+ <dt>on_collision</dt><dd>An optional function that is called if the sprite could not
+ be moved to it's target position due to collision. This function will be called with the
+ sprite as the function context.</dd>
+</dl>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
     
 
@@ -66,8 +102,16 @@
     
 </dl>
 
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
     
@@ -77,13 +121,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Classes</h3>
-        
-        <dl>
-            <dt><a href="frame-phaser.FramePhaser.html">FramePhaser</a></dt>
-            <dd></dd>
-        </dl>
     
     
     

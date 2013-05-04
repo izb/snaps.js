@@ -5,7 +5,16 @@ define(function() {
      * @module ai/proximity-tracker
      */
 
-    /** This constructor is curried when exposed through the engine ref,
+    /**
+     * The proximity tracker tracks sprites and allows you to perform fast queries
+     * to find what sprites are closest to a given point.
+     * <p>
+     * The proximity tracker must be informed when a sprite moves. The easiest way to
+     * do this is via the <code>track</code> sprite plugin. See
+     * {@link module:ai/proximity-tracker.ProximityTracker|track} for implementation
+     * details.
+     * <p>
+     * This constructor is curried when exposed through the engine ref,
      * so construct it without the first parameter, e.g.
      * new sn.ProximityTracker(myCellSize);
      * @constructor module:ai/proximity-tracker.ProximityTracker
@@ -191,14 +200,18 @@ define(function() {
     /** Use this in conjunction with the track plugin. Add it to the list of sprite
      * updaters on your tracked sprites, after the sprite has moved. E.g.
      *
+     * <pre>
      * updates:[{
-     *     name: 'some-sprite-moving-plugin'
+     *   name: 'some-sprite-moving-plugin'
      * }, {
-     *     name:'track',
-     *     fn: myProximityTracker.track.bind(myProximityTracker),
-     *     register: myProximityTracker.register.bind(myProximityTracker),
-     *     deregister: myProximityTracker.unregister.bind(myProximityTracker)
+     *   name:'track',
+     *   fn: myTracker.track.bind(myProximityTracker),
+     *   register: myTracker.register.bind(myProximityTracker),
+     *   deregister: myTracker.unregister.bind(myProximityTracker)
      * }]
+     * </pre>
+     * @param {Object} sprite The sprite to update tracking information for.
+     * @method module:ai/proximity-tracker.ProximityTracker#track
      */
     ProximityTracker.prototype.track = function(sprite) {
         var pd = sprite.proximityData[this.id];
@@ -223,6 +236,12 @@ define(function() {
 
     };
 
+    /** Register a sprite with this tracker.
+     * See {@link module:ai/proximity-tracker.ProximityTracker|track} for
+     * an example of how this is used with the track sprite plugin.
+     * @method module:ai/proximity-tracker.ProximityTracker#register
+     * @param {Object} sprite The sprite to register.
+     */
     ProximityTracker.prototype.register = function(sprite) {
 
         var x = (sprite.x/this.cellw)|0;
@@ -242,6 +261,12 @@ define(function() {
         this.track(sprite);
     };
 
+    /** Unregister a sprite with this tracker.
+     * See {@link module:ai/proximity-tracker.ProximityTracker|track} for
+     * an example of how this is used with the track sprite plugin.
+     * @method module:ai/proximity-tracker.ProximityTracker#unregister
+     * @param {Object} sprite The sprite to unregister.
+     */
     ProximityTracker.prototype.unregister = function(sprite) {
         removeFromItsCell.call(this, sprite);
         delete sprite.proximityData[this.id];

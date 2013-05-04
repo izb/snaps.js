@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: plugins/ai/phasers/frame-phaser</title>
+    <title>JSDoc: Class: Animate</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: plugins/ai/phasers/frame-phaser</h1>
+    <h1 class="page-title">Class: Animate</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    plugins/ai/phasers/frame-phaser
+        <span class="ancestors"><a href="animate.html">plugins/sprite/animate</a>.</span>
+    
+    Animate
     </h2>
     
 </header>  
@@ -38,8 +40,49 @@
     
     
         
-        
-        
+<dt>
+    <h4 class="name" id="Animate"><span class="type-signature"></span>new Animate<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        A sprite updater that animates one or more properties on the sprite. Properties are modified
+directly, so handle with care. Be aware that property updates on things such as position will bypass
+the automatic direction setting you'd get if you had called Sprite#move.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.
+<p>
+Alongside the name, you can pass the following options
+<dl>
+ <dt>tween</dt><dd>The name of the tween function. See the tweens module for a full list of options.</dd>
+ <dt>props</dt><dd>An object describing the properties to adjust. Values are relative adjustments, not
+    absolute values. E.g.
+    <pre>
+    props: {
+        x: 20,
+        y: 30
+    }
+    </pre>
+    Will increase x by 20 and y by 30.
+    </dd>
+ <dt>duration</dt><dd>The duration of the tween in milliseconds. If omitted, the duration will
+     be automatically calculated from the maxloops lifespan of the sprite. The tweener assumes
+     from this that the state will not change.</dd>
+</dl>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
     
 
@@ -66,8 +109,16 @@
     
 </dl>
 
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
     
@@ -77,13 +128,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Classes</h3>
-        
-        <dl>
-            <dt><a href="frame-phaser.FramePhaser.html">FramePhaser</a></dt>
-            <dd></dd>
-        </dl>
     
     
     

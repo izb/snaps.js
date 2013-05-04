@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: plugins/ai/phasers/frame-phaser</title>
+    <title>JSDoc: Class: Track</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: plugins/ai/phasers/frame-phaser</h1>
+    <h1 class="page-title">Class: Track</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    plugins/ai/phasers/frame-phaser
+        <span class="ancestors"><a href="track.html">plugins/sprite/track</a>.</span>
+    
+    Track
     </h2>
     
 </header>  
@@ -38,8 +40,62 @@
     
     
         
-        
-        
+<dt>
+    <h4 class="name" id="Track"><span class="type-signature"></span>new Track<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        A plugin that gets triggered whenever a sprite's position changes.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>update:[{name:'track'}]</code>.
+<p>
+Alongside the name, you can pass the following options
+<dl>
+ <dt>fn</dt><dd>A function to call whenever the position changes. If the position hasn't
+   changed since the last frame, this function will not be called. The function is of the
+   form
+   <pre>
+   function(sprite) {
+       // track sprite
+   }
+   </pre>
+   </dd>
+ <dt>register</dt><dd>A function to call when the sprite is registered with this plugin.
+ The function is of the form
+   <pre>
+   function(sprite) {
+       // register sprite
+   }
+   </pre>
+   </dd>
+ <dt>deregister</dt><dd>A function to call when the sprite is removed from the stage.
+ The function is of the form
+   <pre>
+   function(sprite) {
+       // deregister sprite
+   }
+   </pre>
+   </dd>
+</dl>
+The register and deregister functions are useful when combined with the ProximityTracker
+to track large numbers of autonomous sprites. See
+<a href="proximity-tracker.ProximityTracker.html"><code>ProximityTracker.track</code></a> for
+an example of how to set that up.
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
     
 
@@ -66,8 +122,16 @@
     
 </dl>
 
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
     
@@ -77,13 +141,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Classes</h3>
-        
-        <dl>
-            <dt><a href="frame-phaser.FramePhaser.html">FramePhaser</a></dt>
-            <dd></dd>
-        </dl>
     
     
     

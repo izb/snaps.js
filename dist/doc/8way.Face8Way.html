@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: plugins/ai/phasers/frame-phaser</title>
+    <title>JSDoc: Class: Face8Way</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: plugins/ai/phasers/frame-phaser</h1>
+    <h1 class="page-title">Class: Face8Way</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    plugins/ai/phasers/frame-phaser
+        <span class="ancestors"><a href="8way.html">plugins/sprite/8way</a>.</span>
+    
+    Face8Way
     </h2>
     
 </header>  
@@ -38,8 +40,35 @@
     
     
         
-        
-        
+<dt>
+    <h4 class="name" id="Face8Way"><span class="type-signature"></span>new Face8Way<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        A sprite updater that sets the sprite's state extension to a compass direction
+('n', 'ne', 'e', 'se'...)
+based on the direction values in the sprite. Direction updates automatically when the sprite
+moves but can be overridden with setDirection. The compass direction takes into account the
+isometric projection.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.
+<p>
+This plugin takes no options.
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
     
 
@@ -66,8 +95,16 @@
     
 </dl>
 
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
     
@@ -77,13 +114,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Classes</h3>
-        
-        <dl>
-            <dt><a href="frame-phaser.FramePhaser.html">FramePhaser</a></dt>
-            <dd></dd>
-        </dl>
     
     
     

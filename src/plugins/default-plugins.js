@@ -25,6 +25,11 @@ function() {
 
     'use strict';
 
+    /**
+     * @module plugins/default-plugins
+     * @private
+     */
+
     var plugins = arguments;
 
     return function(sn) {

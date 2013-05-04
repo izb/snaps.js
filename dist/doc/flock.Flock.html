@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: plugins/ai/phasers/frame-phaser</title>
+    <title>JSDoc: Class: Flock</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: plugins/ai/phasers/frame-phaser</h1>
+    <h1 class="page-title">Class: Flock</h1>
 
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    plugins/ai/phasers/frame-phaser
+        <span class="ancestors"><a href="flock.html">plugins/sprite/flock</a>.</span>
+    
+    Flock
     </h2>
     
 </header>  
@@ -38,8 +40,65 @@
     
     
         
-        
-        
+<dt>
+    <h4 class="name" id="Flock"><span class="type-signature"></span>new Flock<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        This plugin tracks groups of sprites and moves them together using the boids flocking
+algorithm.
+<p>
+This plugin supports phasers and will flock more efficiently, but with less
+accuracy with phased updates.
+<p>
+Note that this plugin will not move the sprites, it only calculates velocity. To move the
+sprites you should add the apply-velocity plugin after this one as a commit update. In this way
+the sprites accurately update based on their positions at the same moment in time.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>update:[{name:'flock'}]</code>.
+<p>
+Alongside the name, you can pass the following options
+<dl>
+ <dt>tracker</dt><dd>Pass a tracker object here. See ProximityTracker. Sprites that flock
+ with the same tracker will belong to the same flock. You should also apply the track
+ plugin to track the sprite in the proximity tracker.</dd>
+ <dt>flock_speed</dt><dd>In pixels/second. This is the maximum speed for any flockmate.</dd>
+ <dt>flock_neighborhood</dt><dd>The radius that defines the influential
+ flockmates, in pixels. Larger is generally better but slower, dependant on the tracker.</dd>
+ <dt>flock_separation</dt><dd>This is the desired distance between flockmates. Flock pressure
+ may force them closer together, but you can increase this to try to force them further apart.</dd>
+ <dt>flock_neighbor_limit</dt><dd>If you're experiencing slow performance, try setting a neighbor
+ limit. This limits the flockmates that can influence a sprite to a set number of closest neighbors.
+ This degrades the quality of the flocking behavior. To include all flockmates, set this to a very
+ high number.</dd>
+ <dt>flock_steering</dt><dd>Pass a function here to control the flock. The function should be of the form
+ <pre>
+ flock_steering: function(sprite, out) {
+     out[0]=1;
+     out[1]=0;
+ }
+ </pre>
+ And should steer each flockmate accordingly by populating the passed in spanned 2-length array with x,y
+ values. In the above example, the values 1,0 will guide the sprite eastwards. In a real example, your code
+ might determine the map tile that a sprite is on and guide it along a path, or simply move it on a
+ vector towards some known point.
+ </dd>
+</dl>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
     
 
@@ -66,8 +125,16 @@
     
 </dl>
 
-        
-        
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
     
@@ -77,13 +144,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Classes</h3>
-        
-        <dl>
-            <dt><a href="frame-phaser.FramePhaser.html">FramePhaser</a></dt>
-            <dd></dd>
-        </dl>
     
     
     

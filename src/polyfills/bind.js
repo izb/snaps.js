@@ -5,6 +5,11 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @module polyfills/bind
+     * @private
+     */
+
     if (!Function.prototype.bind) {
         Function.prototype.bind = function (oThis) {
             if (typeof this !== "function") {

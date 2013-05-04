@@ -5,30 +5,60 @@ define(function() {
 
     var sn;
 
-    /*
-     * The track plugin will call a callback function only whenever a
-     * sprite's position changes.
-     *
-     * Example options:
-     *
-     * updates:[{
-     *     name:'track',
-     *     fn: function(sprite) { // track sprite // }
-     * }]
-     *
-     * updates:[{
-     *     name:'track',
-     *     fn: myProximityTracker.track.bind(myProximityTracker)
-     * }]
+    /**
+     * @module plugins/sprite/track
      */
 
+    /**
+     * A plugin that gets triggered whenever a sprite's position changes.
+     * <p>
+     * Note that this should not be constructed directly, but rather via the updates or commit
+     * property in your spawnSprite data, e.g. <code>update:[{name:'track'}]</code>.
+     * <p>
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>fn</dt><dd>A function to call whenever the position changes. If the position hasn't
+     *    changed since the last frame, this function will not be called. The function is of the
+     *    form
+     *    <pre>
+     *    function(sprite) {
+     *        // track sprite
+     *    }
+     *    </pre>
+     *    </dd>
+     *  <dt>register</dt><dd>A function to call when the sprite is registered with this plugin.
+     *  The function is of the form
+     *    <pre>
+     *    function(sprite) {
+     *        // register sprite
+     *    }
+     *    </pre>
+     *    </dd>
+     *  <dt>deregister</dt><dd>A function to call when the sprite is removed from the stage.
+     *  The function is of the form
+     *    <pre>
+     *    function(sprite) {
+     *        // deregister sprite
+     *    }
+     *    </pre>
+     *    </dd>
+     * </dl>
+     * The register and deregister functions are useful when combined with the ProximityTracker
+     * to track large numbers of autonomous sprites. See
+     * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker.track} for
+     * an example of how to set that up.
+     * @constructor module:plugins/sprite/track.Track
+     */
     function Track() {
+        /* TODO: Docs - link to ProximityTracker */
     }
 
     /** Called with the update options as the function context, one of which
      * is this.sprite, which refers to the sprite being updated.
+     * @method module:plugins/sprite/track.Track#update
+     * @private
      * @param  {Number} now The time of the current frame
-     * @param  {Bool} phaseOn If the update is controlled by a phaser,
+     * @param  {Boolean} phaseOn If the update is controlled by a phaser,
      * this will be true to hint that we do a full batch of work, or false
      * to hint that we try to exit as trivially as possible. Ignored on this
      * plugin.
@@ -49,12 +79,20 @@ define(function() {
         return true;
     };
 
+    /**
+     * @method module:plugins/sprite/track.Track#onSpriteRemoved
+     * @private
+     */
     Track.prototype.onSpriteRemoved = function() {
         if (this.deregister) {
             this.deregister(this.sprite);
         }
     };
 
+    /**
+     * @method module:plugins/sprite/track.Track#init
+     * @private
+     */
     Track.prototype.init = function(s) {
         this.sprite = s;
         this.x=s.x;
