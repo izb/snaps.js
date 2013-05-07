@@ -3,8 +3,13 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @module util/js
+     */
+
     /** Convert a click event position (event.pageX/Y) into coords relative
      * to a canvas.
+     * @private
      */
     HTMLCanvasElement.prototype.relCoords = function(x,y,out){
 
@@ -16,6 +21,13 @@ define(function() {
 
     return {
 
+        /**
+         * Copy properties from one object to another
+         * @function module:util/js#copyProps
+         * @param {Object} s The source object
+         * @param {Object} d The destination object
+         * @return {Object} The destination object
+         */
         copyProps: function(s,d) {
             for (var prop in s) {
                 if (s.hasOwnProperty(prop)) {
@@ -25,6 +37,12 @@ define(function() {
             return d;
         },
 
+        /**
+         * Create a shallow clone of an object
+         * @function module:util/js#clone
+         * @param {Object} s The source object
+         * @return {Object} A new copy of the object
+         */
         clone: function(s) {
             var d = {};
             for (var prop in s) {

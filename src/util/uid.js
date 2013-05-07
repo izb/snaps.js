@@ -3,9 +3,16 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @module util/uid
+     */
+
     var next = 1;
 
-    /** Return a unique string for identifier purposes.
+    /**
+     * Generates unique IDs
+     * @function module:util/uid#uid
+     * @return {Number} A unique ID
      */
     return function() {
         return next++;

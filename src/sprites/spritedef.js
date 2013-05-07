@@ -4,6 +4,13 @@ define(function() {
     'use strict';
 
     /**
+     * @module sprites/spritedef
+     * @private
+     */
+
+    /**
+     * @private
+     * @constructor module:sprites/spritedef.State
      * @param {Array} seq Image offset sequence in the form
      * [[x0,y0],[x1,y1],[x2,y2]...]
      */
@@ -13,12 +20,20 @@ define(function() {
         this.def = def;
     }
 
+    /**
+     * @method module:sprites/spritedef.State#jogPos
+     * @private
+     */
     State.prototype.jogPos = function(epoch, now) {
         var dt = now - epoch;
         dt = dt % this.dur;
         return dt / this.dur;
     };
 
+    /**
+     * @method module:sprites/spritedef.State#draw
+     * @private
+     */
     State.prototype.draw = function(ctx, x, y, epoch, now, forceFinal) {
         var def = this.def;
         var pos = this.seq[
@@ -37,6 +52,10 @@ define(function() {
             );
     };
 
+    /**
+     * @private
+     * @constructor module:sprites/spritedef.SpriteDef
+     */
     function SpriteDef(image, w, h, x, y) {
         this.states = {};
         this.image = image;
@@ -48,6 +67,10 @@ define(function() {
         this.y = y;
     }
 
+    /**
+     * @private
+     * @method module:sprites/spritedef.SpriteDef#addState
+     */
     SpriteDef.prototype.addState = function(name, seq, dur) {
         var pos = [];
         var xmax = Math.floor(this.image.width / this.w);
@@ -61,6 +84,10 @@ define(function() {
         this.states[name] = new State(pos, dur, this);
     };
 
+    /**
+     * @private
+     * @method module:sprites/spritedef.SpriteDef#aliasState
+     */
     SpriteDef.prototype.aliasState = function(alias, state) {
         var s = this.states[state];
         /* TODO: Validate */

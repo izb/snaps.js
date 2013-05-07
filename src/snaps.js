@@ -28,6 +28,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
     'use strict';
 
+
+    /**
+     * @module snaps
+     */
+
     var debugText = util.debug.debugText;
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
@@ -36,7 +41,16 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var uid       = util.uid;
     var Stats     = util.Stats;
 
+    /**
+     * The main class of the game engine
+     * @constructor module:snaps.Snaps
+     * @param {Object} game A game object
+     * @param {String} canvasID The ID of a canvas on the page to render into
+     * @param {Object} [settings] Assorted settings to control the engine behavior.
+     */
     function Snaps(game, canvasID, settings) {
+
+        /* TODO: Docs - document settings object options */
 
         var _this = this;
 
@@ -44,11 +58,48 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 
         /* Make some functionality directly available to the game via the engine ref */
+
+        /**
+         * The contents of the util/* modules are exposed here for general use.
+         * @member module:snaps.Snaps#util
+         * @type {Object}
+         */
         this.util = util;
+
+        /**
+         * The contents of the animate/tween module is exposed here for general use.
+         * @member module:snaps.Snaps#tweens
+         * @type {Object}
+         */
         this.tweens = tweens;
+
+        /**
+         * The MinHeap constructor is exposed here for general use.
+         * @member module:snaps.Snaps#MinHeap
+         * @type {Function}
+         */
         this.MinHeap = MinHeap;
+
+        /**
+         * The Stats constructor is exposed here for general use. To access standard running stats you
+         * probably want {@link module:snaps.Snaps#stats|stats} instead.
+         * @member module:snaps.Snaps#Stats
+         * @type {Function}
+         */
         this.Stats = Stats;
+
+        /**
+         * The ProximityTracker constructor is exposed here for general use.
+         * @member module:snaps.Snaps#ProximityTracker
+         * @type {Function}
+         */
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
+
+        /**
+         * The PathFinder constructor is exposed here for general use.
+         * @member module:snaps.Snaps#PathFinder
+         * @type {Function}
+         */
         this.PathFinder = PathFinder.bind(PathFinder, this);
 
         settings = settings || {};
@@ -66,6 +117,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.cameraPlugins = {};
         this.phaserPlugins = {};
 
+        /**
+         * Exposes some standard running stats
+         * @member module:snaps.Snaps#stats
+         * @type {Object}
+         */
         this.stats = new Stats();
 
         this.timers = {};
@@ -110,29 +166,70 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.lastFrameTime = 0;
 
+        /**
+         * Registers a new updater plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerSpriteUpdater
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} ctor The constructor of the sprite updater object.
+         */
         this.registerSpriteUpdater = function(name, ctor) {
             _this.spriteUpdaters[name] = ctor;
         };
 
+        /**
+         * Registers a new effect plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerFxPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the fx updater object.
+         */
         this.registerFxPlugin = function(name, fn) {
             _this.fxUpdaters[name] = fn;
         };
 
-        this.registerLayerPlugin = function(name, fn, init) {
-            init.call(this);
+        /**
+         * Registers a new layer plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerLayerPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the layer updater object.
+         */
+        this.registerLayerPlugin = function(name, fn) {
             _this.layerPlugins[name] = fn;
         };
 
-        this.registerColliderPlugin = function(name, fn, init) {
-            _this.colliders[name] = {fn:fn, init:init};
+        /**
+         * Registers a new collider plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerColliderPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the collider object.
+         */
+        this.registerColliderPlugin = function(name, fn) {
+            _this.colliders[name] = fn;
         };
 
-        this.registerCameraPlugin = function(name, fn, init) {
-            _this.cameraPlugins[name] = {fn:fn, init:init};
+        /**
+         * Registers a new camera plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerCameraPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the camera object.
+         */
+        this.registerCameraPlugin = function(name, fn) {
+            _this.cameraPlugins[name] = fn;
         };
 
+        /**
+         * Registers a new phaser plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerPhaserPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the phaser object.
+         */
         this.registerPhaserPlugin = function(name, fn) {
-            _this.phaserPlugins[name] = {fn:fn};
+            _this.phaserPlugins[name] = fn;
         };
 
         /* Register the default plugins */
@@ -193,22 +290,70 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         }
 
+        /**
+         * If your game object exposes a <code>preloadImages</code> property, then those images
+         * will be preloaded by the engine along with the map images. Call this method to draw
+         * the image by name, e.g.
+         * <pre>
+         * game.preloadImages = {
+         *     logo: 'mylogo.png'
+         * }
+         * //...
+         * sn.drawImage('logo', 50, 30);
+         * </pre>
+         * @method module:snaps.Snaps#drawImage
+         * @param  {String} im The image name
+         * @param  {Number} x  The screen x position
+         * @param  {Number} y  The screen y position
+         */
         this.drawImage = function(im, x, y) {
             _this.ctx.drawImage(_this.imageCache[im],x,y);
         };
 
+        /**
+         * Clears the screen. Normally you don't need to do this if your map has no holes
+         * in it since the screen will be redrawn from corner to corner.
+         * @method module:snaps.Snaps#cls
+         * @param  {String} [col] The screen clearing color as a CSS color spec. Defaults to black.
+         */
         this.cls = function(col) {
             _this.ctx.fillStyle = col||'#000';
             _this.ctx.fillRect (0,0,_this.clientWidth,_this.clientHeight);
         };
 
+        /**
+         * Call this to bind keys to actions which you can test later on with
+         * the <code>actioning</code> method.
+         * <pre>
+         * sn.bindKeys([
+         *     {key:'left',  action:'left'},
+         *     {key:'right', action:'right'},
+         *     {key:'up',    action:'up'},
+         *     {key:'down',  action:'down'},
+         *
+         *     // alternatives
+         *     {key:'w', action:'up'},
+         *     {key:'a', action:'left'},
+         *     {key:'s', action:'down'},
+         *     {key:'d', action:'right'}
+         * ]);
+         * </pre>
+         * @method module:snaps.Snaps#bindKeys
+         * @param  {Array} keybinds An array of objects exposing key and action
+         * properties. See the description for an example.
+         */
         this.bindKeys = function(keybinds) {
+            /* TODO: Docs - Link to actioning method */
             for (var i = 0; i < keybinds.length; i++) {
                 var keybind = keybinds[i];
                 _this.keyboard.bind(keybind.key, keybind.action);
             }
         };
 
+        /**
+         * @method module:snaps.Snaps#updatePhasers
+         * @private
+         */
         this.updatePhasers = function() {
             var epoch = +new Date();
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
@@ -217,6 +362,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.stats.count('updatePhasers', (+new Date())-epoch);
         };
 
+        /**
+         * @method module:snaps.Snaps#updateFX
+         * @private
+         */
         this.updateFX = function() {
             var epoch = +new Date();
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
@@ -228,6 +377,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.stats.count('updateFX', (+new Date())-epoch);
         };
 
+        /**
+         * Spawn a new fx instance
+         * @method module:snaps.Snaps#fx
+         * @param  {Number} name The fx plugin to instantiate
+         * @param  {Object} [opts] Options to pass to the plugin
+         */
         this.fx = function(name, opts) {
             if (!_this.fxUpdaters.hasOwnProperty(name)) {
                 throw "Can't create FX for unregistered FX type: " + name;
@@ -235,6 +390,14 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             _this.activeFX.push(new _this.fxUpdaters[name](opts));
         };
 
+        /**
+         * Insert a new layer
+         * @method module:snaps.Snaps#addLayer
+         * @param  {String} name A unique name for the new layer
+         * @param  {String} type The layer plugin to instantiate
+         * @param  {Object} [opts] Options to pass to the plugin
+         * @param  {Number} idx The layer index to insert it at
+         */
         this.addLayer = function(name, type, opts, idx) {
             /* TODO: name must be unique. */
             /* TODO: Instead of index, we should say which layer to insert after or before, e.g.
@@ -250,6 +413,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return layer;
         };
 
+        /**
+         * Count the sprites on the stage, including those in composites
+         * @method module:snaps.Snaps#spriteCount
+         * @return  {Number} The number of sprites on the stage.
+         */
         this.spriteCount = function() {
             var c = 0;
             for (var i = 0; i < _this.sprites.length; i++) {
@@ -356,7 +524,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         );
 
-
+        /**
+         * Test the keyboard to see if the user has pressed any bound keys
+         * @method module:snaps.Snaps#actioning
+         * @param  {String} action The name of the action to test
+         * @return {Boolean} True if pressed.
+         */
         this.actioning = function(action) {
             return _this.keyboard.actionPressed(action);
         };
@@ -364,41 +537,64 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* TODO: Rename scroll methods to better reflect the fact that it sets
          * the map position rather than animatedly scroll it. */
 
+        /**
+         * Scroll the map view by a given amount of pixels.
+         * @method module:snaps.Snaps#scroll
+         * @param  {Number} dx The number of pixels to scroll horizontally
+         * @param  {Number} dy The number of pixels to scroll vertically
+         */
         this.scroll = function(dx,dy) {
             _this.map.scroll(dx, dy);
         };
 
-        /** Sets the map position to centre on a given world coordinate.
-         * @param {Number} x World X position
-         * @param {Number} y World Y position
+        /**
+         * Sets the map position to center on a given world coordinate.
+         * @method module:snaps.Snaps#scrollTo
+         * @param  {Number} x The x position of the new map center.
+         * @param  {Number} y The y position of the new map center.
          */
         this.scrollTo = function(x,y) {
             _this.map.scrollTo(x, y);
         };
 
+        /** Gets an object describing the pixel limits of the world edges.
+         * @method module:snaps.Snaps#getWorldEdges
+         * @return {Object} Contains 4 properties, le, te, re and be which hold
+         * the left, top, right and bottom edges respectively.
+         */
         this.getWorldEdges = function() {
             return _this.map.getWorldEdges();
         };
 
+        /** Call from your game draw function to draw the map, sprites, layers, fx etc
+         * @method module:snaps.Snaps#drawWorld
+         */
         this.drawWorld = function() {
             this.map.drawWorld(_this.ctx, _this.now, _this.sprites);
         };
 
-        this.drawSpriteWorld = function(name) {
-            _this.spriteMap[name].draw(_this.ctx, _this.map.xoffset, _this.map.yoffset, _this.now);
-        };
-
+        /** Get the mouse screen position
+         * @method module:snaps.Snaps#mouseScreenPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the mouse position in that order.
+         */
         this.mouseScreenPos = function(out) {
             out[0] = _this.mouse.x;
             out[1] = _this.mouse.y;
         };
 
+        /** Get the mouse world position
+         * @method module:snaps.Snaps#mouseWorldPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the mouse position in that order.
+         */
         this.mouseWorldPos = function(out) {
             _this.map.screenToWorldPos(_this.mouse.x, _this.mouse.y, out);
         };
 
         /** Takes a world position and tells you what tile it lies on. Take
          * care with the return value, the function signature is all backwards.
+         * @method module:snaps.Snaps#worldToTilePos
          * @param {Number} x A world x position
          * @param {Number} y A world y position
          * @param {Array} out A 2-length array that will recieve the tile x/y
@@ -412,6 +608,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /** Takes a screen position and tells you what tile it lies on. Take
          * care with the return value, the function signature is all backwards.
+         * @method module:snaps.Snaps#screenToTilePos
          * @param {Number} x A screen x position
          * @param {Number} y A screen y position
          * @param {Array} out A 2-length array that will recieve the tile x/y
@@ -423,24 +620,43 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return this.map.screenToTilePos(x,y, out);
         };
 
+        /** Convert a screen position to a world position
+         * @method module:snaps.Snaps#screenToWorldPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the position in that order.
+         */
         this.screenToWorldPos = function(x, y, out) {
             this.map.screenToWorldPos(x,y, out);
         };
 
+        /** Convert a world position to a screen position
+         * @method module:snaps.Snaps#worldToScreenPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the position in that order.
+         */
         this.worldToScreenPos = function(x, y, out) {
             this.map.worldToScreenPos(x,y, out);
         };
 
         /** Get a tile by it's row and column position in the original map data.
-         * @param  {object} layer. The layer to search for tiles.
+         * @method module:snaps.Snaps#getTile
+         * @param  {Object} layer The layer to search for tiles.
          * @param  {Number} c The column, aka x position in the data.
          * @param  {Number} r the row, aka y position in the data.
-         * @return {Tile} A tile, or null if the input was out of range.
+         * @return {Object} A tile, or null if the input was out of range.
          */
         this.getTile = function(layer, c, r) {
+            /* TODO: Docs - Link to tile class */
             return this.map.getTile(layer, c, r);
         };
 
+        /** Get a tile by it's row and column position and find the world position
+         * of its center point.
+         * @method module:snaps.Snaps#getTileWorldPos
+         * @param  {Number} c The column, aka x position in the data.
+         * @param  {Number} r the row, aka y position in the data.
+         * @return {Object} A tile, or null if the input was out of range.
+         */
         this.getTileWorldPos = function(c, r, out) {
             this.map.tileDimensions(out);
             if ((r&1)===0) {
@@ -452,22 +668,57 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         };
 
+        /** Get a tile property from a world position. Starts at the topmost
+         * map layer and world down to the ground.
+         * @method module:snaps.Snaps#getTilePropAtWorldPos
+         * @param  {String} prop The property to get
+         * @param  {Number} x The x world position
+         * @param  {Number} y The y world position
+         * @return {String} The property or undefined.
+         */
         this.getTilePropAtWorldPos = function(prop, x, y) {
             return this.map.getTilePropAtWorldPos(prop, x,y);
         };
 
+        /** Get a tile property from a tile column and row in the original map data.
+         * Starts at the topmost map layer and world down to the ground.
+         * @method module:snaps.Snaps#getTilePropAtTilePos
+         * @param  {String} prop The property to get
+         * @param  {Number} x The x tile column position
+         * @param  {Number} y The y tile row position
+         * @return {String} The property or undefined.
+         */
         this.getTilePropAtTilePos = function(prop, x, y) {
             return this.map.getTilePropAtTilePos(prop, x,y);
         };
 
+        /**
+         * Create a new collider for use in sprites.
+         * @method module:snaps.Snaps#createCollider
+         * @param  {String} type The name of the collider plugin
+         * @param  {Object} opts Options to pass to the collider
+         * @return {Object} A collider
+         */
         this.createCollider = function(type, opts) {
             if(!_this.colliders.hasOwnProperty(type)) {
                 throw "Warning: undefined collider plugin: " + type;
             }
-            return new _this.colliders[type].fn(opts);
+            return new _this.colliders[type](opts);
         };
 
+
+        /**
+         * Create a new camera for use in game. Creating a camera does not
+         * activate it. You need to then call <code>switchToCamera</code>.
+         * @method module:snaps.Snaps#createCamera
+         * @param  {String} name The name of the camera so that you can refer
+         * to it again.
+         * @param  {String} type The name of the camera plugin to instantiate.
+         * @param  {Object} opts Options to pass to the camera
+         * @return {Object} The new camera.
+         */
         this.createCamera = function(name, type, opts) {
+            /* TODO: Docs - Link to switchToCamera */
             if(!_this.cameraPlugins.hasOwnProperty(type)) {
                 throw "Warning: undefined camera plugin: " + type;
             }
@@ -476,35 +727,34 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 throw "Camera already exists: "+name;
             }
 
-            this.cameras[name] = new _this.cameraPlugins[type].fn(opts);
+            this.cameras[name] = new _this.cameraPlugins[type](opts);
             return this.cameras[name];
         };
 
+        /**
+         * Switch to a previously created, named camera
+         * @method module:snaps.Snaps#switchToCamera
+         * @param  {String} name The name of the camera
+         */
         this.switchToCamera = function(name) {
             this.camera = this.cameras[name];
         };
 
         /**
          * Spawn a new sprite in the world
-         * @param defName The name of the sprite definition to use. These are
+         * @method module:snaps.Snaps#spawnSprite
+         * @param {String} defName The name of the sprite definition to use. These are
          * set up in your game's spriteDefs data.
-         * @param stateName The initial state. This too is defined in the
+         * @param {String} stateName The initial state. This too is defined in the
          * sprite's definition, in your game's spriteDefs data.
-         * @param {Function/Number} x The world x coordinate. If a function, it should take
-         * no parameters and return a number.
-         * @param {Function/Number} y The world y coordinate. If a function, it should take
-         * no parameters and return a number.
-         * @param {Function/Number} h The height off the ground. If a function, it should take
-         * no parameters and return a number.
-         * @param Optional parameter object, which can contain:
-         * 'id' if you want to be able to find your sprite again.
-         * 'maxloops' if your sprite should remove itself from the world
-         * after it's looped around its animation a certain number of times. Can be a function, like
-         * the world position parameters.
-         * Normally you'd set this to 1 for things like explosions.
-         * 'update' An array of functions that are called in-order for this
-         * sprite.
-         * 'endCallback' A function called when the sprite naturally ends
+         * @param {Number} x The world x coordinate. Can be a function which takes
+         * no parameters and returns a number.
+         * @param {Number} y The world y coordinate. Can be a function which takes
+         * no parameters and returns a number.
+         * @param {Number} h The height off the ground. Can be a function which takes
+         * no parameters and returns a number.
+         * @param {Object} [opts] Optional sprite parameters. For a list of parameters
+         * see the opts parameter on the {@link module:sprites/sprite.Sprite|Sprite class constructor}.
          */
         this.spawnSprite = function(defName, stateName, stateExt, x, y, h, opts) {
 
@@ -526,6 +776,15 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return s;
         };
 
+        /**
+         * Spawn a new composite in the world
+         * @method module:snaps.Snaps#createComposite
+         * @param {Number} x The world x coordinate.
+         * @param {Number} y The world y coordinate.
+         * @param {String} id A unique ID so you can find the composite again.
+         * @param {Object} [endCallback] Once the composite and all its child sprites expire,
+         * this is called.
+         */
         this.createComposite = function(x,y,id,endCallback) {
 
             if (id===undefined) {
@@ -545,20 +804,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /** Marks a time in the future for a timer to trigger. Timers are
          * not events driven by the engine, but rather need to be explicitely
-         * checked in a timely fashion by the game, via checkTimer.
-         * @param A name for the timer. Use this to check the timer later.
-         * @param When to set the timer for in ms. E.g. 1000 == 1s in the future.
+         * checked in a timely fashion by the game, via {@link module:snaps.Snaps#markTime|checkTimer}.
+         * @method module:snaps.Snaps#markTime
+         * @param {String} name A name for the timer. Use this to check the timer later.
+         * @param {Number} time When to set the timer for in ms. E.g. 1000 == 1s in the future.
          */
         this.markTime = function(name, time) {
             _this.timers[name] = _this.now + time;
         };
 
         /** Checks to see if a timer set with markTime has passed.
-         * @param name The name of the timer to check.
-         * @param resetMs Optional. If omitted, the timer will be removed. If
+         * @method module:snaps.Snaps#checkTimer
+         * @param {String} name The name of the timer to check.
+         * @param {Number} [resetMs] If omitted, the timer will be removed. If
          * present, the timer will be reset, adding resetMs to its current
          * expired trigger time.
-         * @return true if the timer has triggered. Note that an immediate
+         * @return {Boolean} true if the timer has triggered. Note that an immediate
          * call to checkTimer again will return false - The true value is
          * only returned once unless the timer is reset.
          */
@@ -584,10 +845,19 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return false;
         };
 
+        /** Find a sprite on the stage by ID
+         * @method module:snaps.Snaps#sprite
+         * @param {String} sprite The name of the sprite to get.
+         * @return {Object} A sprite, or undefined
+         */
         this.sprite = function(sprite) {
             return _this.spriteMap[sprite];
         };
 
+        /**
+         * @method module:snaps.Snaps#updateSprites
+         * @private
+         */
         this.updateSprites = function() {
             var epoch = +new Date();
             var keepsprites = [];
@@ -611,20 +881,35 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.stats.count('updateSprites', (+new Date())-epoch);
         };
 
+        /**
+         * The current frame time, updated at the start of each loop
+         * @method module:snaps.Snaps#getNow
+         * @return {Number} The current frame time.
+         */
         this.getNow = function() {
             return _this.now;
         };
 
+        /**
+         * Spawn a new phaser for use in sprite updates
+         * @method module:snaps.Snaps#createPhaser
+         * @param {String} name The name of the phaser plugin to instantiate.
+         * @param {Object} [opts] Optional values passed to the phaser.
+         */
         this.createPhaser = function(name, opts) {
             if (!_this.phaserPlugins.hasOwnProperty(name)) {
                 throw "Can't create phaser for unregistered type: " + name;
             }
 
-            var phaser = new _this.phaserPlugins[name].fn('id'+uid(), opts);
+            var phaser = new _this.phaserPlugins[name]('id'+uid(), opts);
             _this.phasers.push(phaser);
             return phaser;
         };
 
+        /**
+         * Call this when the canvas is resized in the browser.
+         * @method module:snaps.Snaps#resizeCanvas
+         */
         this.resizeCanvas = function() {
 
             var c = document.getElementById(canvasID);
@@ -635,6 +920,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
     }
 
+    /**
+     * The contents of the util/* modules are exposed here for general use.
+     * @member module:snaps.Snaps#util
+     * @type {Object}
+     */
     Snaps.util = util;
 
     return Snaps;

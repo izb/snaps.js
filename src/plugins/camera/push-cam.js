@@ -38,7 +38,7 @@ define(function() {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerCameraPlugin('pushcam', PushCam, function(){});
+        sn.registerCameraPlugin('pushcam', PushCam);
     };
 
 });

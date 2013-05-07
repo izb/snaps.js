@@ -3,10 +3,31 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
 
     'use strict';
 
+    /**
+     * @module sprites/composite
+     */
+
     var copyProps = js.copyProps;
     var clone = js.clone;
 
+
+    /**
+     * Construct a composite sprite. Do not call this constructor directly; you should instead call
+     * <code>sn.createComposite()</code> on the engine.
+     * <p>
+     * A composite is a collection of sprites that can be manipulated as one. They share the same plane
+     * which means they are more efficient. A composite has x, y, but no h position, but the sprites within
+     * it behave as though they have x and h but no y position (y is ignored within a composite).
+     * @constructor module:sprites/composite.Composite
+     * @param {Object} sn The engine reference
+     * @param {Number} x X position in the world for the composite.
+     * @param {Number} y Y position in the world for the composite.
+     * @param {String} id A unique identifier.
+     * @param {Function} [endCallback] Once the composite and all its child sprites expire, this is called.
+     */
     function Composite(sn, x, y, id, endCallback) {
+        /* TODO: Passing an ID in here is smelly. I think. Or perhaps it's ok coz it requires
+         * a factory method to call this. I dunno. */
         this.sn = sn;
         this.x = x;
         this.y = y;
@@ -15,11 +36,34 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
         this.sprites = [];
     }
 
+    /**
+     * Initialize the composite before use.
+     * @method module:sprites/composite.Composite#init
+     * @private
+     */
     Composite.prototype.init = function() {
         /* TODO: Initialize composite plugins */
     };
 
+
+    /**
+     * Add a sprite to the composite.
+     * @method module:sprites/composite.Composite#addSprite
+     * @param defName The name of the sprite definition to use. These are
+     * set up in your game's spriteDefs data.
+     * @param stateName The initial state. This too is defined in the
+     * sprite's definition, in your game's spriteDefs data.
+     * @param {Number} x The world x coordinate. If a function, it should take
+     * no parameters and return a number.
+     * @param {Number} y The world y coordinate. If a function, it should take
+     * no parameters and return a number.
+     * @param {Number} h The height off the ground. If a function, it should take
+     * no parameters and return a number.
+     * @param {Object} [opts] See snaps.spawnSprite for a full list of options.
+     */
     Composite.prototype.addSprite = function(defName, stateName, x, y, h, opts) {
+
+        /* TODO: Docs - Link to spawnSprite in opts param */
 
         if (opts===undefined) {
             opts = {};
@@ -56,6 +100,12 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
         return s;
     };
 
+    /** Tests to see if this is an active composite. Inactive composites will be destroyed by the
+     * engine. If any child sprites are active, this will be active.
+     * @method module:sprites/composite.Composite#isActive
+     * @param {Number} now Current frame timestamp
+     * @return {Boolean} True if active
+     */
     Composite.prototype.isActive = function(now) {
 
         if (!this.active) {
@@ -82,6 +132,10 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
         return isactive;
     };
 
+    /**
+     * @private
+     * @method module:sprites/composite.Composite#update
+     */
     Composite.prototype.update = function(now, fnEach) {
         /* TODO: Call composite plugins */
         for (var i = this.sprites.length - 1; i >= 0; i--) {
@@ -92,6 +146,10 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/composite.Composite#draw
+     */
     Composite.prototype.draw = function(ctx, screenx, screeny, now) {
         if (!this.active) {
             /* This may have been set by prior call to update, so check here */
@@ -113,6 +171,10 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/composite.Composite#onRemove
+     */
     Composite.prototype.onRemove = function() {
         for (var i = this.sprites.length - 1; i >= 0; i--) {
             this.sprites[i].onRemove();

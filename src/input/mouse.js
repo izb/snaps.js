@@ -8,7 +8,8 @@ define(function() {
     'use strict';
 
     /** Creates a mouse input handler and starts listening for
-     * mouse events.
+     * mouse events. You don't normally need to create this since the engine
+     * creates one by default.
      * @constructor module:input/mouse.Mouse
      * @param {HTMLCanvasElement} canvas Mouse position will be
      * relative to and constrained to the limits of the given canvas.

@@ -3,7 +3,17 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @module util/bitmap
+     */
     return {
+
+        /**
+         * Extract the red channel from an image into an array.
+         * @function module:util/bitmap#imageToRData
+         * @param {DOMElement} image The source image
+         * @return {Array} An array of byte values as a regular array
+         */
         imageToRData: function(image)
         {
             var w = image.width;

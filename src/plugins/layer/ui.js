@@ -43,7 +43,7 @@ define(function() {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('ui', UI, function(){});
+        sn.registerLayerPlugin('ui', UI);
     };
 
 });

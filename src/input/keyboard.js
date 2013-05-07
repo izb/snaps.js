@@ -8,7 +8,8 @@ define(function() {
     'use strict';
 
     /** Creates a keyboard input handler and starts listening for
-     * keyboard events.
+     * keyboard events. You don't normally need to create this since the engine
+     * creates one by default.
      * @constructor module:input/keyboard.Keyboard
      */
     function Keyboard() {

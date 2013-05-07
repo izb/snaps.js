@@ -175,7 +175,7 @@ function(traceProp, midPtEllipse, localScan) {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerColliderPlugin('circle-trace', CircleTrace, function(){});
+        sn.registerColliderPlugin('circle-trace', CircleTrace);
     };
 
 });

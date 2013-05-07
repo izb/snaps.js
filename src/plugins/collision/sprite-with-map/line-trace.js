@@ -90,7 +90,7 @@ function(traceProp, localScan) {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerColliderPlugin('line-trace', LineTrace, function(){});
+        sn.registerColliderPlugin('line-trace', LineTrace);
     };
 
 });

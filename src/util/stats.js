@@ -3,12 +3,38 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @module util/stats
+     */
+
+    /**
+     * Construct a stats recorder.
+     * @constructor module:util/stats.Stats
+     */
     function Stats() {
+
+        /* TODO: Docs - Go through every constructor looking for this properties that can be exposed
+         * through documentation. */
+
         this.samples = {};
         this.totals = {};
+
+        /**
+         * A named map of stats and their averages over the last 10 samples.
+         * E.g. <code>stats.averages['fps'];</code>
+         * @type {Object}
+         * @member module:util/stats.Stats#averages
+         */
         this.averages = {};
     }
 
+    /**
+     * Count a named stat. The last 10 recorded stats for each name will be stored
+     * and accessible as averages.
+     * @method module:util/stats.Stats#count
+     * @param  {String} name The stat to count
+     * @param  {Number} val  The new value for the stat
+     */
     Stats.prototype.count = function(name, val) {
         var s, t;
         if (!this.samples.hasOwnProperty(name)) {

@@ -1,48 +1,70 @@
 /*global define*/
 define(['util/js'], function(js) {
 
+    /**
+     * @module sprites/sprite
+     */
+
     'use strict';
 
     var copyProps = js.copyProps;
     var clone = js.clone;
 
-    /** Creates a new sprite object.
-     * @param {Object} sn Snaps engine ref
-     * @param {Object} def The sprite definition to use
-     * @param {Function/Number} x X world position
-     * @param {Function/Number} y Y world position
-     * @param {Function/Number} h Height from the ground
-     * @param {Object} opts Optional configuration options. All properties are optional
-     * and is in the following form:
-     * {
-     *     maxloops: {Function/Number} How many times should the initial state loop
-     *               before the sprite is automatically destroyed? Set to 0 or undefined
-     *               if it does not automatically expire.
-     *     updates: {Array} An array of sprite update plugin instances that will be called
-     *              with each update of this sprite.
-     *     collider: {object} A collider to test for collisions during movement
-     *     endCallback: {Function}An optional function to call when the sprite is destroyed.
-     *     autoRemove: {bool} Optional (defaults to true). If set, the sprite will be removed
-     *                 from the scene once it expires. If maxloops is set and it is not
-     *                 removed, it will remain on the final frame.
-     *     quantizedHeight: {bool} Optional (defaults to false). If you move x,y, and h at the
-     *                 same time and the movement collides, then h will by default be altered
-     *                 by the proportion of the path travelled. If this flag is true, then h will
-     *                 be altered entirely, regardless of the collision.
-     * }
+    /** Creates a new sprite object. Note that you shouldn't normally call this constructor directly.
+     * Call the factory method <code>sn.spawnSprite</code> instead.
+     * <p>
+     * Some parameters or options accept functions. An example of how to pass a random range into any
+     * Function/Number parameters would be to bind the rnd function in util/rnd. E.g.
      *
-     * An example of how to pass a random range into any Function/Number parameters would be to bind
-     * the rnd function in util/rnd. E.g.
+     * <pre>
+     * // Random range between -20 and 20:
+     * var posRange = rnd.bind(rnd,-20,20);
+     * // Fast cached random number set
+     * var fastRand = rnd.fastRand(10,20);
      *
-     * var posRange = rnd.bind(rnd,-20,20); // Random range between -20 and 20
-     * var fastRand = rnd.fastRand(10,20); // Fast cached random number set
-     *
-     * new Sprite(sn,def,posRange,posRange,0,{maxloops:fastRand});
+     * new Sprite(sn,def,
+     *     posRange,posRange,
+     *     0,
+     *     {maxloops:fastRand});
+     * </pre>
      *
      * Alternatively of course, you could provide your own custom parameterless number
      * generator and pass it in.
+     * @constructor module:sprites/sprite.Sprite
+     * @param {Object} sn Snaps engine ref
+     * @param {Object} def The sprite definition to use
+     * @param {Number} x X world position. You may also pass a parameterless function that returns
+     * a number.
+     * @param {Number} y Y world position. You may also pass a parameterless function that returns
+     * a number.
+     * @param {Number} h Height from the ground. You may also pass a parameterless function that returns
+     * a number.
+     * @param {Object} [opts] Optional configuration options. All properties are optional.
+     * <dl>
+     *  <dt>id</dt><dd>If you want to be able to find your sprite again</dd>
+     *  <dt>maxloops</dt><dd>How many times should the initial state loop
+     *    before the sprite is automatically destroyed? Set to 0 or undefined
+     *    if it does not automatically expire. Can also be a parameterless function that returns a number.</dd>
+     *  <dt>autoRemove</dt><dd>Defaults to true. If set, the sprite will be removed
+     *    from the scene once it expires. If maxloops is set and it is not
+     *    removed, it will remain on the final frame.</dd>
+     *  <dt>updates</dt><dd>An array of sprite update plugin instances that will be called
+     *    with each update of this sprite.</dd>
+     *  <dt>commits</dt><dd>An array of sprite update plugin instances that will be called
+     *    after all the 'updates' updates are called on each sprite. Think of it as a second phase of
+     *    updates.</dd>
+     *  <dt>collider</dt><dd>A collider to test for collisions during movement</dd>
+     *  <dt>endCallback</dt><dd>An optional function to call when the sprite is destroyed, i.e. removed from the stage</dd>
+     *  <dt>quantizedHeight</dt><dd>Defaults to false. If you move x,y, and h at the
+     *    same time and the movement collides, then h will by default be altered
+     *    by the proportion of the path travelled. If this flag is true, then h will
+     *    be altered entirely, regardless of the collision.</dd>
+     * </dl>
      */
     function Sprite(sn, def, x, y, h, opts) {
+
+        /* TODO: Docs - link to spawnSprite */
+
         opts = opts||{};
 
         this.def = def;
@@ -92,6 +114,11 @@ define(['util/js'], function(js) {
         this.velocityy = 0;
     }
 
+    /**
+     * Initialize the sprite before use.
+     * @method module:sprites/sprite.Sprite#init
+     * @private
+     */
     Sprite.prototype.init = function() {
         var i;
 
@@ -119,6 +146,7 @@ define(['util/js'], function(js) {
     /** Returns the max duration of the sprite before it automatically expires.
      * This value may change if the state changes. Does not take time already
      * expired into account.
+     * @method module:sprites/sprite.Sprite#maxDuration
      * @return {Number} The max duration of the current state, or 0 if it will not
      * expire.
      */
@@ -129,6 +157,12 @@ define(['util/js'], function(js) {
         return this.state.dur * this.maxloops;
     };
 
+    /** Tests to see if this is an active sprite. Inactive sprites will be destroyed by the
+     * engine.
+     * @method module:sprites/sprite.Sprite#isActive
+     * @param {Number} now Current frame timestamp
+     * @return {Boolean} True if active
+     */
     Sprite.prototype.isActive = function(now) {
         if (this.active && this.maxloops>0 && this.state.dur * this.maxloops <= (now - this.epoch)) {
             this.active = false;
@@ -140,6 +174,14 @@ define(['util/js'], function(js) {
         return this.active||!this.autoRemove;
     };
 
+    /** Changes the state and extension of this sprite. States in sprite definitions are in the form
+     * 'running_ne' where 'running' is the state and 'ne' is the extension.
+     * See morphState for an alternative option.
+     * @method module:sprites/sprite.Sprite#setState
+     * @param {String} state The state of the sprite as specified in its sprite
+     * definition.
+     * @param {String} ext   The state extension to set, or undefined.
+     */
     Sprite.prototype.setState = function(state, ext) {
 
         this.active = true;
@@ -163,20 +205,48 @@ define(['util/js'], function(js) {
         this.epoch = this.sn.getNow();
     };
 
+    /** Finds the current state name, i.e. the state without the extension.
+     * @method module:sprites/sprite.Sprite#stateName
+     * @return {String} The state name
+     */
     Sprite.prototype.stateName = function() {
         return this.stateName;
     };
 
+    /** Determines whether this sprite has the given fully-qualified (i.e. including
+     * extension) state name.
+     * @method module:sprites/sprite.Sprite#hasState
+     * @param {String} state The state of the sprite as specified in its sprite
+     * definition.
+     * @return {Boolean} True if it does
+     */
     Sprite.prototype.hasState = function(state) {
         return this.def.states.hasOwnProperty(state);
     };
 
-    Sprite.prototype.morphState = function(state) {
+    /** Changes the state and extension of this sprite. States in sprite definitions are in the form
+     * 'running_ne' where 'running' is the state and 'ne' is the extension.
+     * <p>
+     * This method differs from setState in that it maintains the animation jog position of the state,
+     * e.g. if the sprite was halfway through its running animation in 'running_ne' and you called this
+     * method to change to 'running_e' then the animation would start halfway through its new state.
+     * <p>
+     * If you had called setState then the new state's animation would have started from the beginning.
+     * @method module:sprites/sprite.Sprite#setState
+     * @param {String} state The state of the sprite as specified in its sprite
+     * definition.
+     * @param {String} ext   The state extension to set, or undefined.
+     */
+    Sprite.prototype.morphState = function(state, ext) {
         /* TODO: Make a state transition, but maintain the jog position. Note that the jog position
          * may be clamped to the last frame if autoRemove is false and the internal active flag is set.
          */
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#update
+     */
     Sprite.prototype.update = function(now) {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
@@ -192,6 +262,10 @@ define(['util/js'], function(js) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#commit
+     */
     Sprite.prototype.commit = function(now) {
         /* TODO: Not sure if it's a bug or a feature, but we can't guarantee that an update and a commit
          * that share the same phaser will share the same phase. We should test for that. */
@@ -213,6 +287,10 @@ define(['util/js'], function(js) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#drawAt
+     */
     Sprite.prototype.drawAt = function(ctx, screenx, screeny, now) {
         if (!this.active && this.autoRemove) {
             /* This may have been set by prior call to update, so check here */
@@ -224,9 +302,10 @@ define(['util/js'], function(js) {
 
     /** Move a sprite to a point, taking collision into account.
      * If there is a collision, the sprite will be moved to the point of collision.
+     * @method module:sprites/sprite.Sprite#moveTo
      * @param  {Number} tx Target x world position
      * @param  {Number} ty Target y world position
-     * @param  {Number} th Optional; Target height
+     * @param  {Number} [th] Target height
      * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.moveTo = function(tx,ty,th,collide) {
@@ -239,9 +318,10 @@ define(['util/js'], function(js) {
 
     /** Move a sprite by a given amount, taking collision into account.
      * If there is a collision, the sprite will be moved to the point of collision.
+     * @method module:sprites/sprite.Sprite#move
      * @param  {Number} dx Amount to alter x position
      * @param  {Number} dy Amount to alter y position
-     * @param  {Number} dh Optional; Amount to alter height
+     * @param  {Number} [dh] Amount to alter height
      * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.move = function(dx,dy,dh, collide) {
@@ -314,6 +394,7 @@ define(['util/js'], function(js) {
      * position to look towards. This is not used in sprite rendering
      * directly, but can be picked up by plugins. Direction is set automatically
      * if the sprite moves, but you can then override direction by calling this.
+     * @method module:sprites/sprite.Sprite#setDirection
      * @param {Number} tox World X position to orient towards.
      * @param {Number} toy World Y position to orient towards.
      */
@@ -324,7 +405,8 @@ define(['util/js'], function(js) {
     };
 
     /** Calculates the normalized vector of the sprite's direction.
-     * @param {Number} out An 2-length array that will recieve the xy values of
+     * @method module:sprites/sprite.Sprite#vector
+     * @param {Array} out An 2-length array that will recieve the xy values of
      * the vector in that order.
      */
     Sprite.prototype.vector = function(out) {
@@ -345,6 +427,13 @@ define(['util/js'], function(js) {
         out[1] = this.vectory;
     };
 
+    /** Calculates a normalized vector between the sprite and a given point.
+     * @method module:sprites/sprite.Sprite#vector
+     * @param {Number} x The X world position of the test point.
+     * @param {Number} y The Y world position of the test point.
+     * @param {Array} out An 2-length array that will recieve the xy values of
+     * the vector in that order.
+     */
     Sprite.prototype.vectorTo = function(x, y, out) {
         var dx = x - this.x;
         var dy = y - this.y;
@@ -358,6 +447,10 @@ define(['util/js'], function(js) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#draw
+     */
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
         this.drawAt(
                 ctx,
@@ -366,6 +459,11 @@ define(['util/js'], function(js) {
                 now);
     };
 
+    /**
+     * Called when the sprite is removed from the stage.
+     * @private
+     * @method module:sprites/sprite.Sprite#onRemove
+     */
     Sprite.prototype.onRemove = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
@@ -378,11 +476,19 @@ define(['util/js'], function(js) {
         }
     };
 
+    /**
+     * Default function for predicates.
+     * @private
+     * @method module:sprites/sprite.Sprite#troo
+     */
     var troo = function() {
         return true;
     };
 
-    /** See snaps.spawnSprite for parameter descriptions.
+    /**
+     * See snaps.spawnSprite for parameter descriptions.
+     * @private
+     * @method module:sprites/sprite.Sprite#troo
      */
     Sprite.construct = function(sn, defName, stateName, stateExt, x, y, h, opts) {
 

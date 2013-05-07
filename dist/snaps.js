@@ -5,6 +5,13 @@ define('sprites/spritedef',[],function() {
     
 
     /**
+     * @module sprites/spritedef
+     * @private
+     */
+
+    /**
+     * @private
+     * @constructor module:sprites/spritedef.State
      * @param {Array} seq Image offset sequence in the form
      * [[x0,y0],[x1,y1],[x2,y2]...]
      */
@@ -14,12 +21,20 @@ define('sprites/spritedef',[],function() {
         this.def = def;
     }
 
+    /**
+     * @method module:sprites/spritedef.State#jogPos
+     * @private
+     */
     State.prototype.jogPos = function(epoch, now) {
         var dt = now - epoch;
         dt = dt % this.dur;
         return dt / this.dur;
     };
 
+    /**
+     * @method module:sprites/spritedef.State#draw
+     * @private
+     */
     State.prototype.draw = function(ctx, x, y, epoch, now, forceFinal) {
         var def = this.def;
         var pos = this.seq[
@@ -38,6 +53,10 @@ define('sprites/spritedef',[],function() {
             );
     };
 
+    /**
+     * @private
+     * @constructor module:sprites/spritedef.SpriteDef
+     */
     function SpriteDef(image, w, h, x, y) {
         this.states = {};
         this.image = image;
@@ -49,6 +68,10 @@ define('sprites/spritedef',[],function() {
         this.y = y;
     }
 
+    /**
+     * @private
+     * @method module:sprites/spritedef.SpriteDef#addState
+     */
     SpriteDef.prototype.addState = function(name, seq, dur) {
         var pos = [];
         var xmax = Math.floor(this.image.width / this.w);
@@ -62,6 +85,10 @@ define('sprites/spritedef',[],function() {
         this.states[name] = new State(pos, dur, this);
     };
 
+    /**
+     * @private
+     * @method module:sprites/spritedef.SpriteDef#aliasState
+     */
     SpriteDef.prototype.aliasState = function(alias, state) {
         var s = this.states[state];
         /* TODO: Validate */
@@ -77,8 +104,13 @@ define('util/js',[],function() {
 
     
 
+    /**
+     * @module util/js
+     */
+
     /** Convert a click event position (event.pageX/Y) into coords relative
      * to a canvas.
+     * @private
      */
     HTMLCanvasElement.prototype.relCoords = function(x,y,out){
 
@@ -90,6 +122,13 @@ define('util/js',[],function() {
 
     return {
 
+        /**
+         * Copy properties from one object to another
+         * @function module:util/js#copyProps
+         * @param {Object} s The source object
+         * @param {Object} d The destination object
+         * @return {Object} The destination object
+         */
         copyProps: function(s,d) {
             for (var prop in s) {
                 if (s.hasOwnProperty(prop)) {
@@ -99,6 +138,12 @@ define('util/js',[],function() {
             return d;
         },
 
+        /**
+         * Create a shallow clone of an object
+         * @function module:util/js#clone
+         * @param {Object} s The source object
+         * @return {Object} A new copy of the object
+         */
         clone: function(s) {
             var d = {};
             for (var prop in s) {
@@ -116,48 +161,70 @@ define('util/js',[],function() {
 /*global define*/
 define('sprites/sprite',['util/js'], function(js) {
 
+    /**
+     * @module sprites/sprite
+     */
+
     
 
     var copyProps = js.copyProps;
     var clone = js.clone;
 
-    /** Creates a new sprite object.
-     * @param {Object} sn Snaps engine ref
-     * @param {Object} def The sprite definition to use
-     * @param {Function/Number} x X world position
-     * @param {Function/Number} y Y world position
-     * @param {Function/Number} h Height from the ground
-     * @param {Object} opts Optional configuration options. All properties are optional
-     * and is in the following form:
-     * {
-     *     maxloops: {Function/Number} How many times should the initial state loop
-     *               before the sprite is automatically destroyed? Set to 0 or undefined
-     *               if it does not automatically expire.
-     *     updates: {Array} An array of sprite update plugin instances that will be called
-     *              with each update of this sprite.
-     *     collider: {object} A collider to test for collisions during movement
-     *     endCallback: {Function}An optional function to call when the sprite is destroyed.
-     *     autoRemove: {bool} Optional (defaults to true). If set, the sprite will be removed
-     *                 from the scene once it expires. If maxloops is set and it is not
-     *                 removed, it will remain on the final frame.
-     *     quantizedHeight: {bool} Optional (defaults to false). If you move x,y, and h at the
-     *                 same time and the movement collides, then h will by default be altered
-     *                 by the proportion of the path travelled. If this flag is true, then h will
-     *                 be altered entirely, regardless of the collision.
-     * }
+    /** Creates a new sprite object. Note that you shouldn't normally call this constructor directly.
+     * Call the factory method <code>sn.spawnSprite</code> instead.
+     * <p>
+     * Some parameters or options accept functions. An example of how to pass a random range into any
+     * Function/Number parameters would be to bind the rnd function in util/rnd. E.g.
      *
-     * An example of how to pass a random range into any Function/Number parameters would be to bind
-     * the rnd function in util/rnd. E.g.
+     * <pre>
+     * // Random range between -20 and 20:
+     * var posRange = rnd.bind(rnd,-20,20);
+     * // Fast cached random number set
+     * var fastRand = rnd.fastRand(10,20);
      *
-     * var posRange = rnd.bind(rnd,-20,20); // Random range between -20 and 20
-     * var fastRand = rnd.fastRand(10,20); // Fast cached random number set
-     *
-     * new Sprite(sn,def,posRange,posRange,0,{maxloops:fastRand});
+     * new Sprite(sn,def,
+     *     posRange,posRange,
+     *     0,
+     *     {maxloops:fastRand});
+     * </pre>
      *
      * Alternatively of course, you could provide your own custom parameterless number
      * generator and pass it in.
+     * @constructor module:sprites/sprite.Sprite
+     * @param {Object} sn Snaps engine ref
+     * @param {Object} def The sprite definition to use
+     * @param {Number} x X world position. You may also pass a parameterless function that returns
+     * a number.
+     * @param {Number} y Y world position. You may also pass a parameterless function that returns
+     * a number.
+     * @param {Number} h Height from the ground. You may also pass a parameterless function that returns
+     * a number.
+     * @param {Object} [opts] Optional configuration options. All properties are optional.
+     * <dl>
+     *  <dt>id</dt><dd>If you want to be able to find your sprite again</dd>
+     *  <dt>maxloops</dt><dd>How many times should the initial state loop
+     *    before the sprite is automatically destroyed? Set to 0 or undefined
+     *    if it does not automatically expire. Can also be a parameterless function that returns a number.</dd>
+     *  <dt>autoRemove</dt><dd>Defaults to true. If set, the sprite will be removed
+     *    from the scene once it expires. If maxloops is set and it is not
+     *    removed, it will remain on the final frame.</dd>
+     *  <dt>updates</dt><dd>An array of sprite update plugin instances that will be called
+     *    with each update of this sprite.</dd>
+     *  <dt>commits</dt><dd>An array of sprite update plugin instances that will be called
+     *    after all the 'updates' updates are called on each sprite. Think of it as a second phase of
+     *    updates.</dd>
+     *  <dt>collider</dt><dd>A collider to test for collisions during movement</dd>
+     *  <dt>endCallback</dt><dd>An optional function to call when the sprite is destroyed, i.e. removed from the stage</dd>
+     *  <dt>quantizedHeight</dt><dd>Defaults to false. If you move x,y, and h at the
+     *    same time and the movement collides, then h will by default be altered
+     *    by the proportion of the path travelled. If this flag is true, then h will
+     *    be altered entirely, regardless of the collision.</dd>
+     * </dl>
      */
     function Sprite(sn, def, x, y, h, opts) {
+
+        /* TODO: Docs - link to spawnSprite */
+
         opts = opts||{};
 
         this.def = def;
@@ -207,6 +274,11 @@ define('sprites/sprite',['util/js'], function(js) {
         this.velocityy = 0;
     }
 
+    /**
+     * Initialize the sprite before use.
+     * @method module:sprites/sprite.Sprite#init
+     * @private
+     */
     Sprite.prototype.init = function() {
         var i;
 
@@ -234,6 +306,7 @@ define('sprites/sprite',['util/js'], function(js) {
     /** Returns the max duration of the sprite before it automatically expires.
      * This value may change if the state changes. Does not take time already
      * expired into account.
+     * @method module:sprites/sprite.Sprite#maxDuration
      * @return {Number} The max duration of the current state, or 0 if it will not
      * expire.
      */
@@ -244,6 +317,12 @@ define('sprites/sprite',['util/js'], function(js) {
         return this.state.dur * this.maxloops;
     };
 
+    /** Tests to see if this is an active sprite. Inactive sprites will be destroyed by the
+     * engine.
+     * @method module:sprites/sprite.Sprite#isActive
+     * @param {Number} now Current frame timestamp
+     * @return {Boolean} True if active
+     */
     Sprite.prototype.isActive = function(now) {
         if (this.active && this.maxloops>0 && this.state.dur * this.maxloops <= (now - this.epoch)) {
             this.active = false;
@@ -255,6 +334,14 @@ define('sprites/sprite',['util/js'], function(js) {
         return this.active||!this.autoRemove;
     };
 
+    /** Changes the state and extension of this sprite. States in sprite definitions are in the form
+     * 'running_ne' where 'running' is the state and 'ne' is the extension.
+     * See morphState for an alternative option.
+     * @method module:sprites/sprite.Sprite#setState
+     * @param {String} state The state of the sprite as specified in its sprite
+     * definition.
+     * @param {String} ext   The state extension to set, or undefined.
+     */
     Sprite.prototype.setState = function(state, ext) {
 
         this.active = true;
@@ -278,20 +365,48 @@ define('sprites/sprite',['util/js'], function(js) {
         this.epoch = this.sn.getNow();
     };
 
+    /** Finds the current state name, i.e. the state without the extension.
+     * @method module:sprites/sprite.Sprite#stateName
+     * @return {String} The state name
+     */
     Sprite.prototype.stateName = function() {
         return this.stateName;
     };
 
+    /** Determines whether this sprite has the given fully-qualified (i.e. including
+     * extension) state name.
+     * @method module:sprites/sprite.Sprite#hasState
+     * @param {String} state The state of the sprite as specified in its sprite
+     * definition.
+     * @return {Boolean} True if it does
+     */
     Sprite.prototype.hasState = function(state) {
         return this.def.states.hasOwnProperty(state);
     };
 
-    Sprite.prototype.morphState = function(state) {
+    /** Changes the state and extension of this sprite. States in sprite definitions are in the form
+     * 'running_ne' where 'running' is the state and 'ne' is the extension.
+     * <p>
+     * This method differs from setState in that it maintains the animation jog position of the state,
+     * e.g. if the sprite was halfway through its running animation in 'running_ne' and you called this
+     * method to change to 'running_e' then the animation would start halfway through its new state.
+     * <p>
+     * If you had called setState then the new state's animation would have started from the beginning.
+     * @method module:sprites/sprite.Sprite#setState
+     * @param {String} state The state of the sprite as specified in its sprite
+     * definition.
+     * @param {String} ext   The state extension to set, or undefined.
+     */
+    Sprite.prototype.morphState = function(state, ext) {
         /* TODO: Make a state transition, but maintain the jog position. Note that the jog position
          * may be clamped to the last frame if autoRemove is false and the internal active flag is set.
          */
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#update
+     */
     Sprite.prototype.update = function(now) {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
@@ -307,6 +422,10 @@ define('sprites/sprite',['util/js'], function(js) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#commit
+     */
     Sprite.prototype.commit = function(now) {
         /* TODO: Not sure if it's a bug or a feature, but we can't guarantee that an update and a commit
          * that share the same phaser will share the same phase. We should test for that. */
@@ -328,6 +447,10 @@ define('sprites/sprite',['util/js'], function(js) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#drawAt
+     */
     Sprite.prototype.drawAt = function(ctx, screenx, screeny, now) {
         if (!this.active && this.autoRemove) {
             /* This may have been set by prior call to update, so check here */
@@ -339,9 +462,10 @@ define('sprites/sprite',['util/js'], function(js) {
 
     /** Move a sprite to a point, taking collision into account.
      * If there is a collision, the sprite will be moved to the point of collision.
+     * @method module:sprites/sprite.Sprite#moveTo
      * @param  {Number} tx Target x world position
      * @param  {Number} ty Target y world position
-     * @param  {Number} th Optional; Target height
+     * @param  {Number} [th] Target height
      * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.moveTo = function(tx,ty,th,collide) {
@@ -354,9 +478,10 @@ define('sprites/sprite',['util/js'], function(js) {
 
     /** Move a sprite by a given amount, taking collision into account.
      * If there is a collision, the sprite will be moved to the point of collision.
+     * @method module:sprites/sprite.Sprite#move
      * @param  {Number} dx Amount to alter x position
      * @param  {Number} dy Amount to alter y position
-     * @param  {Number} dh Optional; Amount to alter height
+     * @param  {Number} [dh] Amount to alter height
      * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.move = function(dx,dy,dh, collide) {
@@ -429,6 +554,7 @@ define('sprites/sprite',['util/js'], function(js) {
      * position to look towards. This is not used in sprite rendering
      * directly, but can be picked up by plugins. Direction is set automatically
      * if the sprite moves, but you can then override direction by calling this.
+     * @method module:sprites/sprite.Sprite#setDirection
      * @param {Number} tox World X position to orient towards.
      * @param {Number} toy World Y position to orient towards.
      */
@@ -439,7 +565,8 @@ define('sprites/sprite',['util/js'], function(js) {
     };
 
     /** Calculates the normalized vector of the sprite's direction.
-     * @param {Number} out An 2-length array that will recieve the xy values of
+     * @method module:sprites/sprite.Sprite#vector
+     * @param {Array} out An 2-length array that will recieve the xy values of
      * the vector in that order.
      */
     Sprite.prototype.vector = function(out) {
@@ -460,6 +587,13 @@ define('sprites/sprite',['util/js'], function(js) {
         out[1] = this.vectory;
     };
 
+    /** Calculates a normalized vector between the sprite and a given point.
+     * @method module:sprites/sprite.Sprite#vector
+     * @param {Number} x The X world position of the test point.
+     * @param {Number} y The Y world position of the test point.
+     * @param {Array} out An 2-length array that will recieve the xy values of
+     * the vector in that order.
+     */
     Sprite.prototype.vectorTo = function(x, y, out) {
         var dx = x - this.x;
         var dy = y - this.y;
@@ -473,6 +607,10 @@ define('sprites/sprite',['util/js'], function(js) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/sprite.Sprite#draw
+     */
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
         this.drawAt(
                 ctx,
@@ -481,6 +619,11 @@ define('sprites/sprite',['util/js'], function(js) {
                 now);
     };
 
+    /**
+     * Called when the sprite is removed from the stage.
+     * @private
+     * @method module:sprites/sprite.Sprite#onRemove
+     */
     Sprite.prototype.onRemove = function() {
         if (this.updates!==undefined) {
             for (var i = 0; i < this.updates.length; i++) {
@@ -493,11 +636,19 @@ define('sprites/sprite',['util/js'], function(js) {
         }
     };
 
+    /**
+     * Default function for predicates.
+     * @private
+     * @method module:sprites/sprite.Sprite#troo
+     */
     var troo = function() {
         return true;
     };
 
-    /** See snaps.spawnSprite for parameter descriptions.
+    /**
+     * See snaps.spawnSprite for parameter descriptions.
+     * @private
+     * @method module:sprites/sprite.Sprite#troo
      */
     Sprite.construct = function(sn, defName, stateName, stateExt, x, y, h, opts) {
 
@@ -597,10 +748,31 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
 
     
 
+    /**
+     * @module sprites/composite
+     */
+
     var copyProps = js.copyProps;
     var clone = js.clone;
 
+
+    /**
+     * Construct a composite sprite. Do not call this constructor directly; you should instead call
+     * <code>sn.createComposite()</code> on the engine.
+     * <p>
+     * A composite is a collection of sprites that can be manipulated as one. They share the same plane
+     * which means they are more efficient. A composite has x, y, but no h position, but the sprites within
+     * it behave as though they have x and h but no y position (y is ignored within a composite).
+     * @constructor module:sprites/composite.Composite
+     * @param {Object} sn The engine reference
+     * @param {Number} x X position in the world for the composite.
+     * @param {Number} y Y position in the world for the composite.
+     * @param {String} id A unique identifier.
+     * @param {Function} [endCallback] Once the composite and all its child sprites expire, this is called.
+     */
     function Composite(sn, x, y, id, endCallback) {
+        /* TODO: Passing an ID in here is smelly. I think. Or perhaps it's ok coz it requires
+         * a factory method to call this. I dunno. */
         this.sn = sn;
         this.x = x;
         this.y = y;
@@ -609,11 +781,34 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
         this.sprites = [];
     }
 
+    /**
+     * Initialize the composite before use.
+     * @method module:sprites/composite.Composite#init
+     * @private
+     */
     Composite.prototype.init = function() {
         /* TODO: Initialize composite plugins */
     };
 
+
+    /**
+     * Add a sprite to the composite.
+     * @method module:sprites/composite.Composite#addSprite
+     * @param defName The name of the sprite definition to use. These are
+     * set up in your game's spriteDefs data.
+     * @param stateName The initial state. This too is defined in the
+     * sprite's definition, in your game's spriteDefs data.
+     * @param {Number} x The world x coordinate. If a function, it should take
+     * no parameters and return a number.
+     * @param {Number} y The world y coordinate. If a function, it should take
+     * no parameters and return a number.
+     * @param {Number} h The height off the ground. If a function, it should take
+     * no parameters and return a number.
+     * @param {Object} [opts] See snaps.spawnSprite for a full list of options.
+     */
     Composite.prototype.addSprite = function(defName, stateName, x, y, h, opts) {
+
+        /* TODO: Docs - Link to spawnSprite in opts param */
 
         if (opts===undefined) {
             opts = {};
@@ -650,6 +845,12 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
         return s;
     };
 
+    /** Tests to see if this is an active composite. Inactive composites will be destroyed by the
+     * engine. If any child sprites are active, this will be active.
+     * @method module:sprites/composite.Composite#isActive
+     * @param {Number} now Current frame timestamp
+     * @return {Boolean} True if active
+     */
     Composite.prototype.isActive = function(now) {
 
         if (!this.active) {
@@ -676,6 +877,10 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
         return isactive;
     };
 
+    /**
+     * @private
+     * @method module:sprites/composite.Composite#update
+     */
     Composite.prototype.update = function(now, fnEach) {
         /* TODO: Call composite plugins */
         for (var i = this.sprites.length - 1; i >= 0; i--) {
@@ -686,6 +891,10 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/composite.Composite#draw
+     */
     Composite.prototype.draw = function(ctx, screenx, screeny, now) {
         if (!this.active) {
             /* This may have been set by prior call to update, so check here */
@@ -707,6 +916,10 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
         }
     };
 
+    /**
+     * @private
+     * @method module:sprites/composite.Composite#onRemove
+     */
     Composite.prototype.onRemove = function() {
         for (var i = this.sprites.length - 1; i >= 0; i--) {
             this.sprites[i].onRemove();
@@ -727,7 +940,8 @@ define('input/keyboard',[],function() {
     
 
     /** Creates a keyboard input handler and starts listening for
-     * keyboard events.
+     * keyboard events. You don't normally need to create this since the engine
+     * creates one by default.
      * @constructor module:input/keyboard.Keyboard
      */
     function Keyboard() {
@@ -914,7 +1128,8 @@ define('input/mouse',[],function() {
     
 
     /** Creates a mouse input handler and starts listening for
-     * mouse events.
+     * mouse events. You don't normally need to create this since the engine
+     * creates one by default.
      * @constructor module:input/mouse.Mouse
      * @param {HTMLCanvasElement} canvas Mouse position will be
      * relative to and constrained to the limits of the given canvas.
@@ -963,15 +1178,43 @@ define('util/preload',[],function() {
 
     
 
+    /**
+     * @module util/preload
+     */
+
+     /**
+      * Create a preloader for fetching multiple image files.
+      * @constructor module:util/preload.Preloader
+      */
     function Preloader() {
         this.batch = [];
         this.errorstate = false;
     }
 
+    /**
+     * Initialize the composite before use.
+     * @method module:util/preload.Preloader#add
+     * @param {String} file The file to load
+     * @param {String} tag Some tag to help you identify the image when it's loaded
+     * @param {Function} [fnStore] A callback to receive the loaded image, in the form
+     * <pre>
+     * function(image, tag) {
+     * }
+     * </pre>
+     * Where the image is a loaded Image object.
+     */
     Preloader.prototype.add = function(file, tag, fnStore) {
         this.batch.push({file:file, tag:tag, fnStore:fnStore});
     };
 
+    /**
+     * Start the preloader
+     * @method module:util/preload.Preloader#load
+     * @param  {Function} fnComplete Callback when all files are loaded.
+     * @param  {Function} fnProgress Called periodically with progress expressed
+     * as a number between 0 and 1.
+     * @param  {Function} fnError Called on each load error.
+     */
     Preloader.prototype.load = function(fnComplete, fnProgress, fnError) {
 
         var count = this.batch.length;
@@ -985,7 +1228,9 @@ define('util/preload',[],function() {
                     return;
                 }
                 count--;
-                item.fnStore(img, item.tag);
+                if (item.fnStore!==undefined) {
+                    item.fnStore(img, item.tag);
+                }
                 fnProgress(1-count/_this.batch.length);
                 if (count===0) {
                     fnComplete();
@@ -1020,7 +1265,12 @@ define('util/rnd',[],function() {
 
     
 
+    /**
+     * @module util/rnd
+     */
+
     /** Return a random integer.
+     * @function module:util/rnd#rnd
      * @param min Lowest possible value
      * @param max Highest possible value
      */
@@ -1028,6 +1278,11 @@ define('util/rnd',[],function() {
         return min+Math.random()*(max-min+1)|0;
     };
 
+    /** Return a random float.
+     * @function module:util/rnd#rndFloat
+     * @param min Lowest possible value
+     * @param max Highest possible value
+     */
     var rndFloat = function(min,max) {
         return min+Math.random()*(max-min+1);
     };
@@ -1056,24 +1311,48 @@ define('util/rnd',[],function() {
 
         rndFloat: rndFloat,
 
-        /** Generates a function that returns a faster random number
-         * generator, but which has a setup cost. If you're using a very large
+        /** Generates a function that returns a faster random integer
+         * generator, but which has a setup cost. If you're generating a very large
          * number of random numbers, this is significantly faster.
-         *
-         * http://jsperf.com/precalc-random-numbers
-         *
+         * <p>
+         * See {@link http://jsperf.com/precalc-random-numbers|jsperf.com}
+         * <p>
          * e.g.
-         * var nextRand = rnd.fastRand(1, 10); // The slow bit
-         * var n = nextRand(); // The fast bit
-         * @param min Lowest possible value
-         * @param max Highest possible value
+         * <pre>
+         * // This bit is slow
+         * var nextRand = rnd.fastRand(1, 10);
+         * // This bit is fast
+         * var n = nextRand();
+         * <pre>
+         * @function module:util/rnd#fastRand
+         * @param {Number} min Lowest possible value
+         * @param {Number} max Highest possible value
          * @param {Number} setsize Optional. The number of values to
          * precalculate.
          */
-        fastRand: function(min, max,setsize) {
+        fastRand: function(min, max, setsize) {
             return genRands(min, max, setsize, rnd);
         },
 
+        /** Generates a function that returns a faster random float
+         * generator, but which has a setup cost. If you're generating a very large
+         * number of random numbers, this is significantly faster.
+         * <p>
+         * See {@link http://jsperf.com/precalc-random-numbers|jsperf.com}
+         * <p>
+         * e.g.
+         * <pre>
+         * // This bit is slow
+         * var nextRand = rnd.fastRandFloat(0, 1);
+         * // This bit is fast
+         * var n = nextRand();
+         * <pre>
+         * @function module:util/rnd#fastRandFloat
+         * @param {Number} min Lowest possible value
+         * @param {Number} max Highest possible value
+         * @param {Number} setsize Optional. The number of values to
+         * precalculate.
+         */
         fastRandFloat: function(min, max,setsize) {
             return genRands(min, max, setsize, rndFloat);
         }
@@ -1087,7 +1366,17 @@ define('util/bitmap',[],function() {
 
     
 
+    /**
+     * @module util/bitmap
+     */
     return {
+
+        /**
+         * Extract the red channel from an image into an array.
+         * @function module:util/bitmap#imageToRData
+         * @param {DOMElement} image The source image
+         * @return {Array} An array of byte values as a regular array
+         */
         imageToRData: function(image)
         {
             var w = image.width;
@@ -1119,6 +1408,10 @@ define('util/debug',[],function() {
 
     
 
+    /**
+     * @module util/debug
+     * @private
+     */
     return {
 
         debugText: function(ctx, text, x, y) {
@@ -1142,20 +1435,26 @@ define('util/minheap',[],function() {
     
 
     /**
-     * Implementation of a min heap.
-     *
-     * http://www.digitaltsunami.net/projects/javascript/minheap/index.html
-     *
-     * Modified to expect only to contain objects that expose a 'score'
-     * value for comparison.
+     * @module util/minheap
      */
 
+    /**
+     * Implementation of a min heap.
+     * <p>
+     * See {@link http://www.digitaltsunami.net/projects/javascript/minheap/index.html|digitaltsunami.net}
+     * <p>
+     * Modified to expect only to contain objects that expose a 'score'
+     * value for comparison.
+     * @constructor module:util/minheap.MinHeap
+     */
     function MinHeap() {
 
         this.heap = [];
 
         /**
          * Retrieve the index of the left child of the node at index i.
+         * @method module:util/minheap.MinHeap#left
+         * @private
          */
         this.left = function(i) {
             return 2 * i + 1;
@@ -1163,6 +1462,8 @@ define('util/minheap',[],function() {
 
         /**
          * Retrieve the index of the right child of the node at index i.
+         * @method module:util/minheap.MinHeap#right
+         * @private
          */
         this.right = function(i) {
             return 2 * i + 2;
@@ -1170,6 +1471,8 @@ define('util/minheap',[],function() {
 
         /**
          * Retrieve the index of the parent of the node at index i.
+         * @method module:util/minheap.MinHeap#parent
+         * @private
          */
         this.parent = function(i) {
             return Math.ceil(i / 2) - 1;
@@ -1178,6 +1481,8 @@ define('util/minheap',[],function() {
         /**
          * Ensure that the contents of the heap don't violate the
          * constraint.
+         * @method module:util/minheap.MinHeap#heapify
+         * @private
          */
         this.heapify = function(i) {
             var lIdx = this.left(i);
@@ -1202,6 +1507,8 @@ define('util/minheap',[],function() {
         /**
          * Starting with the node at index i, move up the heap until parent value
          * is less than the node.
+         * @method module:util/minheap.MinHeap#siftUp
+         * @private
          */
         this.siftUp = function(i) {
             var p = this.parent(i);
@@ -1216,7 +1523,8 @@ define('util/minheap',[],function() {
 
     /**
      * Place an item in the heap.
-     * @param item
+     * @method module:util/minheap.MinHeap#push
+     * @param {Object} item An item that exposes a 'score' property
      */
     MinHeap.prototype.push = function(item) {
         this.heap.push(item);
@@ -1226,7 +1534,8 @@ define('util/minheap',[],function() {
     /**
      * Pop the minimum valued item off of the heap. The heap is then updated
      * to float the next smallest item to the top of the heap.
-     * @returns the minimum value contained within the heap.
+     * @method module:util/minheap.MinHeap#pop
+     * @returns {Object} the minimum scored object contained within the heap.
      */
     MinHeap.prototype.pop = function() {
         var value;
@@ -1245,7 +1554,8 @@ define('util/minheap',[],function() {
     /**
      * Returns the minimum value contained within the heap.  This will
      * not remove the value from the heap.
-     * @returns the minimum value within the heap.
+     * @method module:util/minheap.MinHeap#pop
+     * @returns {Object} the minimum scored object contained within the heap.
      */
     MinHeap.prototype.peek = function() {
         return this.heap[0];
@@ -1253,12 +1563,18 @@ define('util/minheap',[],function() {
 
     /**
      * Return the current number of elements within the heap.
-     * @returns size of the heap.
+     * @method module:util/minheap.MinHeap#size
+     * @returns {Number} size of the heap.
      */
     MinHeap.prototype.size = function() {
         return this.heap.length;
     };
 
+    /**
+     * Removes everything in the heap
+     * @method module:util/minheap.MinHeap#clear
+     * @returns {Object} This heap
+     */
     MinHeap.prototype.clear = function() {
         this.heap.length = 0;
         return this;
@@ -1272,12 +1588,38 @@ define('util/stats',[],function() {
 
     
 
+    /**
+     * @module util/stats
+     */
+
+    /**
+     * Construct a stats recorder.
+     * @constructor module:util/stats.Stats
+     */
     function Stats() {
+
+        /* TODO: Docs - Go through every constructor looking for this properties that can be exposed
+         * through documentation. */
+
         this.samples = {};
         this.totals = {};
+
+        /**
+         * A named map of stats and their averages over the last 10 samples.
+         * E.g. <code>stats.averages['fps'];</code>
+         * @type {Object}
+         * @member module:util/stats.Stats#averages
+         */
         this.averages = {};
     }
 
+    /**
+     * Count a named stat. The last 10 recorded stats for each name will be stored
+     * and accessible as averages.
+     * @method module:util/stats.Stats#count
+     * @param  {String} name The stat to count
+     * @param  {Number} val  The new value for the stat
+     */
     Stats.prototype.count = function(name, val) {
         var s, t;
         if (!this.samples.hasOwnProperty(name)) {
@@ -1307,9 +1649,16 @@ define('util/uid',[],function() {
 
     
 
+    /**
+     * @module util/uid
+     */
+
     var next = 1;
 
-    /** Return a unique string for identifier purposes.
+    /**
+     * Generates unique IDs
+     * @function module:util/uid#uid
+     * @return {Number} A unique ID
      */
     return function() {
         return next++;
@@ -1322,7 +1671,17 @@ define('util/url',[],function() {
 
     
 
+    /**
+     * @module util/url
+     */
+
     return {
+        /**
+         * Extracts query string values from the current window's URL
+         * @function module:util/url#queryStringValue
+         * @param {String} name The query string name
+         * @return {String} The query string value, or null
+         */
         queryStringValue: function(name)
         {
             var match = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
@@ -1346,6 +1705,11 @@ define('util/all',[
 function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 
     
+
+    /**
+     * @module util/all
+     * @private
+     */
 
     return {
         Preloader: Preloader,
@@ -2881,7 +3245,7 @@ define('plugins/layer/ui',[],function() {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('ui', UI, function(){});
+        sn.registerLayerPlugin('ui', UI);
     };
 
 });
@@ -2994,7 +3358,7 @@ function(Sprite, uid) {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('ground-sprites', GroundSprites, function(){});
+        sn.registerLayerPlugin('ground-sprites', GroundSprites);
     };
 
 });
@@ -3466,7 +3830,7 @@ define('plugins/camera/push-cam',[],function() {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerCameraPlugin('pushcam', PushCam, function(){});
+        sn.registerCameraPlugin('pushcam', PushCam);
     };
 
 });
@@ -3795,7 +4159,7 @@ function(traceProp, localScan) {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerColliderPlugin('line-trace', LineTrace, function(){});
+        sn.registerColliderPlugin('line-trace', LineTrace);
     };
 
 });
@@ -4045,7 +4409,7 @@ function(traceProp, midPtEllipse, localScan) {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerColliderPlugin('circle-trace', CircleTrace, function(){});
+        sn.registerColliderPlugin('circle-trace', CircleTrace);
     };
 
 });
@@ -4106,6 +4470,7 @@ define('animate/tween',[],function() {
 
         /**
          * Simple linear tween.
+         * @function module:animate/tween#linear
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4121,6 +4486,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases in and out of the animation
+         * @function module:animate/tween#easeInOutCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4138,6 +4504,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases softly in and out of the animation
+         * @function module:animate/tween#easeInOutQuintic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4155,6 +4522,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases very softly into the animation
+         * @function module:animate/tween#easeInQuintic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4172,6 +4540,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases softly into the animation
+         * @function module:animate/tween#easeInQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4188,6 +4557,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases into the animation
+         * @function module:animate/tween#easeInCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4204,6 +4574,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases quickly into the animation
+         * @function module:animate/tween#easeInQuadratic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4219,6 +4590,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases very softly out of the animation
+         * @function module:animate/tween#easeOutQuintic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4236,6 +4608,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases softly out of the animation
+         * @function module:animate/tween#easeOutQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4253,6 +4626,7 @@ define('animate/tween',[],function() {
 
         /**
          * Eases out of the animation
+         * @function module:animate/tween#easeOutCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4270,6 +4644,7 @@ define('animate/tween',[],function() {
 
         /** Opposite of easing in and out. Starts and ends linearly, but
          * comes to a pause in the middle.
+         * @function module:animate/tween#easeOutInCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4286,6 +4661,7 @@ define('animate/tween',[],function() {
         },
 
         /** Moves back first before easing in.
+         * @function module:animate/tween#backInCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4302,6 +4678,7 @@ define('animate/tween',[],function() {
         },
 
         /** Moves back first before easing in.
+         * @function module:animate/tween#backInQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4318,6 +4695,7 @@ define('animate/tween',[],function() {
         },
 
         /** Overshoots, then eases back
+         * @function module:animate/tween#outBackCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4334,6 +4712,7 @@ define('animate/tween',[],function() {
         },
 
         /** Overshoots, then eases back
+         * @function module:animate/tween#outBackQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4350,6 +4729,7 @@ define('animate/tween',[],function() {
         },
 
         /** Bounces around the target point, then settles.
+         * @function module:animate/tween#bounceOut
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4366,6 +4746,7 @@ define('animate/tween',[],function() {
         },
 
         /** Bounces around the start point, then moves quickly to the target.
+         * @function module:animate/tween#bounceIn
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -4867,9 +5248,68 @@ define('ai/pathfinder',[],function() {
         return (dx*dx)+(dy*dy);
     };
 
+    /**
+     * Transform a route of tile positions into a step-by-step path
+     * @private
+     * @param  {Array} route The route to transform
+     * @param  {Array} nesw An array of values to push for each step, arranged
+     * north first, moving clockwise.
+     * @param {Number} span The number of values in nesw per direction
+     * @return {Array} The transformed route
+     */
+    var transformRoute = function(route, nesw, span) {
+        var map = this.sn.map;
+        var newroute = [];
 
-    /** TODO: Not yet implemented.
-     * Takes a route generated by {@link module:ai/pathfinder.PathFinder#route|route}
+        /* In nesw:
+         * 0   1   2   3   4   5   6   7
+         * n  ne   e  se   s  sw   w  nw  */
+
+        if(map.isStaggered()) {
+            /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
+             * 1 pair ahead of the current pair to determine direction. */
+            for (var i = route.length - 4; i >= 0; i-=2) {
+                var y0 = route[i+1];
+                var dx = route[i]-route[i+2];
+                var dy = y0-route[i+3];
+
+                /* If you're browsing this code and start to feel some sort of rage when you see
+                 * the logic wrapped up in these ternary operators wrapped up in a switch statement,
+                 * then I'm genuinely sorry. I do however find this sort of thing strangely beautiful.
+                 * If it helps, here's a top tip that explains that !== is the same as xor:
+                 * http://stackoverflow.com/a/4540443/974 */
+
+                switch(dy) {
+                    case -2:
+                        /*                            n                  */
+                        newroute.push.apply(newroute, nesw.slice(0, span));
+                        continue;
+                    case -1:
+                        /*                                                        nw                         ne                        */
+                        newroute.push.apply(newroute, (((dx===0)!==((y0&1)!==0)))?nesw.slice(7*span, 8*span):nesw.slice(1*span, 2*span));
+                        continue;
+                    case 0:
+                        /*                                     e                          w                         */
+                        newroute.push.apply(newroute, (dx===1)?nesw.slice(2*span, 3*span):nesw.slice(6*span, 7*span));
+                        continue;
+                    case 1:
+                        /*                                                        sw                          se                       */
+                        newroute.push.apply(newroute, (((dx===0)!==((y0&1)!==0)))?nesw.slice(5*span, 6*span):nesw.slice(3*span, 4*span));
+                        continue;
+                    default:
+                        /*                            s                         */
+                        newroute.push.apply(newroute, nesw.slice(4*span, 5*span));
+                        continue;
+                }
+            }
+        } else {
+            throw "Unsupported map orientation in routeToDirections/routeToVectors: "+map.type;
+        }
+        return newroute;
+    };
+
+
+    /** Takes a route generated by {@link module:ai/pathfinder.PathFinder#route|route}
      * and creates a set of normalized vectors along the route that can be used
      * to influence movement.
      * @method module:ai/pathfinder.PathFinder#routeToVectors
@@ -4878,55 +5318,28 @@ define('ai/pathfinder',[],function() {
      * @return {Array} A spanned array of 2D vectors in the form x,y,x,y,x,y...
      */
     PathFinder.prototype.routeToVectors = function(route) {
-        /* TODO. See routeToDirections */
+        return transformRoute.call(this,route,
+            [ 0, -1,  // n
+              1, -1,  // ne
+              1,  0,  // e
+              1,  1,  // se
+              0,  1,  // s
+             -1,  1,  // sw
+             -1,  0,  // w
+             -1, -1], // ne
+            2);
     };
 
     /** Takes a route generated by {@link module:ai/pathfinder.PathFinder#route|route}
      * and creates a set of compass directions along the rotue that can be used
-     * to set directional
-     * state extensions in sprites.
+     * to set directional state extensions in sprites.
      * @method module:ai/pathfinder.PathFinder#routeToDirections
      * @param {Array} route Route in the form returned by
      * {@link module:ai/pathfinder.PathFinder#route|route}.
      * @return {Array} An array of directions, e.g. <code>['e', 'se', 's']</code>
      */
     PathFinder.prototype.routeToDirections = function(route) {
-        var map = this.sn.map;
-        var newroute = [];
-        if(map.isStaggered()) {
-            /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
-             * 1 pair ahead of the current pair to determine direction. */
-            for (var i = route.length - 4; i >= 0; i-=2) {
-                var y0 = route[i+1];
-                var dx = route[i]-route[i+2];
-                var dy = y0-route[i+3];
-                /* If you're browsing this code and start to feel some sort of rage when you see
-                 * the logic wrapped up in these ternary operators wrapped up in a switch statement,
-                 * then I'm genuinely sorry. I do however find this sort of thing strangely beautiful.
-                 * If it helps, here's a top tip that explains that !== is the same as xor:
-                 * http://stackoverflow.com/a/4540443/974 */
-                switch(dy) {
-                    case -2:
-                        newroute.push('n');
-                        continue;
-                    case -1:
-                        newroute.push((((dx===0)!==((y0&1)!==0)))?'nw':'ne');
-                        continue;
-                    case 0:
-                        newroute.push((dx===1)?'e':'w');
-                        continue;
-                    case 1:
-                        newroute.push((((dx===0)!==((y0&1)!==0)))?'sw':'se');
-                        continue;
-                    default:
-                        newroute.push('s');
-                        continue;
-                }
-            }
-        } else {
-            throw "Unsupported map orientation in routeToDirections: "+map.type;
-        }
-        return newroute;
+        return transformRoute.call(this,route, ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'], 1);
     };
 
     /** Calculates a route from one position to another
@@ -5109,6 +5522,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
     
 
+
+    /**
+     * @module snaps
+     */
+
     var debugText = util.debug.debugText;
     var copyProps = util.js.copyProps;
     var clone     = util.js.clone;
@@ -5117,7 +5535,16 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var uid       = util.uid;
     var Stats     = util.Stats;
 
+    /**
+     * The main class of the game engine
+     * @constructor module:snaps.Snaps
+     * @param {Object} game A game object
+     * @param {String} canvasID The ID of a canvas on the page to render into
+     * @param {Object} [settings] Assorted settings to control the engine behavior.
+     */
     function Snaps(game, canvasID, settings) {
+
+        /* TODO: Docs - document settings object options */
 
         var _this = this;
 
@@ -5125,11 +5552,48 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 
         /* Make some functionality directly available to the game via the engine ref */
+
+        /**
+         * The contents of the util/* modules are exposed here for general use.
+         * @member module:snaps.Snaps#util
+         * @type {Object}
+         */
         this.util = util;
+
+        /**
+         * The contents of the animate/tween module is exposed here for general use.
+         * @member module:snaps.Snaps#tweens
+         * @type {Object}
+         */
         this.tweens = tweens;
+
+        /**
+         * The MinHeap constructor is exposed here for general use.
+         * @member module:snaps.Snaps#MinHeap
+         * @type {Function}
+         */
         this.MinHeap = MinHeap;
+
+        /**
+         * The Stats constructor is exposed here for general use. To access standard running stats you
+         * probably want {@link module:snaps.Snaps#stats|stats} instead.
+         * @member module:snaps.Snaps#Stats
+         * @type {Function}
+         */
         this.Stats = Stats;
+
+        /**
+         * The ProximityTracker constructor is exposed here for general use.
+         * @member module:snaps.Snaps#ProximityTracker
+         * @type {Function}
+         */
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
+
+        /**
+         * The PathFinder constructor is exposed here for general use.
+         * @member module:snaps.Snaps#PathFinder
+         * @type {Function}
+         */
         this.PathFinder = PathFinder.bind(PathFinder, this);
 
         settings = settings || {};
@@ -5147,6 +5611,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.cameraPlugins = {};
         this.phaserPlugins = {};
 
+        /**
+         * Exposes some standard running stats
+         * @member module:snaps.Snaps#stats
+         * @type {Object}
+         */
         this.stats = new Stats();
 
         this.timers = {};
@@ -5191,29 +5660,70 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         this.lastFrameTime = 0;
 
+        /**
+         * Registers a new updater plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerSpriteUpdater
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} ctor The constructor of the sprite updater object.
+         */
         this.registerSpriteUpdater = function(name, ctor) {
             _this.spriteUpdaters[name] = ctor;
         };
 
+        /**
+         * Registers a new effect plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerFxPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the fx updater object.
+         */
         this.registerFxPlugin = function(name, fn) {
             _this.fxUpdaters[name] = fn;
         };
 
-        this.registerLayerPlugin = function(name, fn, init) {
-            init.call(this);
+        /**
+         * Registers a new layer plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerLayerPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the layer updater object.
+         */
+        this.registerLayerPlugin = function(name, fn) {
             _this.layerPlugins[name] = fn;
         };
 
-        this.registerColliderPlugin = function(name, fn, init) {
-            _this.colliders[name] = {fn:fn, init:init};
+        /**
+         * Registers a new collider plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerColliderPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the collider object.
+         */
+        this.registerColliderPlugin = function(name, fn) {
+            _this.colliders[name] = fn;
         };
 
-        this.registerCameraPlugin = function(name, fn, init) {
-            _this.cameraPlugins[name] = {fn:fn, init:init};
+        /**
+         * Registers a new camera plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerCameraPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the camera object.
+         */
+        this.registerCameraPlugin = function(name, fn) {
+            _this.cameraPlugins[name] = fn;
         };
 
+        /**
+         * Registers a new phaser plugin. See other plugin code for an example of how
+         * to call this.
+         * @method module:snaps.Snaps#registerPhaserPlugin
+         * @param  {String} name The name of the plugin.
+         * @param  {Function} fn The constructor of the phaser object.
+         */
         this.registerPhaserPlugin = function(name, fn) {
-            _this.phaserPlugins[name] = {fn:fn};
+            _this.phaserPlugins[name] = fn;
         };
 
         /* Register the default plugins */
@@ -5274,22 +5784,70 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         }
 
+        /**
+         * If your game object exposes a <code>preloadImages</code> property, then those images
+         * will be preloaded by the engine along with the map images. Call this method to draw
+         * the image by name, e.g.
+         * <pre>
+         * game.preloadImages = {
+         *     logo: 'mylogo.png'
+         * }
+         * //...
+         * sn.drawImage('logo', 50, 30);
+         * </pre>
+         * @method module:snaps.Snaps#drawImage
+         * @param  {String} im The image name
+         * @param  {Number} x  The screen x position
+         * @param  {Number} y  The screen y position
+         */
         this.drawImage = function(im, x, y) {
             _this.ctx.drawImage(_this.imageCache[im],x,y);
         };
 
+        /**
+         * Clears the screen. Normally you don't need to do this if your map has no holes
+         * in it since the screen will be redrawn from corner to corner.
+         * @method module:snaps.Snaps#cls
+         * @param  {String} [col] The screen clearing color as a CSS color spec. Defaults to black.
+         */
         this.cls = function(col) {
             _this.ctx.fillStyle = col||'#000';
             _this.ctx.fillRect (0,0,_this.clientWidth,_this.clientHeight);
         };
 
+        /**
+         * Call this to bind keys to actions which you can test later on with
+         * the <code>actioning</code> method.
+         * <pre>
+         * sn.bindKeys([
+         *     {key:'left',  action:'left'},
+         *     {key:'right', action:'right'},
+         *     {key:'up',    action:'up'},
+         *     {key:'down',  action:'down'},
+         *
+         *     // alternatives
+         *     {key:'w', action:'up'},
+         *     {key:'a', action:'left'},
+         *     {key:'s', action:'down'},
+         *     {key:'d', action:'right'}
+         * ]);
+         * </pre>
+         * @method module:snaps.Snaps#bindKeys
+         * @param  {Array} keybinds An array of objects exposing key and action
+         * properties. See the description for an example.
+         */
         this.bindKeys = function(keybinds) {
+            /* TODO: Docs - Link to actioning method */
             for (var i = 0; i < keybinds.length; i++) {
                 var keybind = keybinds[i];
                 _this.keyboard.bind(keybind.key, keybind.action);
             }
         };
 
+        /**
+         * @method module:snaps.Snaps#updatePhasers
+         * @private
+         */
         this.updatePhasers = function() {
             var epoch = +new Date();
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
@@ -5298,6 +5856,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.stats.count('updatePhasers', (+new Date())-epoch);
         };
 
+        /**
+         * @method module:snaps.Snaps#updateFX
+         * @private
+         */
         this.updateFX = function() {
             var epoch = +new Date();
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
@@ -5309,6 +5871,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.stats.count('updateFX', (+new Date())-epoch);
         };
 
+        /**
+         * Spawn a new fx instance
+         * @method module:snaps.Snaps#fx
+         * @param  {Number} name The fx plugin to instantiate
+         * @param  {Object} [opts] Options to pass to the plugin
+         */
         this.fx = function(name, opts) {
             if (!_this.fxUpdaters.hasOwnProperty(name)) {
                 throw "Can't create FX for unregistered FX type: " + name;
@@ -5316,6 +5884,14 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             _this.activeFX.push(new _this.fxUpdaters[name](opts));
         };
 
+        /**
+         * Insert a new layer
+         * @method module:snaps.Snaps#addLayer
+         * @param  {String} name A unique name for the new layer
+         * @param  {String} type The layer plugin to instantiate
+         * @param  {Object} [opts] Options to pass to the plugin
+         * @param  {Number} idx The layer index to insert it at
+         */
         this.addLayer = function(name, type, opts, idx) {
             /* TODO: name must be unique. */
             /* TODO: Instead of index, we should say which layer to insert after or before, e.g.
@@ -5331,6 +5907,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return layer;
         };
 
+        /**
+         * Count the sprites on the stage, including those in composites
+         * @method module:snaps.Snaps#spriteCount
+         * @return  {Number} The number of sprites on the stage.
+         */
         this.spriteCount = function() {
             var c = 0;
             for (var i = 0; i < _this.sprites.length; i++) {
@@ -5437,7 +6018,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         );
 
-
+        /**
+         * Test the keyboard to see if the user has pressed any bound keys
+         * @method module:snaps.Snaps#actioning
+         * @param  {String} action The name of the action to test
+         * @return {Boolean} True if pressed.
+         */
         this.actioning = function(action) {
             return _this.keyboard.actionPressed(action);
         };
@@ -5445,41 +6031,64 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* TODO: Rename scroll methods to better reflect the fact that it sets
          * the map position rather than animatedly scroll it. */
 
+        /**
+         * Scroll the map view by a given amount of pixels.
+         * @method module:snaps.Snaps#scroll
+         * @param  {Number} dx The number of pixels to scroll horizontally
+         * @param  {Number} dy The number of pixels to scroll vertically
+         */
         this.scroll = function(dx,dy) {
             _this.map.scroll(dx, dy);
         };
 
-        /** Sets the map position to centre on a given world coordinate.
-         * @param {Number} x World X position
-         * @param {Number} y World Y position
+        /**
+         * Sets the map position to center on a given world coordinate.
+         * @method module:snaps.Snaps#scrollTo
+         * @param  {Number} x The x position of the new map center.
+         * @param  {Number} y The y position of the new map center.
          */
         this.scrollTo = function(x,y) {
             _this.map.scrollTo(x, y);
         };
 
+        /** Gets an object describing the pixel limits of the world edges.
+         * @method module:snaps.Snaps#getWorldEdges
+         * @return {Object} Contains 4 properties, le, te, re and be which hold
+         * the left, top, right and bottom edges respectively.
+         */
         this.getWorldEdges = function() {
             return _this.map.getWorldEdges();
         };
 
+        /** Call from your game draw function to draw the map, sprites, layers, fx etc
+         * @method module:snaps.Snaps#drawWorld
+         */
         this.drawWorld = function() {
             this.map.drawWorld(_this.ctx, _this.now, _this.sprites);
         };
 
-        this.drawSpriteWorld = function(name) {
-            _this.spriteMap[name].draw(_this.ctx, _this.map.xoffset, _this.map.yoffset, _this.now);
-        };
-
+        /** Get the mouse screen position
+         * @method module:snaps.Snaps#mouseScreenPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the mouse position in that order.
+         */
         this.mouseScreenPos = function(out) {
             out[0] = _this.mouse.x;
             out[1] = _this.mouse.y;
         };
 
+        /** Get the mouse world position
+         * @method module:snaps.Snaps#mouseWorldPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the mouse position in that order.
+         */
         this.mouseWorldPos = function(out) {
             _this.map.screenToWorldPos(_this.mouse.x, _this.mouse.y, out);
         };
 
         /** Takes a world position and tells you what tile it lies on. Take
          * care with the return value, the function signature is all backwards.
+         * @method module:snaps.Snaps#worldToTilePos
          * @param {Number} x A world x position
          * @param {Number} y A world y position
          * @param {Array} out A 2-length array that will recieve the tile x/y
@@ -5493,6 +6102,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /** Takes a screen position and tells you what tile it lies on. Take
          * care with the return value, the function signature is all backwards.
+         * @method module:snaps.Snaps#screenToTilePos
          * @param {Number} x A screen x position
          * @param {Number} y A screen y position
          * @param {Array} out A 2-length array that will recieve the tile x/y
@@ -5504,24 +6114,43 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return this.map.screenToTilePos(x,y, out);
         };
 
+        /** Convert a screen position to a world position
+         * @method module:snaps.Snaps#screenToWorldPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the position in that order.
+         */
         this.screenToWorldPos = function(x, y, out) {
             this.map.screenToWorldPos(x,y, out);
         };
 
+        /** Convert a world position to a screen position
+         * @method module:snaps.Snaps#worldToScreenPos
+         * @param {Array} out An 2-length array that will recieve the xy values of
+         * the position in that order.
+         */
         this.worldToScreenPos = function(x, y, out) {
             this.map.worldToScreenPos(x,y, out);
         };
 
         /** Get a tile by it's row and column position in the original map data.
-         * @param  {object} layer. The layer to search for tiles.
+         * @method module:snaps.Snaps#getTile
+         * @param  {Object} layer The layer to search for tiles.
          * @param  {Number} c The column, aka x position in the data.
          * @param  {Number} r the row, aka y position in the data.
-         * @return {Tile} A tile, or null if the input was out of range.
+         * @return {Object} A tile, or null if the input was out of range.
          */
         this.getTile = function(layer, c, r) {
+            /* TODO: Docs - Link to tile class */
             return this.map.getTile(layer, c, r);
         };
 
+        /** Get a tile by it's row and column position and find the world position
+         * of its center point.
+         * @method module:snaps.Snaps#getTileWorldPos
+         * @param  {Number} c The column, aka x position in the data.
+         * @param  {Number} r the row, aka y position in the data.
+         * @return {Object} A tile, or null if the input was out of range.
+         */
         this.getTileWorldPos = function(c, r, out) {
             this.map.tileDimensions(out);
             if ((r&1)===0) {
@@ -5533,22 +6162,57 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         };
 
+        /** Get a tile property from a world position. Starts at the topmost
+         * map layer and world down to the ground.
+         * @method module:snaps.Snaps#getTilePropAtWorldPos
+         * @param  {String} prop The property to get
+         * @param  {Number} x The x world position
+         * @param  {Number} y The y world position
+         * @return {String} The property or undefined.
+         */
         this.getTilePropAtWorldPos = function(prop, x, y) {
             return this.map.getTilePropAtWorldPos(prop, x,y);
         };
 
+        /** Get a tile property from a tile column and row in the original map data.
+         * Starts at the topmost map layer and world down to the ground.
+         * @method module:snaps.Snaps#getTilePropAtTilePos
+         * @param  {String} prop The property to get
+         * @param  {Number} x The x tile column position
+         * @param  {Number} y The y tile row position
+         * @return {String} The property or undefined.
+         */
         this.getTilePropAtTilePos = function(prop, x, y) {
             return this.map.getTilePropAtTilePos(prop, x,y);
         };
 
+        /**
+         * Create a new collider for use in sprites.
+         * @method module:snaps.Snaps#createCollider
+         * @param  {String} type The name of the collider plugin
+         * @param  {Object} opts Options to pass to the collider
+         * @return {Object} A collider
+         */
         this.createCollider = function(type, opts) {
             if(!_this.colliders.hasOwnProperty(type)) {
                 throw "Warning: undefined collider plugin: " + type;
             }
-            return new _this.colliders[type].fn(opts);
+            return new _this.colliders[type](opts);
         };
 
+
+        /**
+         * Create a new camera for use in game. Creating a camera does not
+         * activate it. You need to then call <code>switchToCamera</code>.
+         * @method module:snaps.Snaps#createCamera
+         * @param  {String} name The name of the camera so that you can refer
+         * to it again.
+         * @param  {String} type The name of the camera plugin to instantiate.
+         * @param  {Object} opts Options to pass to the camera
+         * @return {Object} The new camera.
+         */
         this.createCamera = function(name, type, opts) {
+            /* TODO: Docs - Link to switchToCamera */
             if(!_this.cameraPlugins.hasOwnProperty(type)) {
                 throw "Warning: undefined camera plugin: " + type;
             }
@@ -5557,35 +6221,34 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 throw "Camera already exists: "+name;
             }
 
-            this.cameras[name] = new _this.cameraPlugins[type].fn(opts);
+            this.cameras[name] = new _this.cameraPlugins[type](opts);
             return this.cameras[name];
         };
 
+        /**
+         * Switch to a previously created, named camera
+         * @method module:snaps.Snaps#switchToCamera
+         * @param  {String} name The name of the camera
+         */
         this.switchToCamera = function(name) {
             this.camera = this.cameras[name];
         };
 
         /**
          * Spawn a new sprite in the world
-         * @param defName The name of the sprite definition to use. These are
+         * @method module:snaps.Snaps#spawnSprite
+         * @param {String} defName The name of the sprite definition to use. These are
          * set up in your game's spriteDefs data.
-         * @param stateName The initial state. This too is defined in the
+         * @param {String} stateName The initial state. This too is defined in the
          * sprite's definition, in your game's spriteDefs data.
-         * @param {Function/Number} x The world x coordinate. If a function, it should take
-         * no parameters and return a number.
-         * @param {Function/Number} y The world y coordinate. If a function, it should take
-         * no parameters and return a number.
-         * @param {Function/Number} h The height off the ground. If a function, it should take
-         * no parameters and return a number.
-         * @param Optional parameter object, which can contain:
-         * 'id' if you want to be able to find your sprite again.
-         * 'maxloops' if your sprite should remove itself from the world
-         * after it's looped around its animation a certain number of times. Can be a function, like
-         * the world position parameters.
-         * Normally you'd set this to 1 for things like explosions.
-         * 'update' An array of functions that are called in-order for this
-         * sprite.
-         * 'endCallback' A function called when the sprite naturally ends
+         * @param {Number} x The world x coordinate. Can be a function which takes
+         * no parameters and returns a number.
+         * @param {Number} y The world y coordinate. Can be a function which takes
+         * no parameters and returns a number.
+         * @param {Number} h The height off the ground. Can be a function which takes
+         * no parameters and returns a number.
+         * @param {Object} [opts] Optional sprite parameters. For a list of parameters
+         * see the opts parameter on the {@link module:sprites/sprite.Sprite|Sprite class constructor}.
          */
         this.spawnSprite = function(defName, stateName, stateExt, x, y, h, opts) {
 
@@ -5607,6 +6270,15 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return s;
         };
 
+        /**
+         * Spawn a new composite in the world
+         * @method module:snaps.Snaps#createComposite
+         * @param {Number} x The world x coordinate.
+         * @param {Number} y The world y coordinate.
+         * @param {String} id A unique ID so you can find the composite again.
+         * @param {Object} [endCallback] Once the composite and all its child sprites expire,
+         * this is called.
+         */
         this.createComposite = function(x,y,id,endCallback) {
 
             if (id===undefined) {
@@ -5626,20 +6298,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /** Marks a time in the future for a timer to trigger. Timers are
          * not events driven by the engine, but rather need to be explicitely
-         * checked in a timely fashion by the game, via checkTimer.
-         * @param A name for the timer. Use this to check the timer later.
-         * @param When to set the timer for in ms. E.g. 1000 == 1s in the future.
+         * checked in a timely fashion by the game, via {@link module:snaps.Snaps#markTime|checkTimer}.
+         * @method module:snaps.Snaps#markTime
+         * @param {String} name A name for the timer. Use this to check the timer later.
+         * @param {Number} time When to set the timer for in ms. E.g. 1000 == 1s in the future.
          */
         this.markTime = function(name, time) {
             _this.timers[name] = _this.now + time;
         };
 
         /** Checks to see if a timer set with markTime has passed.
-         * @param name The name of the timer to check.
-         * @param resetMs Optional. If omitted, the timer will be removed. If
+         * @method module:snaps.Snaps#checkTimer
+         * @param {String} name The name of the timer to check.
+         * @param {Number} [resetMs] If omitted, the timer will be removed. If
          * present, the timer will be reset, adding resetMs to its current
          * expired trigger time.
-         * @return true if the timer has triggered. Note that an immediate
+         * @return {Boolean} true if the timer has triggered. Note that an immediate
          * call to checkTimer again will return false - The true value is
          * only returned once unless the timer is reset.
          */
@@ -5665,10 +6339,19 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return false;
         };
 
+        /** Find a sprite on the stage by ID
+         * @method module:snaps.Snaps#sprite
+         * @param {String} sprite The name of the sprite to get.
+         * @return {Object} A sprite, or undefined
+         */
         this.sprite = function(sprite) {
             return _this.spriteMap[sprite];
         };
 
+        /**
+         * @method module:snaps.Snaps#updateSprites
+         * @private
+         */
         this.updateSprites = function() {
             var epoch = +new Date();
             var keepsprites = [];
@@ -5692,20 +6375,35 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.stats.count('updateSprites', (+new Date())-epoch);
         };
 
+        /**
+         * The current frame time, updated at the start of each loop
+         * @method module:snaps.Snaps#getNow
+         * @return {Number} The current frame time.
+         */
         this.getNow = function() {
             return _this.now;
         };
 
+        /**
+         * Spawn a new phaser for use in sprite updates
+         * @method module:snaps.Snaps#createPhaser
+         * @param {String} name The name of the phaser plugin to instantiate.
+         * @param {Object} [opts] Optional values passed to the phaser.
+         */
         this.createPhaser = function(name, opts) {
             if (!_this.phaserPlugins.hasOwnProperty(name)) {
                 throw "Can't create phaser for unregistered type: " + name;
             }
 
-            var phaser = new _this.phaserPlugins[name].fn('id'+uid(), opts);
+            var phaser = new _this.phaserPlugins[name]('id'+uid(), opts);
             _this.phasers.push(phaser);
             return phaser;
         };
 
+        /**
+         * Call this when the canvas is resized in the browser.
+         * @method module:snaps.Snaps#resizeCanvas
+         */
         this.resizeCanvas = function() {
 
             var c = document.getElementById(canvasID);
@@ -5716,6 +6414,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
     }
 
+    /**
+     * The contents of the util/* modules are exposed here for general use.
+     * @member module:snaps.Snaps#util
+     * @type {Object}
+     */
     Snaps.util = util;
 
     return Snaps;

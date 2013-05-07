@@ -106,7 +106,7 @@ function(Sprite, uid) {
 
     return function(snaps) {
         sn = snaps;
-        sn.registerLayerPlugin('ground-sprites', GroundSprites, function(){});
+        sn.registerLayerPlugin('ground-sprites', GroundSprites);
     };
 
 });

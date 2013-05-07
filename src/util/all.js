@@ -13,6 +13,11 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 
     'use strict';
 
+    /**
+     * @module util/all
+     * @private
+     */
+
     return {
         Preloader: Preloader,
         rnd: rnd,

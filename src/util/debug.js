@@ -3,6 +3,10 @@ define(function() {
 
     'use strict';
 
+    /**
+     * @module util/debug
+     * @private
+     */
     return {
 
         debugText: function(ctx, text, x, y) {

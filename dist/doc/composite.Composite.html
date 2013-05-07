@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: Composite</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: Composite</h1>
+
+    
+
+
+
+<section>
+    
+<header>
+    <h2>
+        <span class="ancestors"><a href="composite.html">sprites/composite</a>.</span>
+    
+    Composite
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+<dt>
+    <h4 class="name" id="Composite"><span class="type-signature"></span>new Composite<span class="signature">(sn, x, y, id, <span class="optional">endCallback</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Construct a composite sprite. Do not call this constructor directly; you should instead call
+<code>sn.createComposite()</code> on the engine.
+<p>
+A composite is a collection of sprites that can be manipulated as one. They share the same plane
+which means they are more efficient. A composite has x, y, but no h position, but the sprites within
+it behave as though they have x and h but no y position (y is ignored within a composite).
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>sn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The engine reference</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">X position in the world for the composite.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">Y position in the world for the composite.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">A unique identifier.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>endCallback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Function</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">Once the composite and all its child sprites expire, this is called.</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl>
+            
+<dt>
+    <h4 class="name" id="addSprite"><span class="type-signature"></span>addSprite<span class="signature">(defName, stateName, x, y, h, <span class="optional">opts</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Add a sprite to the composite.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>defName</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The name of the sprite definition to use. These are
+set up in your game's spriteDefs data.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>stateName</code></td>
+            
+            
+            <td class="type">
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The initial state. This too is defined in the
+sprite's definition, in your game's spriteDefs data.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The world x coordinate. If a function, it should take
+no parameters and return a number.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The world y coordinate. If a function, it should take
+no parameters and return a number.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>h</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The height off the ground. If a function, it should take
+no parameters and return a number.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">See snaps.spawnSprite for a full list of options.</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="isActive"><span class="type-signature"></span>isActive<span class="signature">(now)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Tests to see if this is an active composite. Inactive composites will be destroyed by the
+engine. If any child sprites are active, this will be active.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>now</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">Current frame timestamp</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    True if active
+</div>
+
+
+
+<dl>
+	<dt class="oneline">
+		Type
+	</dt>
+	<dd class="oneline">
+		
+<span class="param-type">Boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="occlusion-scanner.html">ai/occlusion-scanner</a></li><li><a href="pathfinder.html">ai/pathfinder</a></li><li><a href="proximity-tracker.html">ai/proximity-tracker</a></li><li><a href="tween.html">animate/tween</a></li><li><a href="keyboard.html">input/keyboard</a></li><li><a href="mouse.html">input/mouse</a></li><li><a href="staggered-isometric.html">map/staggered-isometric</a></li><li><a href="tile.html">map/tile</a></li><li><a href="push-cam.html">plugins/ai/camera/push-cam</a></li><li><a href="frame-phaser.html">plugins/ai/phasers/frame-phaser</a></li><li><a href="time-phaser.html">plugins/ai/phasers/time-phaser</a></li><li><a href="circle-trace.html">plugins/collision/sprite-with-map/circle-trace</a></li><li><a href="line-trace.html">plugins/collision/sprite-with-map/line-trace</a></li><li><a href="particles.html">plugins/fx/particles</a></li><li><a href="ground-sprites.html">plugins/layer/ground-sprites</a></li><li><a href="ui.html">plugins/layer/ui</a></li><li><a href="8way.html">plugins/sprite/8way</a></li><li><a href="animate.html">plugins/sprite/animate</a></li><li><a href="apply-velocity.html">plugins/sprite/apply-velocity</a></li><li><a href="bounce.html">plugins/sprite/bounce</a></li><li><a href="flock.html">plugins/sprite/flock</a></li><li><a href="follow-mouse.html">plugins/sprite/follow-mouse</a></li><li><a href="track.html">plugins/sprite/track</a></li><li><a href="module-snaps.html">snaps</a></li><li><a href="composite.html">sprites/composite</a></li><li><a href="sprite.html">sprites/sprite</a></li><li><a href="bitmap.html">util/bitmap</a></li><li><a href="js.html">util/js</a></li><li><a href="minheap.html">util/minheap</a></li><li><a href="preload.html">util/preload</a></li><li><a href="rnd.html">util/rnd</a></li><li><a href="stats.html">util/stats</a></li><li><a href="uid.html">util/uid</a></li><li><a href="url.html">util/url</a></li></ul><h3>Classes</h3><ul><li><a href="occlusion-scanner.OcclusionScanner.html">OcclusionScanner</a></li><li><a href="pathfinder.PathFinder.html">PathFinder</a></li><li><a href="proximity-tracker.ProximityTracker.html">ProximityTracker</a></li><li><a href="keyboard.Keyboard.html">Keyboard</a></li><li><a href="mouse.Mouse.html">Mouse</a></li><li><a href="staggered-isometric.StaggeredIsometric.html">StaggeredIsometric</a></li><li><a href="tile.Tile.html">Tile</a></li><li><a href="push-cam.PushCam.html">PushCam</a></li><li><a href="frame-phaser.FramePhaser.html">FramePhaser</a></li><li><a href="time-phaser.TimePhaser.html">TimePhaser</a></li><li><a href="circle-trace.CircleTrace.html">CircleTrace</a></li><li><a href="line-trace.LineTrace.html">LineTrace</a></li><li><a href="particles.Particles.html">Particles</a></li><li><a href="ground-sprites.GroundSprites.html">GroundSprites</a></li><li><a href="ui.UI.html">UI</a></li><li><a href="8way.Face8Way.html">Face8Way</a></li><li><a href="animate.Animate.html">Animate</a></li><li><a href="apply-velocity.ApplyVelocity.html">ApplyVelocity</a></li><li><a href="bounce.Bounce.html">Bounce</a></li><li><a href="flock.Flock.html">Flock</a></li><li><a href="follow-mouse.FollowMouse.html">FollowMouse</a></li><li><a href="track.Track.html">Track</a></li><li><a href="module-snaps.Snaps.html">Snaps</a></li><li><a href="composite.Composite.html">Composite</a></li><li><a href="sprite.Sprite.html">Sprite</a></li><li><a href="minheap.MinHeap.html">MinHeap</a></li><li><a href="preload.Preloader.html">Preloader</a></li><li><a href="stats.Stats.html">Stats</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<script> prettyPrint(); </script>
+</body>
+</html>

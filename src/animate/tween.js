@@ -12,6 +12,7 @@ define(function() {
 
         /**
          * Simple linear tween.
+         * @function module:animate/tween#linear
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -27,6 +28,7 @@ define(function() {
 
         /**
          * Eases in and out of the animation
+         * @function module:animate/tween#easeInOutCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -44,6 +46,7 @@ define(function() {
 
         /**
          * Eases softly in and out of the animation
+         * @function module:animate/tween#easeInOutQuintic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -61,6 +64,7 @@ define(function() {
 
         /**
          * Eases very softly into the animation
+         * @function module:animate/tween#easeInQuintic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -78,6 +82,7 @@ define(function() {
 
         /**
          * Eases softly into the animation
+         * @function module:animate/tween#easeInQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -94,6 +99,7 @@ define(function() {
 
         /**
          * Eases into the animation
+         * @function module:animate/tween#easeInCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -110,6 +116,7 @@ define(function() {
 
         /**
          * Eases quickly into the animation
+         * @function module:animate/tween#easeInQuadratic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -125,6 +132,7 @@ define(function() {
 
         /**
          * Eases very softly out of the animation
+         * @function module:animate/tween#easeOutQuintic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -142,6 +150,7 @@ define(function() {
 
         /**
          * Eases softly out of the animation
+         * @function module:animate/tween#easeOutQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -159,6 +168,7 @@ define(function() {
 
         /**
          * Eases out of the animation
+         * @function module:animate/tween#easeOutCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -176,6 +186,7 @@ define(function() {
 
         /** Opposite of easing in and out. Starts and ends linearly, but
          * comes to a pause in the middle.
+         * @function module:animate/tween#easeOutInCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -192,6 +203,7 @@ define(function() {
         },
 
         /** Moves back first before easing in.
+         * @function module:animate/tween#backInCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -208,6 +220,7 @@ define(function() {
         },
 
         /** Moves back first before easing in.
+         * @function module:animate/tween#backInQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -224,6 +237,7 @@ define(function() {
         },
 
         /** Overshoots, then eases back
+         * @function module:animate/tween#outBackCubic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -240,6 +254,7 @@ define(function() {
         },
 
         /** Overshoots, then eases back
+         * @function module:animate/tween#outBackQuartic
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -256,6 +271,7 @@ define(function() {
         },
 
         /** Bounces around the target point, then settles.
+         * @function module:animate/tween#bounceOut
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
@@ -272,6 +288,7 @@ define(function() {
         },
 
         /** Bounces around the start point, then moves quickly to the target.
+         * @function module:animate/tween#bounceIn
          * @param  {Number} t Current time passed since the beginning of the animation. Must be >=0.
          * Will be clamped to the duration.
          * @param  {Number} b The start value of the property being tweened
