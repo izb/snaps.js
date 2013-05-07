@@ -59,11 +59,10 @@ define(['util/js', 'sprites/sprite'], function(js, Sprite) {
      * no parameters and return a number.
      * @param {Number} h The height off the ground. If a function, it should take
      * no parameters and return a number.
-     * @param {Object} [opts] See snaps.spawnSprite for a full list of options.
+     * @param {Object} [opts] For a list of parameters
+     * see the opts parameter on the {@link module:sprites/sprite.Sprite|Sprite class constructor}.
      */
     Composite.prototype.addSprite = function(defName, stateName, x, y, h, opts) {
-
-        /* TODO: Docs - Link to spawnSprite in opts param */
 
         if (opts===undefined) {
             opts = {};

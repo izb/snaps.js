@@ -171,7 +171,7 @@ define('sprites/sprite',['util/js'], function(js) {
     var clone = js.clone;
 
     /** Creates a new sprite object. Note that you shouldn't normally call this constructor directly.
-     * Call the factory method <code>sn.spawnSprite</code> instead.
+     * Call the factory method {@link module:snaps.Snaps#spawnSprite|spawnSprite} instead.
      * <p>
      * Some parameters or options accept functions. An example of how to pass a random range into any
      * Function/Number parameters would be to bind the rnd function in util/rnd. E.g.
@@ -222,8 +222,6 @@ define('sprites/sprite',['util/js'], function(js) {
      * </dl>
      */
     function Sprite(sn, def, x, y, h, opts) {
-
-        /* TODO: Docs - link to spawnSprite */
 
         opts = opts||{};
 
@@ -804,11 +802,10 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
      * no parameters and return a number.
      * @param {Number} h The height off the ground. If a function, it should take
      * no parameters and return a number.
-     * @param {Object} [opts] See snaps.spawnSprite for a full list of options.
+     * @param {Object} [opts] For a list of parameters
+     * see the opts parameter on the {@link module:sprites/sprite.Sprite|Sprite class constructor}.
      */
     Composite.prototype.addSprite = function(defName, stateName, x, y, h, opts) {
-
-        /* TODO: Docs - Link to spawnSprite in opts param */
 
         if (opts===undefined) {
             opts = {};
@@ -1598,9 +1595,6 @@ define('util/stats',[],function() {
      */
     function Stats() {
 
-        /* TODO: Docs - Go through every constructor looking for this properties that can be exposed
-         * through documentation. */
-
         this.samples = {};
         this.totals = {};
 
@@ -1832,7 +1826,19 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         this.hitTests = hitTests;
         this.maxXOverdraw = 0;
         this.maxYOverdraw = 0;
+
+        /**
+         * The canvas width
+         * @type {Number}
+         * @member module:map/staggered-isometric.StaggeredIsometric#clientWidth
+         */
         this.clientWidth = clientWidth;
+
+        /**
+         * The canvas height
+         * @type {Number}
+         * @member module:map/staggered-isometric.StaggeredIsometric#clientHeight
+         */
         this.clientHeight = clientHeight;
         this.hideBuildings = false;
 
@@ -2454,8 +2460,6 @@ define('plugins/sprite/bounce',[],function() {
 
     }
 
-    /* TODO: All docs. Search for {Bool} and make it Boolean */
-
     /** Called with the sprite as the function context.
      * @method module:plugins/sprite/bounce.Bounce#update
      * @private
@@ -2582,14 +2586,15 @@ define('plugins/sprite/animate',[],function() {
     /**
      * A sprite updater that animates one or more properties on the sprite. Properties are modified
      * directly, so handle with care. Be aware that property updates on things such as position will bypass
-     * the automatic direction setting you'd get if you had called Sprite#move.
+     * the automatic direction setting you'd get if you had called {@link module:sprites/sprite.Sprite#move|move}
+     * on your sprite.
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.
      * <p>
      * Alongside the name, you can pass the following options
      * <dl>
-     *  <dt>tween</dt><dd>The name of the tween function. See the tweens module for a full list of options.</dd>
+     *  <dt>tween</dt><dd>The name of the tween function. See the {@link animate/tween|tweens} module for a full list of options.</dd>
      *  <dt>props</dt><dd>An object describing the properties to adjust. Values are relative adjustments, not
      *     absolute values. E.g.
      *     <pre>
@@ -2607,8 +2612,6 @@ define('plugins/sprite/animate',[],function() {
      * @constructor module:plugins/sprite/animate.Animate
      */
     function Animate() {
-        /* TODO: Docs - link to tweens functions. */
-        /* TODO: Docs - link to sprite move function. */
     }
 
 
@@ -2694,8 +2697,8 @@ define('plugins/sprite/8way',[],function() {
      * A sprite updater that sets the sprite's state extension to a compass direction
      * ('n', 'ne', 'e', 'se'...)
      * based on the direction values in the sprite. Direction updates automatically when the sprite
-     * moves but can be overridden with setDirection. The compass direction takes into account the
-     * isometric projection.
+     * moves but can be overridden with {@link module:sprites/sprite.Sprite#setDirection|setDirection}.
+     * The compass direction takes into account the isometric projection.
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.
@@ -2704,7 +2707,6 @@ define('plugins/sprite/8way',[],function() {
      * @constructor module:plugins/sprite/8way.Face8Way
      */
     function Face8Way() {
-        /* TODO: Docs. Link to Sprite#setDirection, and also spawnSprite(s) or composite sprites */
     }
 
     /** Called with the update options as the function context, one of which
@@ -2834,14 +2836,14 @@ define('plugins/sprite/track',[],function() {
      *    </pre>
      *    </dd>
      * </dl>
-     * The register and deregister functions are useful when combined with the ProximityTracker
+     * The register and deregister functions are useful when combined with the
+     * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker}
      * to track large numbers of autonomous sprites. See
      * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker.track} for
      * an example of how to set that up.
      * @constructor module:plugins/sprite/track.Track
      */
     function Track() {
-        /* TODO: Docs - link to ProximityTracker */
     }
 
     /** Called with the update options as the function context, one of which
@@ -2920,8 +2922,9 @@ define('plugins/sprite/flock',[],function() {
      * accuracy with phased updates.
      * <p>
      * Note that this plugin will not move the sprites, it only calculates velocity. To move the
-     * sprites you should add the apply-velocity plugin after this one as a commit update. In this way
-     * the sprites accurately update based on their positions at the same moment in time.
+     * sprites you should add the {@link module:plugins/sprite/apply-velocity.ApplyVelocity|apply-velocity}
+     * plugin after this one as a commit update. In this way the sprites accurately update based on
+     * their positions at the same moment in time.
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'flock'}]</code>.
@@ -2929,8 +2932,9 @@ define('plugins/sprite/flock',[],function() {
      * Alongside the name, you can pass the following options
      * <dl>
      *  <dt>tracker</dt><dd>Pass a tracker object here. See ProximityTracker. Sprites that flock
-     *  with the same tracker will belong to the same flock. You should also apply the track
-     *  plugin to track the sprite in the proximity tracker.</dd>
+     *  with the same tracker will belong to the same flock. You should also apply the
+     *  {@link module:plugins/sprite/track.Track|track plugin} to track the sprite in the
+     *  {@link module:ai/proximity-tracker.ProximityTracker|proximity tracker}.</dd>
      *  <dt>flock_speed</dt><dd>In pixels/second. This is the maximum speed for any flockmate.</dd>
      *  <dt>flock_neighborhood</dt><dd>The radius that defines the influential
      *  flockmates, in pixels. Larger is generally better but slower, dependant on the tracker.</dd>
@@ -2956,10 +2960,7 @@ define('plugins/sprite/flock',[],function() {
      * @constructor module:plugins/sprite/flock.Flock
      */
     function Flock() {
-        /* TODO: Docs - link to proximity tracker */
-        /* TODO: Docs - link to apply velocity plugin */
-        /* TODO: Docs - link to track plugin. Also show an example of a complete flocked sprite with
-         * all required plugins. */
+        /* TODO: Docs - Show an example of a complete flocked sprite with all required plugins. */
         /* TODO: Add support for phased updates */
         this.xy=[0,0];
         this.xy2=[0,0];
@@ -3135,10 +3136,10 @@ define('plugins/sprite/apply-velocity',[],function() {
 
     /**
      * A sprite updater that simply takes the velocityx and velocityy properties on the sprite and
-     * applies it to the position via move. This is useful in situations where another plugin is
-     * updating valocities but those velocities depend upon the momentary positions of sprites. E.g.
-     * you have a flock update which updates velocity. In that case you would have this plugin as
-     * a commit to apply the velocity calculated by flock.
+     * applies it to the position via {@link module:sprites/sprite.Sprite#move|move}. This is useful
+     * in situations where another plugin is updating valocities but those velocities depend upon
+     * the momentary positions of sprites. E.g. you have a flock update which updates velocity.
+     * In that case you would have this plugin as a commit to apply the velocity calculated by flock.
      * <p>
      * Snaps runs all sprite updates first, then runs all sprite commits.
      * <p>
@@ -3154,7 +3155,6 @@ define('plugins/sprite/apply-velocity',[],function() {
      * @constructor module:plugins/sprite/apply-velocity.ApplyVelocity
      */
     function ApplyVelocity() {
-        /* TODO: Docs - link to sprite move method in description. */
         /* TODO: Pass collision ratio to the collision callback */
     }
 
@@ -3327,12 +3327,10 @@ function(Sprite, uid) {
      * no parameters and return a number.
      * @param {Function/Number} y The world y coordinate. If a function, it should take
      * no parameters and return a number.
-     * @param {Object} [opts] Optional parameter object. See sn.spawnSprite for sprite
-     * spawn option values.
+     * @param {Object} [opts] Optional parameter object. For a list of parameters
+     * see the opts parameter on the {@link module:sprites/sprite.Sprite|Sprite class constructor}.
      */
     GroundSprites.prototype.spawnSprite = function(defName, stateName, stateExt, x, y, opts) {
-
-        /* TODO: Docs - link to spawnSprite in opts param */
 
         opts = opts||{};
 
@@ -3688,10 +3686,9 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
      * Adds a sprite to this phaser. The phaser will reschedule the sprites
      * but cannot guarantee the first frame of update the sprite will receive.
      * @method module:plugins/ai/phasers/frame-phaser.FramePhaser#addSprite
-     * @param {Object} s The sprite to add
+     * @param {Object} s The {@link module:sprites/sprite.Sprite|sprite} to add
      */
     FramePhaser.prototype.addSprite = function(s) {
-        /* TODO: Docs - link to the sprite class */
         if (s.phaserData===undefined) {
             s.phaserData = {};
         }
@@ -3813,6 +3810,11 @@ define('plugins/camera/push-cam',[],function() {
      * </dl>
      */
     function PushCam(opts) {
+        /**
+         * The sprite that this camera is following.
+         * @type {Object}
+         * @member module:plugins/ai/camera/push-cam.PushCam#follow
+         */
         this.follow = sn.sprite(opts.follow);
         if (!this.follow) {
             throw "Camera can't follow missing sprite: "+opts.follow;
@@ -5817,7 +5819,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /**
          * Call this to bind keys to actions which you can test later on with
-         * the <code>actioning</code> method.
+         * the {@link module:snaps.Snaps#actioning|actioning} method.
          * <pre>
          * sn.bindKeys([
          *     {key:'left',  action:'left'},
@@ -5837,7 +5839,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * properties. See the description for an example.
          */
         this.bindKeys = function(keybinds) {
-            /* TODO: Docs - Link to actioning method */
             for (var i = 0; i < keybinds.length; i++) {
                 var keybind = keybinds[i];
                 _this.keyboard.bind(keybind.key, keybind.action);
@@ -5980,8 +5981,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             drawDebug();
 
             _this.lastFrameTime = _this.now;
-
-            //console.log(_this.stats.averages);
         }
 
         preloader.load(
@@ -6137,10 +6136,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @param  {Object} layer The layer to search for tiles.
          * @param  {Number} c The column, aka x position in the data.
          * @param  {Number} r the row, aka y position in the data.
-         * @return {Object} A tile, or null if the input was out of range.
+         * @return {Object} A {@link  module:map/tile.Tile|Tile}, or null if the input was out of range.
          */
         this.getTile = function(layer, c, r) {
-            /* TODO: Docs - Link to tile class */
             return this.map.getTile(layer, c, r);
         };
 
@@ -6203,7 +6201,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /**
          * Create a new camera for use in game. Creating a camera does not
-         * activate it. You need to then call <code>switchToCamera</code>.
+         * activate it. You need to then call {@link module:snaps.Snaps#switchToCamera|switchToCamera}.
          * @method module:snaps.Snaps#createCamera
          * @param  {String} name The name of the camera so that you can refer
          * to it again.
@@ -6212,7 +6210,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @return {Object} The new camera.
          */
         this.createCamera = function(name, type, opts) {
-            /* TODO: Docs - Link to switchToCamera */
             if(!_this.cameraPlugins.hasOwnProperty(type)) {
                 throw "Warning: undefined camera plugin: " + type;
             }

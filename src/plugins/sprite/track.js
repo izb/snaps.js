@@ -43,14 +43,14 @@ define(function() {
      *    </pre>
      *    </dd>
      * </dl>
-     * The register and deregister functions are useful when combined with the ProximityTracker
+     * The register and deregister functions are useful when combined with the
+     * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker}
      * to track large numbers of autonomous sprites. See
      * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker.track} for
      * an example of how to set that up.
      * @constructor module:plugins/sprite/track.Track
      */
     function Track() {
-        /* TODO: Docs - link to ProximityTracker */
     }
 
     /** Called with the update options as the function context, one of which

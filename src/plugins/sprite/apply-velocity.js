@@ -11,10 +11,10 @@ define(function() {
 
     /**
      * A sprite updater that simply takes the velocityx and velocityy properties on the sprite and
-     * applies it to the position via move. This is useful in situations where another plugin is
-     * updating valocities but those velocities depend upon the momentary positions of sprites. E.g.
-     * you have a flock update which updates velocity. In that case you would have this plugin as
-     * a commit to apply the velocity calculated by flock.
+     * applies it to the position via {@link module:sprites/sprite.Sprite#move|move}. This is useful
+     * in situations where another plugin is updating valocities but those velocities depend upon
+     * the momentary positions of sprites. E.g. you have a flock update which updates velocity.
+     * In that case you would have this plugin as a commit to apply the velocity calculated by flock.
      * <p>
      * Snaps runs all sprite updates first, then runs all sprite commits.
      * <p>
@@ -30,7 +30,6 @@ define(function() {
      * @constructor module:plugins/sprite/apply-velocity.ApplyVelocity
      */
     function ApplyVelocity() {
-        /* TODO: Docs - link to sprite move method in description. */
         /* TODO: Pass collision ratio to the collision callback */
     }
 

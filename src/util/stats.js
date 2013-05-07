@@ -13,9 +13,6 @@ define(function() {
      */
     function Stats() {
 
-        /* TODO: Docs - Go through every constructor looking for this properties that can be exposed
-         * through documentation. */
-
         this.samples = {};
         this.totals = {};
 

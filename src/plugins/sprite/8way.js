@@ -15,8 +15,8 @@ define(function() {
      * A sprite updater that sets the sprite's state extension to a compass direction
      * ('n', 'ne', 'e', 'se'...)
      * based on the direction values in the sprite. Direction updates automatically when the sprite
-     * moves but can be overridden with setDirection. The compass direction takes into account the
-     * isometric projection.
+     * moves but can be overridden with {@link module:sprites/sprite.Sprite#setDirection|setDirection}.
+     * The compass direction takes into account the isometric projection.
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.
@@ -25,7 +25,6 @@ define(function() {
      * @constructor module:plugins/sprite/8way.Face8Way
      */
     function Face8Way() {
-        /* TODO: Docs. Link to Sprite#setDirection, and also spawnSprite(s) or composite sprites */
     }
 
     /** Called with the update options as the function context, one of which

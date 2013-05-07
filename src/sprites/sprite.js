@@ -11,7 +11,7 @@ define(['util/js'], function(js) {
     var clone = js.clone;
 
     /** Creates a new sprite object. Note that you shouldn't normally call this constructor directly.
-     * Call the factory method <code>sn.spawnSprite</code> instead.
+     * Call the factory method {@link module:snaps.Snaps#spawnSprite|spawnSprite} instead.
      * <p>
      * Some parameters or options accept functions. An example of how to pass a random range into any
      * Function/Number parameters would be to bind the rnd function in util/rnd. E.g.
@@ -62,8 +62,6 @@ define(['util/js'], function(js) {
      * </dl>
      */
     function Sprite(sn, def, x, y, h, opts) {
-
-        /* TODO: Docs - link to spawnSprite */
 
         opts = opts||{};
 

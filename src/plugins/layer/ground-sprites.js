@@ -75,12 +75,10 @@ function(Sprite, uid) {
      * no parameters and return a number.
      * @param {Function/Number} y The world y coordinate. If a function, it should take
      * no parameters and return a number.
-     * @param {Object} [opts] Optional parameter object. See sn.spawnSprite for sprite
-     * spawn option values.
+     * @param {Object} [opts] Optional parameter object. For a list of parameters
+     * see the opts parameter on the {@link module:sprites/sprite.Sprite|Sprite class constructor}.
      */
     GroundSprites.prototype.spawnSprite = function(defName, stateName, stateExt, x, y, opts) {
-
-        /* TODO: Docs - link to spawnSprite in opts param */
 
         opts = opts||{};
 

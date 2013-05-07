@@ -48,10 +48,9 @@ define(function() {
      * Adds a sprite to this phaser. The phaser will reschedule the sprites
      * but cannot guarantee the first frame of update the sprite will receive.
      * @method module:plugins/ai/phasers/frame-phaser.FramePhaser#addSprite
-     * @param {Object} s The sprite to add
+     * @param {Object} s The {@link module:sprites/sprite.Sprite|sprite} to add
      */
     FramePhaser.prototype.addSprite = function(s) {
-        /* TODO: Docs - link to the sprite class */
         if (s.phaserData===undefined) {
             s.phaserData = {};
         }

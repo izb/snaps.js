@@ -17,8 +17,9 @@ define(function() {
      * accuracy with phased updates.
      * <p>
      * Note that this plugin will not move the sprites, it only calculates velocity. To move the
-     * sprites you should add the apply-velocity plugin after this one as a commit update. In this way
-     * the sprites accurately update based on their positions at the same moment in time.
+     * sprites you should add the {@link module:plugins/sprite/apply-velocity.ApplyVelocity|apply-velocity}
+     * plugin after this one as a commit update. In this way the sprites accurately update based on
+     * their positions at the same moment in time.
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'flock'}]</code>.
@@ -26,8 +27,9 @@ define(function() {
      * Alongside the name, you can pass the following options
      * <dl>
      *  <dt>tracker</dt><dd>Pass a tracker object here. See ProximityTracker. Sprites that flock
-     *  with the same tracker will belong to the same flock. You should also apply the track
-     *  plugin to track the sprite in the proximity tracker.</dd>
+     *  with the same tracker will belong to the same flock. You should also apply the
+     *  {@link module:plugins/sprite/track.Track|track plugin} to track the sprite in the
+     *  {@link module:ai/proximity-tracker.ProximityTracker|proximity tracker}.</dd>
      *  <dt>flock_speed</dt><dd>In pixels/second. This is the maximum speed for any flockmate.</dd>
      *  <dt>flock_neighborhood</dt><dd>The radius that defines the influential
      *  flockmates, in pixels. Larger is generally better but slower, dependant on the tracker.</dd>
@@ -53,10 +55,7 @@ define(function() {
      * @constructor module:plugins/sprite/flock.Flock
      */
     function Flock() {
-        /* TODO: Docs - link to proximity tracker */
-        /* TODO: Docs - link to apply velocity plugin */
-        /* TODO: Docs - link to track plugin. Also show an example of a complete flocked sprite with
-         * all required plugins. */
+        /* TODO: Docs - Show an example of a complete flocked sprite with all required plugins. */
         /* TODO: Add support for phased updates */
         this.xy=[0,0];
         this.xy2=[0,0];

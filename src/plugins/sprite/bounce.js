@@ -29,8 +29,6 @@ define(function() {
 
     }
 
-    /* TODO: All docs. Search for {Bool} and make it Boolean */
-
     /** Called with the sprite as the function context.
      * @method module:plugins/sprite/bounce.Bounce#update
      * @private

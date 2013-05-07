@@ -323,7 +323,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /**
          * Call this to bind keys to actions which you can test later on with
-         * the <code>actioning</code> method.
+         * the {@link module:snaps.Snaps#actioning|actioning} method.
          * <pre>
          * sn.bindKeys([
          *     {key:'left',  action:'left'},
@@ -343,7 +343,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * properties. See the description for an example.
          */
         this.bindKeys = function(keybinds) {
-            /* TODO: Docs - Link to actioning method */
             for (var i = 0; i < keybinds.length; i++) {
                 var keybind = keybinds[i];
                 _this.keyboard.bind(keybind.key, keybind.action);
@@ -486,8 +485,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             drawDebug();
 
             _this.lastFrameTime = _this.now;
-
-            //console.log(_this.stats.averages);
         }
 
         preloader.load(
@@ -643,10 +640,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @param  {Object} layer The layer to search for tiles.
          * @param  {Number} c The column, aka x position in the data.
          * @param  {Number} r the row, aka y position in the data.
-         * @return {Object} A tile, or null if the input was out of range.
+         * @return {Object} A {@link  module:map/tile.Tile|Tile}, or null if the input was out of range.
          */
         this.getTile = function(layer, c, r) {
-            /* TODO: Docs - Link to tile class */
             return this.map.getTile(layer, c, r);
         };
 
@@ -709,7 +705,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /**
          * Create a new camera for use in game. Creating a camera does not
-         * activate it. You need to then call <code>switchToCamera</code>.
+         * activate it. You need to then call {@link module:snaps.Snaps#switchToCamera|switchToCamera}.
          * @method module:snaps.Snaps#createCamera
          * @param  {String} name The name of the camera so that you can refer
          * to it again.
@@ -718,7 +714,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @return {Object} The new camera.
          */
         this.createCamera = function(name, type, opts) {
-            /* TODO: Docs - Link to switchToCamera */
             if(!_this.cameraPlugins.hasOwnProperty(type)) {
                 throw "Warning: undefined camera plugin: " + type;
             }

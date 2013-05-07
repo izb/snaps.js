@@ -30,7 +30,19 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         this.hitTests = hitTests;
         this.maxXOverdraw = 0;
         this.maxYOverdraw = 0;
+
+        /**
+         * The canvas width
+         * @type {Number}
+         * @member module:map/staggered-isometric.StaggeredIsometric#clientWidth
+         */
         this.clientWidth = clientWidth;
+
+        /**
+         * The canvas height
+         * @type {Number}
+         * @member module:map/staggered-isometric.StaggeredIsometric#clientHeight
+         */
         this.clientHeight = clientHeight;
         this.hideBuildings = false;
 

@@ -12,14 +12,15 @@ define(function() {
     /**
      * A sprite updater that animates one or more properties on the sprite. Properties are modified
      * directly, so handle with care. Be aware that property updates on things such as position will bypass
-     * the automatic direction setting you'd get if you had called Sprite#move.
+     * the automatic direction setting you'd get if you had called {@link module:sprites/sprite.Sprite#move|move}
+     * on your sprite.
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.
      * <p>
      * Alongside the name, you can pass the following options
      * <dl>
-     *  <dt>tween</dt><dd>The name of the tween function. See the tweens module for a full list of options.</dd>
+     *  <dt>tween</dt><dd>The name of the tween function. See the {@link animate/tween|tweens} module for a full list of options.</dd>
      *  <dt>props</dt><dd>An object describing the properties to adjust. Values are relative adjustments, not
      *     absolute values. E.g.
      *     <pre>
@@ -37,8 +38,6 @@ define(function() {
      * @constructor module:plugins/sprite/animate.Animate
      */
     function Animate() {
-        /* TODO: Docs - link to tweens functions. */
-        /* TODO: Docs - link to sprite move function. */
     }
 
 

@@ -21,6 +21,11 @@ define(function() {
      * </dl>
      */
     function PushCam(opts) {
+        /**
+         * The sprite that this camera is following.
+         * @type {Object}
+         * @member module:plugins/ai/camera/push-cam.PushCam#follow
+         */
         this.follow = sn.sprite(opts.follow);
         if (!this.follow) {
             throw "Camera can't follow missing sprite: "+opts.follow;
