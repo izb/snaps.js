@@ -13,7 +13,7 @@ define(function() {
 
     /** Constructs a camera that follows a sprite. Called a push cam because the player seems to
      * "push" the camera around. Note that this should not be constructed directly, but rather
-     * via the plugin factory method <code>sn.createCamera('pushcam')</code> on the engine.
+     * via the plugin factory method {@link module:snaps.Snaps#createCamera|createCamera} on the engine.
      * @constructor module:plugins/ai/camera/push-cam.PushCam
      * @param {Object} [opts] An object with assorted options set in it.
      * <dl>

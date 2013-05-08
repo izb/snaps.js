@@ -1,5 +1,5 @@
 /*global define*/
-define(function() {
+define(['util/uid'], function(uid) {
 
     'use strict';
 
@@ -24,12 +24,19 @@ define(function() {
      * @param {Number} properties Properties for this tile instance, which override
      * the defaults.
      */
-    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties) {
+    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties, tid) {
         this.img = img;
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
+
+        /**
+         * Every tile has a unique ID
+         * @member module:map/tile.Tile#id
+         * @type {Number}
+         */
+        this.id = uid();
         this.xoverdraw = xoverdraw;
         this.yoverdraw = yoverdraw;
         this.defaultProps = defaultProps||{};
@@ -52,7 +59,7 @@ define(function() {
             );
     };
 
-    /** Inserts a new layer into the layer list.
+    /** Gets a property value from the tile.
      * @method module:map/tile.Tile#getProperty
      * @param {String} prop The property to get
      * @return {String} The string value or undefined

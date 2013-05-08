@@ -21,8 +21,8 @@ define(function() {
     }
 
 
-    /** This constructor is curried when exposed through the engine ref,
-     * so construct it without the first parameter, e.g.
+    /** This constructor is curried when exposed through {@link module:snaps.Snaps#PathFinder|the engine ref},
+     * which is the prefered way to create it. This means construct it without the first parameter, e.g.
      * new sn.PathFinder(solid, diagonals, ...);
      * @constructor module:ai/pathfinder.PathFinder
      * @param {Function} [solid] A function that determines if a position is

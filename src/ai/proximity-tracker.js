@@ -14,8 +14,8 @@ define(function() {
      * {@link module:ai/proximity-tracker.ProximityTracker|track} for implementation
      * details.
      * <p>
-     * This constructor is curried when exposed through the engine ref,
-     * so construct it without the first parameter, e.g.
+     * This constructor is curried when exposed through {@link module:snaps.Snaps#ProximityTracker|the engine ref},
+     * which is the prefered way to create it. This means construct it without the first parameter, e.g.
      * new sn.ProximityTracker(myCellSize);
      * @constructor module:ai/proximity-tracker.ProximityTracker
      * @param {Number} cellSize The width of each cell in the regular grid

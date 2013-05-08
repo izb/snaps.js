@@ -13,7 +13,7 @@ define(function() {
      * A layer that provides user interface features in the form of mouse or touch
      * responsive widgets.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.addLayer('ui')</code> on the engine.
+     * {@link module:snaps.Snaps#addLayer|addLayer} on the engine.
      * @constructor module:plugins/layer/ui.UI
      * @param {String} layerName A name for the layer. You might see it later on in
      * error messages.

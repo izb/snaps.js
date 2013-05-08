@@ -17,7 +17,7 @@ function(traceProp, localScan) {
     /**
      * Creates a tracer that traces a line along a path to detect collision.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.createCollider('line-trace')</code> on the engine.
+     * {@link module:snaps.Snaps#createCollider|createCollider} on the engine.
      * @constructor module:plugins/collision/sprite-with-map/line-trace.LineTrace
      * @param {Object} opts An object with assorted options set in it.
      * <dl>

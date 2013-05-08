@@ -21,6 +21,8 @@ define(function() {
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>commit:[{name:'apply-velocity'}]</code>.
      * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
+     * <p>
      * Alongside the name, you can pass the following options
      * <dl>
      *  <dt>on_collision</dt><dd>An optional function that is called if the sprite could not

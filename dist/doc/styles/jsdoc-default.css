@@ -39,8 +39,9 @@ header
 }
 
 #main {
-    float: left;
     margin-right: 80px;
+    padding: 20px;
+    display: table-cell;
 }
 
 section
@@ -50,7 +51,6 @@ section
 	background-color: #fff;
 	padding: 12px 24px;
     border-bottom: 1px solid #ccc;
-    margin-right: 270px;
 }
 
 .variation {
@@ -65,15 +65,18 @@ section
 	font-weight: lighter;
 }
 
+.topdiv {
+    display: table;
+    table-layout: fixed;
+}
+
 nav
 {
-	display: block;
-	float: right;
-    margin-left: -345px;
     margin-top: 28px;
     width: 335px;
-    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
     padding-left: 9px;
+    display: table-cell;
 }
 
 nav ul {

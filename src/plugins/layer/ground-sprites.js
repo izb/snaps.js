@@ -16,7 +16,7 @@ function(Sprite, uid) {
      * A layer that holds normally flat sprites that are intended to be drawn after the
      * ground, but before the buildings and other sprites.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.addLayer('ground-sprites')</code> on the engine.
+     * {@link module:snaps.Snaps#addLayer|addLayer} on the engine.
      * @constructor module:plugins/layer/ground-sprites.GroundSprites
      * @param {String} layerName A name for the layer. You might see it later on in
      * error messages.

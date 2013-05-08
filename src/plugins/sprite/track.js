@@ -15,6 +15,8 @@ define(function() {
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'track'}]</code>.
      * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
+     * <p>
      * Alongside the name, you can pass the following options
      * <dl>
      *  <dt>fn</dt><dd>A function to call whenever the position changes. If the position hasn't

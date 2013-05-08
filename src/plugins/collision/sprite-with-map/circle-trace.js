@@ -19,7 +19,7 @@ function(traceProp, midPtEllipse, localScan) {
      * Creates a circle tracer that traces a circle (An on-screen elipse in isometric-land)
      * along a path to detect collision.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.createCollider('circle-trace')</code> on the engine.
+     * {@link module:snaps.Snaps#createCollider|createCollider} on the engine.
      * @constructor module:plugins/collision/sprite-with-map/circle-trace.CircleTrace
      * @param {Object} opts An object with assorted options set in it.
      * <dl>

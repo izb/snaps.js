@@ -1720,7 +1720,7 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 });
 
 /*global define*/
-define('map/tile',[],function() {
+define('map/tile',['util/uid'], function(uid) {
 
     
 
@@ -1745,12 +1745,19 @@ define('map/tile',[],function() {
      * @param {Number} properties Properties for this tile instance, which override
      * the defaults.
      */
-    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties) {
+    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties, tid) {
         this.img = img;
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
+
+        /**
+         * Every tile has a unique ID
+         * @member module:map/tile.Tile#id
+         * @type {Number}
+         */
+        this.id = uid();
         this.xoverdraw = xoverdraw;
         this.yoverdraw = yoverdraw;
         this.defaultProps = defaultProps||{};
@@ -1773,7 +1780,7 @@ define('map/tile',[],function() {
             );
     };
 
-    /** Inserts a new layer into the layer list.
+    /** Gets a property value from the tile.
      * @method module:map/tile.Tile#getProperty
      * @param {String} prop The property to get
      * @return {String} The string value or undefined
@@ -2447,6 +2454,8 @@ define('plugins/sprite/bounce',[],function() {
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'bounce'}]</code>.
      * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
+     * <p>
      * Alongside the name, you can pass the following options
      * <dl>
      *  <dt>bounce_height</dt><dd>How high it should bounce in pixels.</dd>
@@ -2522,6 +2531,8 @@ define('plugins/sprite/follow-mouse',[],function() {
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'follow_mouse'}]</code>.
      * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
+     * <p>
      * This plugin takes no options.
      * @constructor module:plugins/sprite/follow-mouse.FollowMouse
      */
@@ -2591,6 +2602,8 @@ define('plugins/sprite/animate',[],function() {
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.
+     * <p>
+     * See The <code>opts</code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
      * <p>
      * Alongside the name, you can pass the following options
      * <dl>
@@ -2703,6 +2716,8 @@ define('plugins/sprite/8way',[],function() {
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.
      * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
+     * <p>
      * This plugin takes no options.
      * @constructor module:plugins/sprite/8way.Face8Way
      */
@@ -2807,6 +2822,8 @@ define('plugins/sprite/track',[],function() {
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'track'}]</code>.
+     * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
      * <p>
      * Alongside the name, you can pass the following options
      * <dl>
@@ -2928,6 +2945,8 @@ define('plugins/sprite/flock',[],function() {
      * <p>
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'flock'}]</code>.
+     * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
      * <p>
      * Alongside the name, you can pass the following options
      * <dl>
@@ -3146,6 +3165,8 @@ define('plugins/sprite/apply-velocity',[],function() {
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>commit:[{name:'apply-velocity'}]</code>.
      * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
+     * <p>
      * Alongside the name, you can pass the following options
      * <dl>
      *  <dt>on_collision</dt><dd>An optional function that is called if the sprite could not
@@ -3215,7 +3236,7 @@ define('plugins/layer/ui',[],function() {
      * A layer that provides user interface features in the form of mouse or touch
      * responsive widgets.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.addLayer('ui')</code> on the engine.
+     * {@link module:snaps.Snaps#addLayer|addLayer} on the engine.
      * @constructor module:plugins/layer/ui.UI
      * @param {String} layerName A name for the layer. You might see it later on in
      * error messages.
@@ -3268,7 +3289,7 @@ function(Sprite, uid) {
      * A layer that holds normally flat sprites that are intended to be drawn after the
      * ground, but before the buildings and other sprites.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.addLayer('ground-sprites')</code> on the engine.
+     * {@link module:snaps.Snaps#addLayer|addLayer} on the engine.
      * @constructor module:plugins/layer/ground-sprites.GroundSprites
      * @param {String} layerName A name for the layer. You might see it later on in
      * error messages.
@@ -3380,7 +3401,7 @@ define('plugins/fx/particles',[
 
     /** Spawns particles in a composite sprite.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.fx('particles')</code> on the engine.
+     * {@link module:snaps.Snaps#fx|fx} on the engine.
      * @constructor module:plugins/fx/particles.Particles
      * @param {Object} opts Options, in the following format
      * <dl>
@@ -3513,7 +3534,7 @@ define('plugins/ai/phasers/time-phaser',[],function() {
 
     /** Construct a phaser that performs a set number of sprite updates per second. Note that this
      * should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.createPhaser('time-phaser')</code> on the engine.
+     * {@link module:snaps.Snaps#createPhaser|createPhaser} on the engine.
      * @constructor module:plugins/ai/phasers/time-phaser.TimePhaser
      * @param {String} id A unique ID
      * @param {Object} [opts] An object with assorted options set in it.
@@ -3649,7 +3670,7 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
 
     /** Construct a phaser that performs a set number of sprite updates per frame. Note that this
      * should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.createPhaser('frame-phaser')</code> on the engine.
+     * {@link module:snaps.Snaps#createPhaser|createPhaser} on the engine.
      * @constructor module:plugins/ai/phasers/frame-phaser.FramePhaser
      * @param {String} id A unique ID
      * @param {Object} [opts] An object with assorted options set in it.
@@ -3802,7 +3823,7 @@ define('plugins/camera/push-cam',[],function() {
 
     /** Constructs a camera that follows a sprite. Called a push cam because the player seems to
      * "push" the camera around. Note that this should not be constructed directly, but rather
-     * via the plugin factory method <code>sn.createCamera('pushcam')</code> on the engine.
+     * via the plugin factory method {@link module:snaps.Snaps#createCamera|createCamera} on the engine.
      * @constructor module:plugins/ai/camera/push-cam.PushCam
      * @param {Object} [opts] An object with assorted options set in it.
      * <dl>
@@ -4088,7 +4109,7 @@ function(traceProp, localScan) {
     /**
      * Creates a tracer that traces a line along a path to detect collision.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.createCollider('line-trace')</code> on the engine.
+     * {@link module:snaps.Snaps#createCollider|createCollider} on the engine.
      * @constructor module:plugins/collision/sprite-with-map/line-trace.LineTrace
      * @param {Object} opts An object with assorted options set in it.
      * <dl>
@@ -4255,7 +4276,7 @@ function(traceProp, midPtEllipse, localScan) {
      * Creates a circle tracer that traces a circle (An on-screen elipse in isometric-land)
      * along a path to detect collision.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.createCollider('circle-trace')</code> on the engine.
+     * {@link module:snaps.Snaps#createCollider|createCollider} on the engine.
      * @constructor module:plugins/collision/sprite-with-map/circle-trace.CircleTrace
      * @param {Object} opts An object with assorted options set in it.
      * <dl>
@@ -4783,8 +4804,8 @@ define('ai/proximity-tracker',[],function() {
      * {@link module:ai/proximity-tracker.ProximityTracker|track} for implementation
      * details.
      * <p>
-     * This constructor is curried when exposed through the engine ref,
-     * so construct it without the first parameter, e.g.
+     * This constructor is curried when exposed through {@link module:snaps.Snaps#ProximityTracker|the engine ref},
+     * which is the prefered way to create it. This means construct it without the first parameter, e.g.
      * new sn.ProximityTracker(myCellSize);
      * @constructor module:ai/proximity-tracker.ProximityTracker
      * @param {Number} cellSize The width of each cell in the regular grid
@@ -5068,8 +5089,8 @@ define('ai/pathfinder',[],function() {
     }
 
 
-    /** This constructor is curried when exposed through the engine ref,
-     * so construct it without the first parameter, e.g.
+    /** This constructor is curried when exposed through {@link module:snaps.Snaps#PathFinder|the engine ref},
+     * which is the prefered way to create it. This means construct it without the first parameter, e.g.
      * new sn.PathFinder(solid, diagonals, ...);
      * @constructor module:ai/pathfinder.PathFinder
      * @param {Function} [solid] A function that determines if a position is

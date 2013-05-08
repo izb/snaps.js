@@ -16,6 +16,8 @@ define(function() {
      * Note that this should not be constructed directly, but rather via the updates or commit
      * property in your spawnSprite data, e.g. <code>update:[{name:'follow_mouse'}]</code>.
      * <p>
+     * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
+     * <p>
      * This plugin takes no options.
      * @constructor module:plugins/sprite/follow-mouse.FollowMouse
      */

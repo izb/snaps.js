@@ -11,7 +11,7 @@ define(function() {
 
     /** Construct a phaser that performs a set number of sprite updates per frame. Note that this
      * should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.createPhaser('frame-phaser')</code> on the engine.
+     * {@link module:snaps.Snaps#createPhaser|createPhaser} on the engine.
      * @constructor module:plugins/ai/phasers/frame-phaser.FramePhaser
      * @param {String} id A unique ID
      * @param {Object} [opts] An object with assorted options set in it.

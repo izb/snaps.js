@@ -17,7 +17,7 @@ define([
 
     /** Spawns particles in a composite sprite.
      * Note that this should not be constructed directly, but rather via the plugin factory method
-     * <code>sn.fx('particles')</code> on the engine.
+     * {@link module:snaps.Snaps#fx|fx} on the engine.
      * @constructor module:plugins/fx/particles.Particles
      * @param {Object} opts Options, in the following format
      * <dl>
