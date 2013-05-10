@@ -73,9 +73,6 @@ define(function() {
             return 1;
         };
 
-        /* TODO: Dynamic cost based on proximity of solid tiles. I.e. walk diagonally on open ground,
-         * but orthogonally around the edges of buildings. */
-
         if(map.isStaggered()) {
 
             /* Staggered isometric map */
