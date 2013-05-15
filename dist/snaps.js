@@ -2,7 +2,7 @@
 /*global define*/
 define('sprites/spritedef',[],function() {
 
-    
+
 
     /**
      * @module sprites/spritedef
@@ -102,7 +102,7 @@ define('sprites/spritedef',[],function() {
 /*global define*/
 define('util/js',[],function() {
 
-    
+
 
     /**
      * @module util/js
@@ -165,7 +165,7 @@ define('sprites/sprite',['util/js'], function(js) {
      * @module sprites/sprite
      */
 
-    
+
 
     var copyProps = js.copyProps;
     var clone = js.clone;
@@ -744,7 +744,7 @@ define('sprites/sprite',['util/js'], function(js) {
 /*global define*/
 define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
 
-    
+
 
     /**
      * @module sprites/composite
@@ -934,7 +934,7 @@ define('input/keyboard',[],function() {
      * @module input/keyboard
      */
 
-    
+
 
     /** Creates a keyboard input handler and starts listening for
      * keyboard events. You don't normally need to create this since the engine
@@ -1122,7 +1122,7 @@ define('input/mouse',[],function() {
      * @module input/mouse
      */
 
-    
+
 
     /** Creates a mouse input handler and starts listening for
      * mouse events. You don't normally need to create this since the engine
@@ -1173,7 +1173,7 @@ define('input/mouse',[],function() {
 /*global define*/
 define('util/preload',[],function() {
 
-    
+
 
     /**
      * @module util/preload
@@ -1260,7 +1260,7 @@ define('util/preload',[],function() {
 /*global define*/
 define('util/rnd',[],function() {
 
-    
+
 
     /**
      * @module util/rnd
@@ -1361,7 +1361,7 @@ define('util/rnd',[],function() {
 /*global define*/
 define('util/bitmap',[],function() {
 
-    
+
 
     /**
      * @module util/bitmap
@@ -1403,7 +1403,7 @@ define('util/bitmap',[],function() {
 /*global define*/
 define('util/debug',[],function() {
 
-    
+
 
     /**
      * @module util/debug
@@ -1429,7 +1429,7 @@ define('util/debug',[],function() {
 /*global define*/
 define('util/minheap',[],function() {
 
-    
+
 
     /**
      * @module util/minheap
@@ -1583,7 +1583,7 @@ define('util/minheap',[],function() {
 /*global define*/
 define('util/stats',[],function() {
 
-    
+
 
     /**
      * @module util/stats
@@ -1641,7 +1641,7 @@ define('util/stats',[],function() {
 /*global define*/
 define('util/uid',[],function() {
 
-    
+
 
     /**
      * @module util/uid
@@ -1663,7 +1663,7 @@ define('util/uid',[],function() {
 /*global define*/
 define('util/url',[],function() {
 
-    
+
 
     /**
      * @module util/url
@@ -1698,7 +1698,7 @@ define('util/all',[
     'util/url'],
 function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 
-    
+
 
     /**
      * @module util/all
@@ -1722,7 +1722,7 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 /*global define*/
 define('map/tile',['util/uid'], function(uid) {
 
-    
+
 
     /**
      * @module map/tile
@@ -1804,7 +1804,7 @@ define('map/tile',['util/uid'], function(uid) {
 /*global define*/
 define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitmap, debug, js) {
 
-    
+
 
     /**
      * @module map/staggered-isometric
@@ -2439,7 +2439,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 /*global define*/
 define('plugins/sprite/bounce',[],function() {
 
-    
+
 
     var sn;
 
@@ -2516,7 +2516,7 @@ define('plugins/sprite/bounce',[],function() {
 /*global define*/
 define('plugins/sprite/follow-mouse',[],function() {
 
-    
+
 
     var pos = [0,0];
     var sn;
@@ -2586,7 +2586,7 @@ define('plugins/sprite/follow-mouse',[],function() {
 /*global define*/
 define('plugins/sprite/animate',[],function() {
 
-    
+
 
     var sn;
 
@@ -2696,7 +2696,7 @@ define('plugins/sprite/animate',[],function() {
 /*global define*/
 define('plugins/sprite/8way',[],function() {
 
-    
+
 
     var sn;
 
@@ -2809,7 +2809,7 @@ define('plugins/sprite/8way',[],function() {
 /*global define*/
 define('plugins/sprite/track',[],function() {
 
-    
+
 
     var sn;
 
@@ -2877,6 +2877,9 @@ define('plugins/sprite/track',[],function() {
      */
     Track.prototype.update = function(now, phaseOn) {
 
+        /* TODO: Docs - Check all returns have types. */
+        /* TODO: Docs - Check all multiple types in parameters are documented right. I.e. Function/Number ones. */
+
         var s = this.sprite;
 
         if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
@@ -2923,7 +2926,7 @@ define('plugins/sprite/track',[],function() {
 /*global define*/
 define('plugins/sprite/flock',[],function() {
 
-    
+
 
     var sn;
 
@@ -3145,7 +3148,7 @@ define('plugins/sprite/flock',[],function() {
 /*global define*/
 define('plugins/sprite/apply-velocity',[],function() {
 
-    
+
 
     var sn;
 
@@ -3224,7 +3227,7 @@ define('plugins/sprite/apply-velocity',[],function() {
 /*global define*/
 define('plugins/layer/ui',[],function() {
 
-    
+
 
     /**
      * @module plugins/layer/ui
@@ -3277,7 +3280,7 @@ define('plugins/layer/ground-sprites',['sprites/sprite',
 
 function(Sprite, uid) {
 
-    
+
 
     /**
      * @module plugins/layer/ground-sprites
@@ -3389,7 +3392,7 @@ define('plugins/fx/particles',[
     'util/rnd'
 ], function(Sprite, Composite, utilRnd) {
 
-    
+
 
     /**
      * @module plugins/fx/particles
@@ -3524,7 +3527,7 @@ define('plugins/fx/particles',[
 /*global define*/
 define('plugins/ai/phasers/time-phaser',[],function() {
 
-    
+
 
     /**
      * @module plugins/ai/phasers/time-phaser
@@ -3660,7 +3663,7 @@ define('plugins/ai/phasers/time-phaser',[],function() {
 /*global define*/
 define('plugins/ai/phasers/frame-phaser',[],function() {
 
-    
+
 
     /**
      * @module plugins/ai/phasers/frame-phaser
@@ -3811,7 +3814,7 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
 /*global define*/
 define('plugins/camera/push-cam',[],function() {
 
-    
+
 
     /* TODO: Consistency: camera vs cameras */
 
@@ -3861,7 +3864,7 @@ define('plugins/camera/push-cam',[],function() {
 /*global define*/
 define('plugins/collision/lib/prop-scanner',[],function() {
 
-    
+
 
     /**
      * @module plugins/collision/lib/prop-scanner
@@ -4019,7 +4022,7 @@ define('plugins/collision/lib/prop-scanner',[],function() {
 /*global define*/
 define('plugins/collision/lib/local-scanner',[],function() {
 
-    
+
 
     /**
      * @module plugins/collision/lib/local-scanner
@@ -4096,7 +4099,7 @@ define('plugins/collision/sprite-with-map/line-trace',[
     'plugins/collision/lib/local-scanner'],
 function(traceProp, localScan) {
 
-    
+
 
     var sn;
 
@@ -4262,7 +4265,7 @@ define('plugins/collision/sprite-with-map/circle-trace',[
     'plugins/collision/lib/local-scanner'],
 function(traceProp, midPtEllipse, localScan) {
 
-    
+
 
     /**
      * @module plugins/collision/sprite-with-map/circle-trace
@@ -4462,7 +4465,7 @@ define('plugins/default-plugins',[
     ],
 function() {
 
-    
+
 
     /**
      * @module plugins/default-plugins
@@ -4482,7 +4485,7 @@ function() {
 /*global define*/
 define('animate/tween',[],function() {
 
-    
+
 
     /* Via http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm */
 
@@ -5070,7 +5073,7 @@ define('ai/proximity-tracker',[],function() {
 
 define('ai/pathfinder',[],function() {
 
-    
+
 
     /**
      * @module ai/pathfinder
@@ -5437,7 +5440,7 @@ define('ai/pathfinder',[],function() {
 /*global define*/
 define('polyfills/requestAnimationFrame',[],function() {
 
-    
+
 
     /**
      * @module polyfills/requestAnimationFrame
@@ -5484,7 +5487,7 @@ define('polyfills/bind',[],function() {
 
     /* https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind */
 
-    
+
 
     /**
      * @module polyfills/bind
@@ -5543,7 +5546,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
      * TODO: https://github.com/izb/snaps.js/wiki/Todo
      */
 
-    
+
 
 
     /**

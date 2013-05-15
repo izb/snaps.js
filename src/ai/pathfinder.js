@@ -209,13 +209,20 @@ define(function() {
      * @param {Number} span The number of values in nesw per direction
      * @return {Array} The transformed route
      */
-    var transformRoute = function(route, nesw, span) {
+    var transformRoute = function(route, nesw, span, widen) {
         var map = this.sn.map;
         var newroute = [];
+
+        widen = !!widen;
 
         /* In nesw:
          * 0   1   2   3   4   5   6   7
          * n  ne   e  se   s  sw   w  nw  */
+
+        var visited = {};
+        for (var i = route.length - 2; i >= 0; i-=2) {
+            visited[] = true;
+        }
 
         if(map.isStaggered()) {
             /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look

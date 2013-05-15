@@ -13,6 +13,7 @@ define(function() {
      * @param max Highest possible value
      */
     var rnd = function(min,max) {
+        /* TODO: Docs - Check all params everywhere have types. */
         return min+Math.random()*(max-min+1)|0;
     };
 
