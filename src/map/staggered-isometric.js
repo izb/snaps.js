@@ -193,8 +193,11 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             ts.yspan = Math.floor(ts.imageheight / ts.tileheight);
         }
 
+        this.columns = this.rows = 0;
+
         for (i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
+            this.columns = Math.max(this.columns, l.width);
             l.rows = [];
             var row = [];
             for (j = 0; j < l.data.length; j++) {
@@ -238,6 +241,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
                 if (row.length>= l.width) {
                     l.rows.push(row);
+                    this.rows = Math.max(this.rows, row.length);
                     row = [];
                 }
             }

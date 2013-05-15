@@ -2,7 +2,7 @@
 /*global define*/
 define('sprites/spritedef',[],function() {
 
-
+    
 
     /**
      * @module sprites/spritedef
@@ -102,7 +102,7 @@ define('sprites/spritedef',[],function() {
 /*global define*/
 define('util/js',[],function() {
 
-
+    
 
     /**
      * @module util/js
@@ -165,7 +165,7 @@ define('sprites/sprite',['util/js'], function(js) {
      * @module sprites/sprite
      */
 
-
+    
 
     var copyProps = js.copyProps;
     var clone = js.clone;
@@ -744,7 +744,7 @@ define('sprites/sprite',['util/js'], function(js) {
 /*global define*/
 define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
 
-
+    
 
     /**
      * @module sprites/composite
@@ -934,7 +934,7 @@ define('input/keyboard',[],function() {
      * @module input/keyboard
      */
 
-
+    
 
     /** Creates a keyboard input handler and starts listening for
      * keyboard events. You don't normally need to create this since the engine
@@ -1122,7 +1122,7 @@ define('input/mouse',[],function() {
      * @module input/mouse
      */
 
-
+    
 
     /** Creates a mouse input handler and starts listening for
      * mouse events. You don't normally need to create this since the engine
@@ -1173,7 +1173,7 @@ define('input/mouse',[],function() {
 /*global define*/
 define('util/preload',[],function() {
 
-
+    
 
     /**
      * @module util/preload
@@ -1260,7 +1260,7 @@ define('util/preload',[],function() {
 /*global define*/
 define('util/rnd',[],function() {
 
-
+    
 
     /**
      * @module util/rnd
@@ -1272,6 +1272,7 @@ define('util/rnd',[],function() {
      * @param max Highest possible value
      */
     var rnd = function(min,max) {
+        /* TODO: Docs - Check all params everywhere have types. */
         return min+Math.random()*(max-min+1)|0;
     };
 
@@ -1361,7 +1362,7 @@ define('util/rnd',[],function() {
 /*global define*/
 define('util/bitmap',[],function() {
 
-
+    
 
     /**
      * @module util/bitmap
@@ -1403,7 +1404,7 @@ define('util/bitmap',[],function() {
 /*global define*/
 define('util/debug',[],function() {
 
-
+    
 
     /**
      * @module util/debug
@@ -1429,7 +1430,7 @@ define('util/debug',[],function() {
 /*global define*/
 define('util/minheap',[],function() {
 
-
+    
 
     /**
      * @module util/minheap
@@ -1583,7 +1584,7 @@ define('util/minheap',[],function() {
 /*global define*/
 define('util/stats',[],function() {
 
-
+    
 
     /**
      * @module util/stats
@@ -1641,7 +1642,7 @@ define('util/stats',[],function() {
 /*global define*/
 define('util/uid',[],function() {
 
-
+    
 
     /**
      * @module util/uid
@@ -1663,7 +1664,7 @@ define('util/uid',[],function() {
 /*global define*/
 define('util/url',[],function() {
 
-
+    
 
     /**
      * @module util/url
@@ -1698,7 +1699,7 @@ define('util/all',[
     'util/url'],
 function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 
-
+    
 
     /**
      * @module util/all
@@ -1722,7 +1723,7 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 /*global define*/
 define('map/tile',['util/uid'], function(uid) {
 
-
+    
 
     /**
      * @module map/tile
@@ -1745,19 +1746,12 @@ define('map/tile',['util/uid'], function(uid) {
      * @param {Number} properties Properties for this tile instance, which override
      * the defaults.
      */
-    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties, tid) {
+    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties) {
         this.img = img;
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
-
-        /**
-         * Every tile has a unique ID
-         * @member module:map/tile.Tile#id
-         * @type {Number}
-         */
-        this.id = uid();
         this.xoverdraw = xoverdraw;
         this.yoverdraw = yoverdraw;
         this.defaultProps = defaultProps||{};
@@ -1804,7 +1798,7 @@ define('map/tile',['util/uid'], function(uid) {
 /*global define*/
 define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitmap, debug, js) {
 
-
+    
 
     /**
      * @module map/staggered-isometric
@@ -1996,8 +1990,11 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
             ts.yspan = Math.floor(ts.imageheight / ts.tileheight);
         }
 
+        this.columns = this.rows = 0;
+
         for (i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
+            this.columns = Math.max(this.columns, l.width);
             l.rows = [];
             var row = [];
             for (j = 0; j < l.data.length; j++) {
@@ -2041,6 +2038,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
                 if (row.length>= l.width) {
                     l.rows.push(row);
+                    this.rows = Math.max(this.rows, row.length);
                     row = [];
                 }
             }
@@ -2439,7 +2437,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 /*global define*/
 define('plugins/sprite/bounce',[],function() {
 
-
+    
 
     var sn;
 
@@ -2516,7 +2514,7 @@ define('plugins/sprite/bounce',[],function() {
 /*global define*/
 define('plugins/sprite/follow-mouse',[],function() {
 
-
+    
 
     var pos = [0,0];
     var sn;
@@ -2586,7 +2584,7 @@ define('plugins/sprite/follow-mouse',[],function() {
 /*global define*/
 define('plugins/sprite/animate',[],function() {
 
-
+    
 
     var sn;
 
@@ -2696,7 +2694,7 @@ define('plugins/sprite/animate',[],function() {
 /*global define*/
 define('plugins/sprite/8way',[],function() {
 
-
+    
 
     var sn;
 
@@ -2809,7 +2807,7 @@ define('plugins/sprite/8way',[],function() {
 /*global define*/
 define('plugins/sprite/track',[],function() {
 
-
+    
 
     var sn;
 
@@ -2877,9 +2875,6 @@ define('plugins/sprite/track',[],function() {
      */
     Track.prototype.update = function(now, phaseOn) {
 
-        /* TODO: Docs - Check all returns have types. */
-        /* TODO: Docs - Check all multiple types in parameters are documented right. I.e. Function/Number ones. */
-
         var s = this.sprite;
 
         if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
@@ -2926,7 +2921,7 @@ define('plugins/sprite/track',[],function() {
 /*global define*/
 define('plugins/sprite/flock',[],function() {
 
-
+    
 
     var sn;
 
@@ -3148,7 +3143,7 @@ define('plugins/sprite/flock',[],function() {
 /*global define*/
 define('plugins/sprite/apply-velocity',[],function() {
 
-
+    
 
     var sn;
 
@@ -3227,7 +3222,7 @@ define('plugins/sprite/apply-velocity',[],function() {
 /*global define*/
 define('plugins/layer/ui',[],function() {
 
-
+    
 
     /**
      * @module plugins/layer/ui
@@ -3280,7 +3275,7 @@ define('plugins/layer/ground-sprites',['sprites/sprite',
 
 function(Sprite, uid) {
 
-
+    
 
     /**
      * @module plugins/layer/ground-sprites
@@ -3392,7 +3387,7 @@ define('plugins/fx/particles',[
     'util/rnd'
 ], function(Sprite, Composite, utilRnd) {
 
-
+    
 
     /**
      * @module plugins/fx/particles
@@ -3527,7 +3522,7 @@ define('plugins/fx/particles',[
 /*global define*/
 define('plugins/ai/phasers/time-phaser',[],function() {
 
-
+    
 
     /**
      * @module plugins/ai/phasers/time-phaser
@@ -3663,7 +3658,7 @@ define('plugins/ai/phasers/time-phaser',[],function() {
 /*global define*/
 define('plugins/ai/phasers/frame-phaser',[],function() {
 
-
+    
 
     /**
      * @module plugins/ai/phasers/frame-phaser
@@ -3814,7 +3809,7 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
 /*global define*/
 define('plugins/camera/push-cam',[],function() {
 
-
+    
 
     /* TODO: Consistency: camera vs cameras */
 
@@ -3864,7 +3859,7 @@ define('plugins/camera/push-cam',[],function() {
 /*global define*/
 define('plugins/collision/lib/prop-scanner',[],function() {
 
-
+    
 
     /**
      * @module plugins/collision/lib/prop-scanner
@@ -4022,7 +4017,7 @@ define('plugins/collision/lib/prop-scanner',[],function() {
 /*global define*/
 define('plugins/collision/lib/local-scanner',[],function() {
 
-
+    
 
     /**
      * @module plugins/collision/lib/local-scanner
@@ -4099,7 +4094,7 @@ define('plugins/collision/sprite-with-map/line-trace',[
     'plugins/collision/lib/local-scanner'],
 function(traceProp, localScan) {
 
-
+    
 
     var sn;
 
@@ -4265,7 +4260,7 @@ define('plugins/collision/sprite-with-map/circle-trace',[
     'plugins/collision/lib/local-scanner'],
 function(traceProp, midPtEllipse, localScan) {
 
-
+    
 
     /**
      * @module plugins/collision/sprite-with-map/circle-trace
@@ -4465,7 +4460,7 @@ define('plugins/default-plugins',[
     ],
 function() {
 
-
+    
 
     /**
      * @module plugins/default-plugins
@@ -4485,7 +4480,7 @@ function() {
 /*global define*/
 define('animate/tween',[],function() {
 
-
+    
 
     /* Via http://www.timotheegroleau.com/Flash/experiments/easing_function_generator.htm */
 
@@ -5073,7 +5068,7 @@ define('ai/proximity-tracker',[],function() {
 
 define('ai/pathfinder',[],function() {
 
-
+    
 
     /**
      * @module ai/pathfinder
@@ -5143,9 +5138,6 @@ define('ai/pathfinder',[],function() {
             /* TODO: Test the overriding of this. */
             return 1;
         };
-
-        /* TODO: Dynamic cost based on proximity of solid tiles. I.e. walk diagonally on open ground,
-         * but orthogonally around the edges of buildings. */
 
         if(map.isStaggered()) {
 
@@ -5281,22 +5273,59 @@ define('ai/pathfinder',[],function() {
      * @param  {Array} nesw An array of values to push for each step, arranged
      * north first, moving clockwise.
      * @param {Number} span The number of values in nesw per direction
+     * @param {Boolean} [widen=false] Widens the route by expanding the path on diagonal
+     * movements (n,s,e and w on isometric maps). Note that this modifies the passed in
+     * route array by adding new tiles onto the end as well as returning a larger
+     * set of output. The tiles in the route will no longer be usable in any sequential
+     * order.
      * @return {Array} The transformed route
      */
-    var transformRoute = function(route, nesw, span) {
+    var transformRoute = function(route, nesw, span, widen) {
         var map = this.sn.map;
+        var columns = map.columns;
         var newroute = [];
+        var newrouteext = [];
+        var i, tid;
+
+        widen = !!widen;
 
         /* In nesw:
          * 0   1   2   3   4   5   6   7
          * n  ne   e  se   s  sw   w  nw  */
 
+        if (widen) {
+            var visited = {};
+            var lastout = -1;
+            for (i = route.length - 2; i >= 0; i-=2) {
+                /* why do we calculate a tile id rather than store id's in the tile objects? because
+                 * the map can have holes which the game can treat as non-solid tiles if it wishes, and
+                 * there may be multiple tiles layered on top of each position. */
+                tid = route[1]*columns+route[0];
+                visited[tid] = 0;
+            }
+        }
+
+        var enwidenStaggered = function(nextout, tilex, tiley) {
+            if (lastout===-1) {
+                lastout = nextout;
+                return;
+            }
+
+            if (lastout===nextout) {
+                route.push(tilex, tiley-2);
+                newrouteext.push.apply(newrouteext, nesw.slice(0, span));
+            } else {
+
+            }
+        };
+
         if(map.isStaggered()) {
             /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
              * 1 pair ahead of the current pair to determine direction. */
-            for (var i = route.length - 4; i >= 0; i-=2) {
+            for (i = route.length - 4; i >= 0; i-=2) {
+                var x0 = route[i];
                 var y0 = route[i+1];
-                var dx = route[i]-route[i+2];
+                var dx = x0-route[i+2];
                 var dy = y0-route[i+3];
 
                 /* If you're browsing this code and start to feel some sort of rage when you see
@@ -5307,23 +5336,62 @@ define('ai/pathfinder',[],function() {
 
                 switch(dy) {
                     case -2:
-                        /*                            n                  */
+                        /* n */
+                        if (widen) {
+                            enwidenStaggered(0, x0, y0);
+                        }
                         newroute.push.apply(newroute, nesw.slice(0, span));
                         continue;
                     case -1:
-                        /*                                                        nw                         ne                        */
-                        newroute.push.apply(newroute, (((dx===0)!==((y0&1)!==0)))?nesw.slice(7*span, 8*span):nesw.slice(1*span, 2*span));
+                        if ((dx===0)!==((y0&1)!==0)) {
+                            /* nw */
+                            if (widen) {
+                                enwidenStaggered(7, x0, y0);
+                            }
+                            newroute.push.apply(newroute, nesw.slice(7*span, 8*span));
+                        } else {
+                            /* ne */
+                            if (widen) {
+                                enwidenStaggered(1, x0, y0);
+                            }
+                            newroute.push.apply(newroute, nesw.slice(1*span, 2*span));
+                        }
                         continue;
                     case 0:
-                        /*                                     e                          w                         */
-                        newroute.push.apply(newroute, (dx===1)?nesw.slice(2*span, 3*span):nesw.slice(6*span, 7*span));
+                        if (dx===1) {
+                            /* e */
+                            if (widen) {
+                                enwidenStaggered(2, x0, y0);
+                            }
+                            newroute.push.apply(newroute, nesw.slice(2*span, 3*span));
+                        } else {
+                            /* w */
+                            if (widen) {
+                                enwidenStaggered(6, x0, y0);
+                            }
+                            newroute.push.apply(newroute, nesw.slice(6*span, 7*span));
+                        }
                         continue;
                     case 1:
-                        /*                                                        sw                          se                       */
-                        newroute.push.apply(newroute, (((dx===0)!==((y0&1)!==0)))?nesw.slice(5*span, 6*span):nesw.slice(3*span, 4*span));
+                        if ((dx===0)!==((y0&1)!==0)) {
+                            /* sw */
+                            if (widen) {
+                                enwidenStaggered(5, x0, y0);
+                            }
+                            newroute.push.apply(newroute, nesw.slice(5*span, 6*span));
+                        } else {
+                            /* se */
+                            if (widen) {
+                                enwidenStaggered(3, x0, y0);
+                            }
+                            newroute.push.apply(newroute, nesw.slice(3*span, 4*span));
+                        }
                         continue;
                     default:
-                        /*                            s                         */
+                        /* s */
+                        if (widen) {
+                            enwidenStaggered(4, x0, y0);
+                        }
                         newroute.push.apply(newroute, nesw.slice(4*span, 5*span));
                         continue;
                 }
@@ -5331,6 +5399,10 @@ define('ai/pathfinder',[],function() {
         } else {
             throw "Unsupported map orientation in routeToDirections/routeToVectors: "+map.type;
         }
+        if (newrouteext.length>0) {
+            newroute.push.apply(newroute, newrouteext);
+        }
+
         return newroute;
     };
 
@@ -5341,9 +5413,14 @@ define('ai/pathfinder',[],function() {
      * @method module:ai/pathfinder.PathFinder#routeToVectors
      * @param {Array} route Route in the form returned by
      * {@link module:ai/pathfinder.PathFinder#route|route}.
+     * @param {Boolean} [widen=false] Widens the route by expanding the path on diagonal
+     * movements (n,s,e and w on isometric maps). Note that this modifies the passed in
+     * route array by adding new tiles onto the end as well as returning a larger
+     * set of output. The tiles in the route will no longer be usable in any sequential
+     * order.
      * @return {Array} A spanned array of 2D vectors in the form x,y,x,y,x,y...
      */
-    PathFinder.prototype.routeToVectors = function(route) {
+    PathFinder.prototype.routeToVectors = function(route, widen) {
         return transformRoute.call(this,route,
             [ 0, -1,  // n
               1, -1,  // ne
@@ -5353,7 +5430,7 @@ define('ai/pathfinder',[],function() {
              -1,  1,  // sw
              -1,  0,  // w
              -1, -1], // ne
-            2);
+            2, widen);
     };
 
     /** Takes a route generated by {@link module:ai/pathfinder.PathFinder#route|route}
@@ -5362,10 +5439,15 @@ define('ai/pathfinder',[],function() {
      * @method module:ai/pathfinder.PathFinder#routeToDirections
      * @param {Array} route Route in the form returned by
      * {@link module:ai/pathfinder.PathFinder#route|route}.
+     * @param {Boolean} [widen=false] Widens the route by expanding the path on diagonal
+     * movements (n,s,e and w on isometric maps). Note that this modifies the passed in
+     * route array by adding new tiles onto the end as well as returning a larger
+     * set of output. The tiles in the route will no longer be usable in any sequential
+     * order.
      * @return {Array} An array of directions, e.g. <code>['e', 'se', 's']</code>
      */
-    PathFinder.prototype.routeToDirections = function(route) {
-        return transformRoute.call(this,route, ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'], 1);
+    PathFinder.prototype.routeToDirections = function(route, widen) {
+        return transformRoute.call(this,route, ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'], 1, widen);
     };
 
     /** Calculates a route from one position to another
@@ -5440,7 +5522,7 @@ define('ai/pathfinder',[],function() {
 /*global define*/
 define('polyfills/requestAnimationFrame',[],function() {
 
-
+    
 
     /**
      * @module polyfills/requestAnimationFrame
@@ -5487,7 +5569,7 @@ define('polyfills/bind',[],function() {
 
     /* https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind */
 
-
+    
 
     /**
      * @module polyfills/bind
@@ -5546,7 +5628,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
      * TODO: https://github.com/izb/snaps.js/wiki/Todo
      */
 
-
+    
 
 
     /**

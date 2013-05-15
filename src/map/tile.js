@@ -24,19 +24,12 @@ define(['util/uid'], function(uid) {
      * @param {Number} properties Properties for this tile instance, which override
      * the defaults.
      */
-    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties, tid) {
+    function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties) {
         this.img = img;
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
-
-        /**
-         * Every tile has a unique ID
-         * @member module:map/tile.Tile#id
-         * @type {Number}
-         */
-        this.id = uid();
         this.xoverdraw = xoverdraw;
         this.yoverdraw = yoverdraw;
         this.defaultProps = defaultProps||{};

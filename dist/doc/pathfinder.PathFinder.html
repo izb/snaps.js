@@ -513,7 +513,7 @@ of the form x,y,x,y,x,y...
         
             
 <dt>
-    <h4 class="name" id="routeToDirections"><span class="type-signature"></span>routeToDirections<span class="signature">(route)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="routeToDirections"><span class="type-signature"></span>routeToDirections<span class="signature">(route, <span class="optional">widen</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
     
 </dt>
@@ -545,7 +545,11 @@ to set directional state extensions in sprites.
 		<th>Type</th>
 		
 		
+		<th>Argument</th>
 		
+		
+		
+		<th>Default</th>
 		
 		
 		<th class="last">Description</th>
@@ -570,11 +574,66 @@ to set directional state extensions in sprites.
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
             
+            
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">Route in the form returned by
 <a href="pathfinder.PathFinder.html#route"><code>route</code></a>.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>widen</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">Widens the route by expanding the path on diagonal
+movements (n,s,e and w on isometric maps). Note that this modifies the passed in
+route array by adding new tiles onto the end as well as returning a larger
+set of output. The tiles in the route will no longer be usable in any sequential
+order.</td>
         </tr>
 	
 	
@@ -645,7 +704,7 @@ to set directional state extensions in sprites.
         
             
 <dt>
-    <h4 class="name" id="routeToVectors"><span class="type-signature"></span>routeToVectors<span class="signature">(route)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="routeToVectors"><span class="type-signature"></span>routeToVectors<span class="signature">(route, <span class="optional">widen</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
     
 </dt>
@@ -677,7 +736,11 @@ to influence movement.
 		<th>Type</th>
 		
 		
+		<th>Argument</th>
 		
+		
+		
+		<th>Default</th>
 		
 		
 		<th class="last">Description</th>
@@ -702,11 +765,66 @@ to influence movement.
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
             
+            
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">Route in the form returned by
 <a href="pathfinder.PathFinder.html#route"><code>route</code></a>.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>widen</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">Widens the route by expanding the path on diagonal
+movements (n,s,e and w on isometric maps). Note that this modifies the passed in
+route array by adding new tiles onto the end as well as returning a larger
+set of output. The tiles in the route will no longer be usable in any sequential
+order.</td>
         </tr>
 	
 	
