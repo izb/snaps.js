@@ -215,9 +215,13 @@ define(function() {
      * @return {Array} The transformed route
      */
     var transformRoute = function(route, nesw, span, widen) {
+        if (route.length<=2) {
+            return [];
+        }
+
         var map = this.sn.map;
         var columns = map.columns;
-        var newroute = [];
+        var newroute = new Array(route.length/2-1);
         var newrouteext = [];
         var i, tid;
 
@@ -261,6 +265,7 @@ define(function() {
                 var y0 = route[i+1];
                 var dx = x0-route[i+2];
                 var dy = y0-route[i+3];
+                var cut = [span*i/2, span];
 
                 /* If you're browsing this code and start to feel some sort of rage when you see
                  * the logic wrapped up in these ternary operators wrapped up in a switch statement,
@@ -274,60 +279,60 @@ define(function() {
                         if (widen) {
                             enwidenStaggered(0, x0, y0);
                         }
-                        newroute.push.apply(newroute, nesw.slice(0, span));
-                        continue;
+                        newroute.splice.apply(newroute, cut.concat(nesw.slice(0, span)));
+                        break;
                     case -1:
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* nw */
                             if (widen) {
                                 enwidenStaggered(7, x0, y0);
                             }
-                            newroute.push.apply(newroute, nesw.slice(7*span, 8*span));
+                            newroute.splice.apply(newroute, cut.concat(nesw.slice(7*span, 8*span)));
                         } else {
                             /* ne */
                             if (widen) {
                                 enwidenStaggered(1, x0, y0);
                             }
-                            newroute.push.apply(newroute, nesw.slice(1*span, 2*span));
+                            newroute.splice.apply(newroute, cut.concat(nesw.slice(1*span, 2*span)));
                         }
-                        continue;
+                        break;
                     case 0:
                         if (dx===1) {
                             /* e */
                             if (widen) {
                                 enwidenStaggered(2, x0, y0);
                             }
-                            newroute.push.apply(newroute, nesw.slice(2*span, 3*span));
+                            newroute.splice.apply(newroute, cut.concat(nesw.slice(2*span, 3*span)));
                         } else {
                             /* w */
                             if (widen) {
                                 enwidenStaggered(6, x0, y0);
                             }
-                            newroute.push.apply(newroute, nesw.slice(6*span, 7*span));
+                            newroute.splice.apply(newroute, cut.concat(nesw.slice(6*span, 7*span)));
                         }
-                        continue;
+                        break;
                     case 1:
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* sw */
                             if (widen) {
                                 enwidenStaggered(5, x0, y0);
                             }
-                            newroute.push.apply(newroute, nesw.slice(5*span, 6*span));
+                            newroute.splice.apply(newroute, cut.concat(nesw.slice(5*span, 6*span)));
                         } else {
                             /* se */
                             if (widen) {
                                 enwidenStaggered(3, x0, y0);
                             }
-                            newroute.push.apply(newroute, nesw.slice(3*span, 4*span));
+                            newroute.splice.apply(newroute, cut.concat(nesw.slice(3*span, 4*span)));
                         }
-                        continue;
+                        break;
                     default:
                         /* s */
                         if (widen) {
                             enwidenStaggered(4, x0, y0);
                         }
-                        newroute.push.apply(newroute, nesw.slice(4*span, 5*span));
-                        continue;
+                        newroute.splice.apply(newroute, cut.concat(nesw.slice(4*span, 5*span)));
+                        break;
                 }
             }
         } else {
