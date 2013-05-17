@@ -7,6 +7,9 @@ define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
         /* Plugins */
         'plugins/default-plugins',
 
+        /* Tasks */
+        'tasks/slowqueue',
+
         /* Animation */
         'animate/tween',
 
@@ -19,6 +22,7 @@ define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
+        SlowQueue,
         tweens,
         ProximityTracker, PathFinder) {
 
@@ -129,6 +133,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.camera = null;
 
         this.activeFX = [];
+
+        this.taskQueues = [];
 
         this.now = 0;
         this.epoch = 0; /* 0 in chrome, but moz passes unix time. Epoch will be adjusted on first repaint */
@@ -350,6 +356,18 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         /**
+         * @method module:snaps.Snaps#updateTasks
+         * @private
+         */
+        this.updateTasks = function() {
+            var epoch = +new Date();
+            for (var i = _this.taskQueues.length - 1; i >= 0; i--) {
+                _this.taskQueues[i].run();
+            }
+            this.stats.count('updateTasks', (+new Date())-epoch);
+        };
+
+        /**
          * @method module:snaps.Snaps#updatePhasers
          * @private
          */
@@ -469,6 +487,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             _this.requestAnimationFrame(loop);
 
+            _this.updateTasks();
             _this.updateFX();
             _this.map.updateLayers(now);
             _this.updatePhasers();
@@ -702,6 +721,19 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return new _this.colliders[type](opts);
         };
 
+        /**
+         * Adds a new task queue. You can add task objects to this queue. Tasks are
+         * run in a time-contrained prioritised way in the game loop.
+         * @method module:snaps.Snaps#createTaskQueue
+         * @param  {Number} maxFrameTime The maximum time permitted for this queue to
+         * run in during each frame.
+         * @return {Object} A {@link module:util/slowqueue#SlowQueue|queue object}.
+         */
+        this.createTaskQueue = function(maxFrameTime) {
+            var q = new SlowQueue(maxFrameTime);
+            this.taskQueues.push(q);
+            return q;
+        };
 
         /**
          * Create a new camera for use in game. Creating a camera does not

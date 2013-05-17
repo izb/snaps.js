@@ -17,7 +17,7 @@ define(function() {
     function Node(x,y) {
         this.x = x;
         this.y = y;
-        this.score = 0;
+        this.priority = 0;
     }
 
 
@@ -434,14 +434,14 @@ define(function() {
                     continue;
                 }
 
-                var tscore = current.score + this.cost(current.x,current.y) * this.distance(i,current.x,current.y);
-                if (neighbour.closed && tscore>=neighbour.score) {
+                var tscore = current.priority + this.cost(current.x,current.y) * this.distance(i,current.x,current.y);
+                if (neighbour.closed && tscore>=neighbour.priority) {
                     continue;
                 }
 
-                if (!neighbour.open || tscore < neighbour.score) {
+                if (!neighbour.open || tscore < neighbour.priority) {
                     neighbour.cameFrom=current;
-                    neighbour.score = tscore;
+                    neighbour.priority = tscore;
                     neighbour.fscore = neighbour.gscore+distance2(neighbour.x,neighbour.y,x1,y1);
                     if (!neighbour.open) {
                         neighbour.open = true;

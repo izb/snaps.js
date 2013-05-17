@@ -12,7 +12,7 @@ define(function() {
      * <p>
      * See {@link http://www.digitaltsunami.net/projects/javascript/minheap/index.html|digitaltsunami.net}
      * <p>
-     * Modified to expect only to contain objects that expose a 'score'
+     * Modified to expect only to contain objects that expose a 'priority'
      * value for comparison.
      * @constructor module:util/minheap.MinHeap
      */
@@ -57,12 +57,12 @@ define(function() {
             var lIdx = this.left(i);
             var rIdx = this.right(i);
             var smallest;
-            if (lIdx < this.heap.length && (this.heap[lIdx].score < this.heap[i].score)) {
+            if (lIdx < this.heap.length && (this.heap[lIdx].priority < this.heap[i].priority)) {
                 smallest = lIdx;
             } else {
                 smallest = i;
             }
-            if (rIdx < this.heap.length && (this.heap[rIdx].score < this.heap[smallest].score)) {
+            if (rIdx < this.heap.length && (this.heap[rIdx].priority < this.heap[smallest].priority)) {
                 smallest = rIdx;
             }
             if (i !== smallest) {
@@ -81,7 +81,7 @@ define(function() {
          */
         this.siftUp = function(i) {
             var p = this.parent(i);
-            if (p >= 0 && (this.heap[p].score > this.heap[i].score)) {
+            if (p >= 0 && (this.heap[p].priority > this.heap[i].priority)) {
                 var temp = this.heap[p];
                 this.heap[p] = this.heap[i];
                 this.heap[i] = temp;
@@ -93,7 +93,7 @@ define(function() {
     /**
      * Place an item in the heap.
      * @method module:util/minheap.MinHeap#push
-     * @param {Object} item An item that exposes a 'score' property
+     * @param {Object} item An item that exposes a 'priority' property
      */
     MinHeap.prototype.push = function(item) {
         this.heap.push(item);
@@ -104,7 +104,7 @@ define(function() {
      * Pop the minimum valued item off of the heap. The heap is then updated
      * to float the next smallest item to the top of the heap.
      * @method module:util/minheap.MinHeap#pop
-     * @returns {Object} the minimum scored object contained within the heap.
+     * @returns {Object} the minimum priority object contained within the heap.
      */
     MinHeap.prototype.pop = function() {
         var value;
@@ -124,7 +124,7 @@ define(function() {
      * Returns the minimum value contained within the heap.  This will
      * not remove the value from the heap.
      * @method module:util/minheap.MinHeap#pop
-     * @returns {Object} the minimum scored object contained within the heap.
+     * @returns {Object} the minimum priority object contained within the heap.
      */
     MinHeap.prototype.peek = function() {
         return this.heap[0];
