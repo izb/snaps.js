@@ -249,12 +249,12 @@ define(function() {
                 return;
             }
 
-            if (lastout===nextout) {
+            if (lastout!==-1) {
                 route.push(tilex, tiley-2);
                 newrouteext.push.apply(newrouteext, nesw.slice(0, span));
-            } else {
-
             }
+
+            lastout = nextout;
         };
 
         if(map.isStaggered()) {
