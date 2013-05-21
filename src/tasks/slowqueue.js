@@ -26,10 +26,10 @@ define(['util/minheap', 'util/uid'], function(MinHeap, uid) {
 
     /**
      * Add a new task to the queue
-     * @method module:util/slowqueue#addTask
+     * @method module:util/slowqueue.SlowQueue#addTask
      * @param  {Object} task A task to add
      * @param  {Number} [priority=1] The task priority. High priority tasks will be
-     * done before low ones, even if a low priority task is half-done. Low numbers
+     * done before low ones. Partially completed tasks always have top priority. Low numbers
      * are higher priority than high numbers.
      */
     SlowQueue.prototype.addTask = function(task, priority) {
@@ -46,7 +46,7 @@ define(['util/minheap', 'util/uid'], function(MinHeap, uid) {
     /**
      * Runs the task queue. The queue will make a best effort to return within the
      * configured max frame time.
-     * @method module:util/slowqueue#run
+     * @method module:util/slowqueue.SlowQueue#run
      */
     SlowQueue.prototype.run = function() {
         /* TODO */

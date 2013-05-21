@@ -4505,10 +4505,10 @@ define('tasks/slowqueue',['util/minheap', 'util/uid'], function(MinHeap, uid) {
 
     /**
      * Add a new task to the queue
-     * @method module:util/slowqueue#addTask
+     * @method module:util/slowqueue.SlowQueue#addTask
      * @param  {Object} task A task to add
      * @param  {Number} [priority=1] The task priority. High priority tasks will be
-     * done before low ones, even if a low priority task is half-done. Low numbers
+     * done before low ones. Partially completed tasks always have top priority. Low numbers
      * are higher priority than high numbers.
      */
     SlowQueue.prototype.addTask = function(task, priority) {
@@ -4525,7 +4525,7 @@ define('tasks/slowqueue',['util/minheap', 'util/uid'], function(MinHeap, uid) {
     /**
      * Runs the task queue. The queue will make a best effort to return within the
      * configured max frame time.
-     * @method module:util/slowqueue#run
+     * @method module:util/slowqueue.SlowQueue#run
      */
     SlowQueue.prototype.run = function() {
         /* TODO */
@@ -5355,7 +5355,7 @@ define('ai/pathfinder',[],function() {
         var columns = map.columns;
         var newroute = new Array(route.length/2-1);
         var newrouteext = [];
-        var i, tid;
+        var x0, y0, x1, y1, i, tid, lastout = -1;
 
         widen = !!widen;
 
@@ -5363,19 +5363,7 @@ define('ai/pathfinder',[],function() {
          * 0   1   2   3   4   5   6   7
          * n  ne   e  se   s  sw   w  nw  */
 
-        if (widen) {
-            var visited = {};
-            var lastout = -1;
-            for (i = route.length - 2; i >= 0; i-=2) {
-                /* why do we calculate a tile id rather than store id's in the tile objects? because
-                 * the map can have holes which the game can treat as non-solid tiles if it wishes, and
-                 * there may be multiple tiles layered on top of each position. */
-                tid = route[1]*columns+route[0];
-                visited[tid] = 0;
-            }
-        }
-
-        var enwidenStaggered = function(nextout, x0, y0, x1, y1) {
+        var enwidenStaggered = function(nextout, x1, y1) {
             var lx, ly, rx, ry, lc, rc; /* Left and right */
 
             if (lastout===-1) {
@@ -5459,10 +5447,10 @@ define('ai/pathfinder',[],function() {
             /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
              * 1 pair ahead of the current pair to determine direction. */
             for (i = route.length - 4; i >= 0; i-=2) {
-                var x0 = route[i];
-                var y0 = route[i+1];
-                var x1 = route[i+2];
-                var y1 = route[i+3];
+                x0 = route[i];
+                y0 = route[i+1];
+                x1 = route[i+2];
+                y1 = route[i+3];
                 var dx = x0-x1;
                 var dy = y0-y1;
                 var cut = [span*i/2, span];
@@ -5471,7 +5459,7 @@ define('ai/pathfinder',[],function() {
                     case -2:
                         /* n */
                         if (widen) {
-                            enwidenStaggered(0, x0, y0, x1, y1);
+                            enwidenStaggered(0, x1, y1);
                         }
                         newroute.splice.apply(newroute, cut.concat(nesw.slice(0, span)));
                         break;
@@ -5480,13 +5468,13 @@ define('ai/pathfinder',[],function() {
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* nw */
                             if (widen) {
-                                enwidenStaggered(7, x0, y0, x1, y1);
+                                enwidenStaggered(7, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(7*span, 8*span)));
                         } else {
                             /* ne */
                             if (widen) {
-                                enwidenStaggered(1, x0, y0, x1, y1);
+                                enwidenStaggered(1, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(1*span, 2*span)));
                         }
@@ -5495,13 +5483,13 @@ define('ai/pathfinder',[],function() {
                         if (dx===1) {
                             /* e */
                             if (widen) {
-                                enwidenStaggered(2, x0, y0, x1, y1);
+                                enwidenStaggered(2, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(2*span, 3*span)));
                         } else {
                             /* w */
                             if (widen) {
-                                enwidenStaggered(6, x0, y0, x1, y1);
+                                enwidenStaggered(6, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(6*span, 7*span)));
                         }
@@ -5510,13 +5498,13 @@ define('ai/pathfinder',[],function() {
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* sw */
                             if (widen) {
-                                enwidenStaggered(5, x0, y0, x1, y1);
+                                enwidenStaggered(5, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(5*span, 6*span)));
                         } else {
                             /* se */
                             if (widen) {
-                                enwidenStaggered(3, x0, y0, x1, y1);
+                                enwidenStaggered(3, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(3*span, 4*span)));
                         }
@@ -5524,12 +5512,16 @@ define('ai/pathfinder',[],function() {
                     default:
                         /* s */
                         if (widen) {
-                            enwidenStaggered(4, x0, y0, x1, y1);
+                            enwidenStaggered(4, x1, y1);
                         }
                         newroute.splice.apply(newroute, cut.concat(nesw.slice(4*span, 5*span)));
                         break;
                 }
             } /* for */
+
+            if (widen) {
+                enwidenStaggered(-1, x0, y0);
+            }
 
         } else {
             throw "Unsupported map orientation in routeToDirections/routeToVectors: "+map.type;
