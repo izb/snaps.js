@@ -1441,7 +1441,7 @@ define('util/minheap',[],function() {
      * <p>
      * See {@link http://www.digitaltsunami.net/projects/javascript/minheap/index.html|digitaltsunami.net}
      * <p>
-     * Modified to expect only to contain objects that expose a 'score'
+     * Modified to expect only to contain objects that expose a 'priority'
      * value for comparison.
      * @constructor module:util/minheap.MinHeap
      */
@@ -1486,12 +1486,12 @@ define('util/minheap',[],function() {
             var lIdx = this.left(i);
             var rIdx = this.right(i);
             var smallest;
-            if (lIdx < this.heap.length && (this.heap[lIdx].score < this.heap[i].score)) {
+            if (lIdx < this.heap.length && (this.heap[lIdx].priority < this.heap[i].priority)) {
                 smallest = lIdx;
             } else {
                 smallest = i;
             }
-            if (rIdx < this.heap.length && (this.heap[rIdx].score < this.heap[smallest].score)) {
+            if (rIdx < this.heap.length && (this.heap[rIdx].priority < this.heap[smallest].priority)) {
                 smallest = rIdx;
             }
             if (i !== smallest) {
@@ -1510,7 +1510,7 @@ define('util/minheap',[],function() {
          */
         this.siftUp = function(i) {
             var p = this.parent(i);
-            if (p >= 0 && (this.heap[p].score > this.heap[i].score)) {
+            if (p >= 0 && (this.heap[p].priority > this.heap[i].priority)) {
                 var temp = this.heap[p];
                 this.heap[p] = this.heap[i];
                 this.heap[i] = temp;
@@ -1522,7 +1522,7 @@ define('util/minheap',[],function() {
     /**
      * Place an item in the heap.
      * @method module:util/minheap.MinHeap#push
-     * @param {Object} item An item that exposes a 'score' property
+     * @param {Object} item An item that exposes a 'priority' property
      */
     MinHeap.prototype.push = function(item) {
         this.heap.push(item);
@@ -1533,7 +1533,7 @@ define('util/minheap',[],function() {
      * Pop the minimum valued item off of the heap. The heap is then updated
      * to float the next smallest item to the top of the heap.
      * @method module:util/minheap.MinHeap#pop
-     * @returns {Object} the minimum scored object contained within the heap.
+     * @returns {Object} the minimum priority object contained within the heap.
      */
     MinHeap.prototype.pop = function() {
         var value;
@@ -1553,7 +1553,7 @@ define('util/minheap',[],function() {
      * Returns the minimum value contained within the heap.  This will
      * not remove the value from the heap.
      * @method module:util/minheap.MinHeap#pop
-     * @returns {Object} the minimum scored object contained within the heap.
+     * @returns {Object} the minimum priority object contained within the heap.
      */
     MinHeap.prototype.peek = function() {
         return this.heap[0];
@@ -4478,6 +4478,63 @@ function() {
 });
 
 /*global define*/
+define('tasks/slowqueue',['util/minheap', 'util/uid'], function(MinHeap, uid) {
+
+    
+
+    /**
+     * @module util/slowqueue
+     */
+
+    /**
+     * Implementation of a slow task queue. Task items are dequeued based on an allotted amount
+     * of processing time per frame. Normally you would not construct this directly, but rather you
+     * would use the engine's {@link module:snaps.Snaps#createTaskQueue|createTaskQueue  factory method}.
+     * @constructor module:util/slowqueue.SlowQueue
+     * @param {Number} maxFrameTime The max time permitted on each frame for processing
+     * items on the queue. Tasks may take more than one time slot to complete. Queue processing
+     * may exceed this if a task does not honour its promise to return within the given time.
+     */
+    function SlowQueue(maxFrameTime) {
+        /* TODO: Perhaps a started task should always take priority, since you might be able to post
+         * a higher priority task on the same object, and explode its state. */
+        this.queue = new MinHeap();
+        this.maxFrameTime = maxFrameTime;
+        this.id = uid();
+    }
+
+    /**
+     * Add a new task to the queue
+     * @method module:util/slowqueue#addTask
+     * @param  {Object} task A task to add
+     * @param  {Number} [priority=1] The task priority. High priority tasks will be
+     * done before low ones, even if a low priority task is half-done. Low numbers
+     * are higher priority than high numbers.
+     */
+    SlowQueue.prototype.addTask = function(task, priority) {
+        priority = priority===undefined?1:priority;
+
+        /* TODO: What the heck is a task? */
+
+        this.queue.push({
+            task:task,
+            priority:priority
+        });
+    };
+
+    /**
+     * Runs the task queue. The queue will make a best effort to return within the
+     * configured max frame time.
+     * @method module:util/slowqueue#run
+     */
+    SlowQueue.prototype.run = function() {
+        /* TODO */
+    };
+
+    return SlowQueue;
+});
+
+/*global define*/
 define('animate/tween',[],function() {
 
     
@@ -5083,7 +5140,7 @@ define('ai/pathfinder',[],function() {
     function Node(x,y) {
         this.x = x;
         this.y = y;
-        this.score = 0;
+        this.priority = 0;
     }
 
 
@@ -5266,6 +5323,15 @@ define('ai/pathfinder',[],function() {
         return (dx*dx)+(dy*dy);
     };
 
+    /* Staggered movements.
+     *                 0   1   2   3   4   5   6   7
+     *                 n  ne   e  se   s  sw   w  nw  */
+    var oddmovesx  = [ 0,  1,  1,  1,  0,  0, -1,  0];
+    var oddmovesy  = [-2, -1,  0,  1,  2,  1,  0, -1];
+    var evenmovesx = [ 0,  0,  1,  0,  0, -1, -1, -1];
+    var evenmovesy = [-2, -1,  0,  1,  2,  1,  0, -1];
+
+
     /**
      * Transform a route of tile positions into a step-by-step path
      * @private
@@ -5309,19 +5375,85 @@ define('ai/pathfinder',[],function() {
             }
         }
 
-        var enwidenStaggered = function(nextout, tilex, tiley) {
+        var enwidenStaggered = function(nextout, x0, y0, x1, y1) {
+            var lx, ly, rx, ry, lc, rc; /* Left and right */
+
             if (lastout===-1) {
                 lastout = nextout;
                 return;
             }
 
-            if (lastout===nextout) {
-                route.push(tilex, tiley-2);
-                newrouteext.push.apply(newrouteext, nesw.slice(0, span));
-            } else {
-
+            var iseven = ((y1&1)===0);
+            switch(lastout) {
+                case 0: /* n */
+                    if (iseven) {
+                        lx = evenmovesx[5]; ly = evenmovesy[5]; //sw
+                        rx = evenmovesx[3]; ry = evenmovesy[3]; //se
+                    } else {
+                        lx = oddmovesx[5];  ly = oddmovesy[5];  //sw
+                        rx = oddmovesx[3];  ry = oddmovesy[3];  //se
+                    }
+                    break;
+                case 2: /* e */
+                    if (iseven) {
+                        lx = evenmovesx[7]; ly = evenmovesy[7]; //nw
+                        rx = evenmovesx[5]; ry = evenmovesy[5]; //se
+                    } else {
+                        lx = oddmovesx[7];  ly = oddmovesy[7];  //nw
+                        rx = oddmovesx[5];  ry = oddmovesy[5];  //se
+                    }
+                    break;
+                case 4: /* s */
+                    if (iseven) {
+                        lx = evenmovesx[1]; ly = evenmovesy[1]; //ne
+                        rx = evenmovesx[7]; ry = evenmovesy[7]; //nw
+                    } else {
+                        lx = oddmovesx[1];  ly = oddmovesy[1];  //ne
+                        rx = oddmovesx[7];  ry = oddmovesy[7];  //nw
+                    }
+                    break;
+                case 6: /* w */
+                    if (iseven) {
+                        lx = evenmovesx[3]; ly = evenmovesy[3]; //se
+                        rx = evenmovesx[1]; ry = evenmovesy[1]; //ne
+                    } else {
+                        lx = oddmovesx[3];  ly = oddmovesy[3];  //se
+                        rx = oddmovesx[1];  ry = oddmovesy[1];  //ne
+                    }
+                    break;
+                default:
+                    lastout = nextout;
+                    return;
             }
-        };
+
+            if (lastout===nextout) {
+                route.push(x1+lx, y1+ly);
+                newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
+                route.push(x1+rx, y1+ry);
+                newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
+            } else {
+                switch(lastout) {
+                case 0: /* n */
+                    lc=1; rc=7;
+                    break;
+                case 2: /* e */
+                    lc=3; rc=1;
+                    break;
+                case 4: /* s */
+                    lc=5; rc=3;
+                    break;
+                case 6: /* w */
+                    lc=7; rc=5;
+                    break;
+                }
+                route.push(x1+lx, y1+ly);
+                newrouteext.push.apply(newrouteext, nesw.slice(lc*span, (lc+1)*span));
+                route.push(x1+rx, y1+ry);
+                newrouteext.push.apply(newrouteext, nesw.slice(rc*span, (rc+1)*span));
+            }
+
+            lastout = nextout;
+        }; /* enwidenStaggered */
 
         if(map.isStaggered()) {
             /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
@@ -5329,35 +5461,32 @@ define('ai/pathfinder',[],function() {
             for (i = route.length - 4; i >= 0; i-=2) {
                 var x0 = route[i];
                 var y0 = route[i+1];
-                var dx = x0-route[i+2];
-                var dy = y0-route[i+3];
+                var x1 = route[i+2];
+                var y1 = route[i+3];
+                var dx = x0-x1;
+                var dy = y0-y1;
                 var cut = [span*i/2, span];
-
-                /* If you're browsing this code and start to feel some sort of rage when you see
-                 * the logic wrapped up in these ternary operators wrapped up in a switch statement,
-                 * then I'm genuinely sorry. I do however find this sort of thing strangely beautiful.
-                 * If it helps, here's a top tip that explains that !== is the same as xor:
-                 * http://stackoverflow.com/a/4540443/974 */
 
                 switch(dy) {
                     case -2:
                         /* n */
                         if (widen) {
-                            enwidenStaggered(0, x0, y0);
+                            enwidenStaggered(0, x0, y0, x1, y1);
                         }
                         newroute.splice.apply(newroute, cut.concat(nesw.slice(0, span)));
                         break;
                     case -1:
+                        /*          xor           */
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* nw */
                             if (widen) {
-                                enwidenStaggered(7, x0, y0);
+                                enwidenStaggered(7, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(7*span, 8*span)));
                         } else {
                             /* ne */
                             if (widen) {
-                                enwidenStaggered(1, x0, y0);
+                                enwidenStaggered(1, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(1*span, 2*span)));
                         }
@@ -5366,13 +5495,13 @@ define('ai/pathfinder',[],function() {
                         if (dx===1) {
                             /* e */
                             if (widen) {
-                                enwidenStaggered(2, x0, y0);
+                                enwidenStaggered(2, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(2*span, 3*span)));
                         } else {
                             /* w */
                             if (widen) {
-                                enwidenStaggered(6, x0, y0);
+                                enwidenStaggered(6, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(6*span, 7*span)));
                         }
@@ -5381,13 +5510,13 @@ define('ai/pathfinder',[],function() {
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* sw */
                             if (widen) {
-                                enwidenStaggered(5, x0, y0);
+                                enwidenStaggered(5, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(5*span, 6*span)));
                         } else {
                             /* se */
                             if (widen) {
-                                enwidenStaggered(3, x0, y0);
+                                enwidenStaggered(3, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(3*span, 4*span)));
                         }
@@ -5395,12 +5524,13 @@ define('ai/pathfinder',[],function() {
                     default:
                         /* s */
                         if (widen) {
-                            enwidenStaggered(4, x0, y0);
+                            enwidenStaggered(4, x0, y0, x1, y1);
                         }
                         newroute.splice.apply(newroute, cut.concat(nesw.slice(4*span, 5*span)));
                         break;
                 }
-            }
+            } /* for */
+
         } else {
             throw "Unsupported map orientation in routeToDirections/routeToVectors: "+map.type;
         }
@@ -5500,14 +5630,14 @@ define('ai/pathfinder',[],function() {
                     continue;
                 }
 
-                var tscore = current.score + this.cost(current.x,current.y) * this.distance(i,current.x,current.y);
-                if (neighbour.closed && tscore>=neighbour.score) {
+                var tscore = current.priority + this.cost(current.x,current.y) * this.distance(i,current.x,current.y);
+                if (neighbour.closed && tscore>=neighbour.priority) {
                     continue;
                 }
 
-                if (!neighbour.open || tscore < neighbour.score) {
+                if (!neighbour.open || tscore < neighbour.priority) {
                     neighbour.cameFrom=current;
-                    neighbour.score = tscore;
+                    neighbour.priority = tscore;
                     neighbour.fscore = neighbour.gscore+distance2(neighbour.x,neighbour.y,x1,y1);
                     if (!neighbour.open) {
                         neighbour.open = true;
@@ -5614,6 +5744,9 @@ define('snaps',['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
         /* Plugins */
         'plugins/default-plugins',
 
+        /* Tasks */
+        'tasks/slowqueue',
+
         /* Animation */
         'animate/tween',
 
@@ -5626,6 +5759,7 @@ define('snaps',['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
+        SlowQueue,
         tweens,
         ProximityTracker, PathFinder) {
 
@@ -5736,6 +5870,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.camera = null;
 
         this.activeFX = [];
+
+        this.taskQueues = [];
 
         this.now = 0;
         this.epoch = 0; /* 0 in chrome, but moz passes unix time. Epoch will be adjusted on first repaint */
@@ -5957,6 +6093,18 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         };
 
         /**
+         * @method module:snaps.Snaps#updateTasks
+         * @private
+         */
+        this.updateTasks = function() {
+            var epoch = +new Date();
+            for (var i = _this.taskQueues.length - 1; i >= 0; i--) {
+                _this.taskQueues[i].run();
+            }
+            this.stats.count('updateTasks', (+new Date())-epoch);
+        };
+
+        /**
          * @method module:snaps.Snaps#updatePhasers
          * @private
          */
@@ -6076,6 +6224,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             _this.requestAnimationFrame(loop);
 
+            _this.updateTasks();
             _this.updateFX();
             _this.map.updateLayers(now);
             _this.updatePhasers();
@@ -6309,6 +6458,19 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return new _this.colliders[type](opts);
         };
 
+        /**
+         * Adds a new task queue. You can add task objects to this queue. Tasks are
+         * run in a time-contrained prioritised way in the game loop.
+         * @method module:snaps.Snaps#createTaskQueue
+         * @param  {Number} maxFrameTime The maximum time permitted for this queue to
+         * run in during each frame.
+         * @return {Object} A {@link module:util/slowqueue#SlowQueue|queue object}.
+         */
+        this.createTaskQueue = function(maxFrameTime) {
+            var q = new SlowQueue(maxFrameTime);
+            this.taskQueues.push(q);
+            return q;
+        };
 
         /**
          * Create a new camera for use in game. Creating a camera does not

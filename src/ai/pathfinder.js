@@ -200,6 +200,15 @@ define(function() {
         return (dx*dx)+(dy*dy);
     };
 
+    /* Staggered movements.
+     *                 0   1   2   3   4   5   6   7
+     *                 n  ne   e  se   s  sw   w  nw  */
+    var oddmovesx  = [ 0,  1,  1,  1,  0,  0, -1,  0];
+    var oddmovesy  = [-2, -1,  0,  1,  2,  1,  0, -1];
+    var evenmovesx = [ 0,  0,  1,  0,  0, -1, -1, -1];
+    var evenmovesy = [-2, -1,  0,  1,  2,  1,  0, -1];
+
+
     /**
      * Transform a route of tile positions into a step-by-step path
      * @private
@@ -243,19 +252,85 @@ define(function() {
             }
         }
 
-        var enwidenStaggered = function(nextout, tilex, tiley) {
+        var enwidenStaggered = function(nextout, x0, y0, x1, y1) {
+            var lx, ly, rx, ry, lc, rc; /* Left and right */
+
             if (lastout===-1) {
                 lastout = nextout;
                 return;
             }
 
-            if (lastout!==-1) {
-                route.push(tilex, tiley-2);
-                newrouteext.push.apply(newrouteext, nesw.slice(0, span));
+            var iseven = ((y1&1)===0);
+            switch(lastout) {
+                case 0: /* n */
+                    if (iseven) {
+                        lx = evenmovesx[5]; ly = evenmovesy[5]; //sw
+                        rx = evenmovesx[3]; ry = evenmovesy[3]; //se
+                    } else {
+                        lx = oddmovesx[5];  ly = oddmovesy[5];  //sw
+                        rx = oddmovesx[3];  ry = oddmovesy[3];  //se
+                    }
+                    break;
+                case 2: /* e */
+                    if (iseven) {
+                        lx = evenmovesx[7]; ly = evenmovesy[7]; //nw
+                        rx = evenmovesx[5]; ry = evenmovesy[5]; //se
+                    } else {
+                        lx = oddmovesx[7];  ly = oddmovesy[7];  //nw
+                        rx = oddmovesx[5];  ry = oddmovesy[5];  //se
+                    }
+                    break;
+                case 4: /* s */
+                    if (iseven) {
+                        lx = evenmovesx[1]; ly = evenmovesy[1]; //ne
+                        rx = evenmovesx[7]; ry = evenmovesy[7]; //nw
+                    } else {
+                        lx = oddmovesx[1];  ly = oddmovesy[1];  //ne
+                        rx = oddmovesx[7];  ry = oddmovesy[7];  //nw
+                    }
+                    break;
+                case 6: /* w */
+                    if (iseven) {
+                        lx = evenmovesx[3]; ly = evenmovesy[3]; //se
+                        rx = evenmovesx[1]; ry = evenmovesy[1]; //ne
+                    } else {
+                        lx = oddmovesx[3];  ly = oddmovesy[3];  //se
+                        rx = oddmovesx[1];  ry = oddmovesy[1];  //ne
+                    }
+                    break;
+                default:
+                    lastout = nextout;
+                    return;
+            }
+
+            if (lastout===nextout) {
+                route.push(x1+lx, y1+ly);
+                newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
+                route.push(x1+rx, y1+ry);
+                newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
+            } else {
+                switch(lastout) {
+                case 0: /* n */
+                    lc=1; rc=7;
+                    break;
+                case 2: /* e */
+                    lc=3; rc=1;
+                    break;
+                case 4: /* s */
+                    lc=5; rc=3;
+                    break;
+                case 6: /* w */
+                    lc=7; rc=5;
+                    break;
+                }
+                route.push(x1+lx, y1+ly);
+                newrouteext.push.apply(newrouteext, nesw.slice(lc*span, (lc+1)*span));
+                route.push(x1+rx, y1+ry);
+                newrouteext.push.apply(newrouteext, nesw.slice(rc*span, (rc+1)*span));
             }
 
             lastout = nextout;
-        };
+        }; /* enwidenStaggered */
 
         if(map.isStaggered()) {
             /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
@@ -263,35 +338,32 @@ define(function() {
             for (i = route.length - 4; i >= 0; i-=2) {
                 var x0 = route[i];
                 var y0 = route[i+1];
-                var dx = x0-route[i+2];
-                var dy = y0-route[i+3];
+                var x1 = route[i+2];
+                var y1 = route[i+3];
+                var dx = x0-x1;
+                var dy = y0-y1;
                 var cut = [span*i/2, span];
-
-                /* If you're browsing this code and start to feel some sort of rage when you see
-                 * the logic wrapped up in these ternary operators wrapped up in a switch statement,
-                 * then I'm genuinely sorry. I do however find this sort of thing strangely beautiful.
-                 * If it helps, here's a top tip that explains that !== is the same as xor:
-                 * http://stackoverflow.com/a/4540443/974 */
 
                 switch(dy) {
                     case -2:
                         /* n */
                         if (widen) {
-                            enwidenStaggered(0, x0, y0);
+                            enwidenStaggered(0, x0, y0, x1, y1);
                         }
                         newroute.splice.apply(newroute, cut.concat(nesw.slice(0, span)));
                         break;
                     case -1:
+                        /*          xor           */
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* nw */
                             if (widen) {
-                                enwidenStaggered(7, x0, y0);
+                                enwidenStaggered(7, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(7*span, 8*span)));
                         } else {
                             /* ne */
                             if (widen) {
-                                enwidenStaggered(1, x0, y0);
+                                enwidenStaggered(1, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(1*span, 2*span)));
                         }
@@ -300,13 +372,13 @@ define(function() {
                         if (dx===1) {
                             /* e */
                             if (widen) {
-                                enwidenStaggered(2, x0, y0);
+                                enwidenStaggered(2, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(2*span, 3*span)));
                         } else {
                             /* w */
                             if (widen) {
-                                enwidenStaggered(6, x0, y0);
+                                enwidenStaggered(6, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(6*span, 7*span)));
                         }
@@ -315,13 +387,13 @@ define(function() {
                         if ((dx===0)!==((y0&1)!==0)) {
                             /* sw */
                             if (widen) {
-                                enwidenStaggered(5, x0, y0);
+                                enwidenStaggered(5, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(5*span, 6*span)));
                         } else {
                             /* se */
                             if (widen) {
-                                enwidenStaggered(3, x0, y0);
+                                enwidenStaggered(3, x0, y0, x1, y1);
                             }
                             newroute.splice.apply(newroute, cut.concat(nesw.slice(3*span, 4*span)));
                         }
@@ -329,12 +401,13 @@ define(function() {
                     default:
                         /* s */
                         if (widen) {
-                            enwidenStaggered(4, x0, y0);
+                            enwidenStaggered(4, x0, y0, x1, y1);
                         }
                         newroute.splice.apply(newroute, cut.concat(nesw.slice(4*span, 5*span)));
                         break;
                 }
-            }
+            } /* for */
+
         } else {
             throw "Unsupported map orientation in routeToDirections/routeToVectors: "+map.type;
         }
