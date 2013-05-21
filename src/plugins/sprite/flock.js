@@ -95,12 +95,15 @@ define(function() {
          * TODO: Should phasing alter weights?
          */
 
-        var weightSeparation = 2;
+        var weightSeparation = 2.5;
         var weightAlignment = 1;
         var weightCohesion = 1.8;
-        var weightSteering = 0.5;
+        var weightSteering = 0.9;
         var weightInertia =1.5;
         var hweightInertia =weightInertia/2;
+
+        /* TODO: I have a vague suspicion that not all the vertical components are being
+         * halved correctly. */
 
         /* steering */
 

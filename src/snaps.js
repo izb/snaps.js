@@ -113,7 +113,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* If regions is true, then the x,y is shown for tiles. If it's a comma-separated list
          * then those property values are shown on each tile. */
         this.dbgShowRegions   = !!settings.showRegions;
-        this.dbgRegionProps   = settings.showRegions!==undefined&&settings.showRegions.length>0&&settings.showRegions!=='true'?
+        this.dbgRegionProps   = settings.showRegions&&settings.showRegions.length>0&&settings.showRegions!=='true'?
             settings.showRegions.split(','):[];
 
         this.imageCache = {};

@@ -81,11 +81,11 @@ define(function() {
              * the offset jumps in the original orthogonally arranged tile data looks peculiar and
              * differs on odd and even rows. Trust me though, these values check out fine. */
 
-            /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
+            /*                               E  SE  S  SW   W  NW   N  NE : E  S   W   N */
             this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
             this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
 
-            /*                                E  SE   S  SW   W  NW   N  NE   E   S   W   N */
+            /*                                E  SE   S  SW   W  NW   N  NE : E   S   W   N */
             this.xdirectionsEven = diagonals?[1,  0,  0, -1, -1, -1,  0,  0]:[1,  0, -1,  0];
             this.ydirectionsEven = diagonals?[0,  1,  2,  1,  0, -1, -2, -1]:[0,  2,  0, -2];
 
@@ -452,6 +452,10 @@ define(function() {
             this.nodeRows[i].length = 0;
         }
         var n = this.node(x0,y0);
+        if (n===null) {
+            /* This means the first square was solid. Call off the search. */
+            return [];
+        }
         n.open = true;
         this.scoreHeap.clear().push(n);
         n.fscore = distance2(x0,y0,x1,y1);

@@ -3138,12 +3138,15 @@ define('plugins/sprite/flock',[],function() {
          * TODO: Should phasing alter weights?
          */
 
-        var weightSeparation = 2;
+        var weightSeparation = 2.5;
         var weightAlignment = 1;
         var weightCohesion = 1.8;
-        var weightSteering = 0.5;
+        var weightSteering = 0.9;
         var weightInertia =1.5;
         var hweightInertia =weightInertia/2;
+
+        /* TODO: I have a vague suspicion that not all the vertical components are being
+         * halved correctly. */
 
         /* steering */
 
@@ -5327,11 +5330,11 @@ define('ai/pathfinder',[],function() {
              * the offset jumps in the original orthogonally arranged tile data looks peculiar and
              * differs on odd and even rows. Trust me though, these values check out fine. */
 
-            /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
+            /*                               E  SE  S  SW   W  NW   N  NE : E  S   W   N */
             this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
             this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
 
-            /*                                E  SE   S  SW   W  NW   N  NE   E   S   W   N */
+            /*                                E  SE   S  SW   W  NW   N  NE : E   S   W   N */
             this.xdirectionsEven = diagonals?[1,  0,  0, -1, -1, -1,  0,  0]:[1,  0, -1,  0];
             this.ydirectionsEven = diagonals?[0,  1,  2,  1,  0, -1, -2, -1]:[0,  2,  0, -2];
 
@@ -5698,6 +5701,10 @@ define('ai/pathfinder',[],function() {
             this.nodeRows[i].length = 0;
         }
         var n = this.node(x0,y0);
+        if (n===null) {
+            /* This means the first square was solid. Call off the search. */
+            return [];
+        }
         n.open = true;
         this.scoreHeap.clear().push(n);
         n.fscore = distance2(x0,y0,x1,y1);
@@ -5942,7 +5949,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* If regions is true, then the x,y is shown for tiles. If it's a comma-separated list
          * then those property values are shown on each tile. */
         this.dbgShowRegions   = !!settings.showRegions;
-        this.dbgRegionProps   = settings.showRegions!==undefined&&settings.showRegions.length>0&&settings.showRegions!=='true'?
+        this.dbgRegionProps   = settings.showRegions&&settings.showRegions.length>0&&settings.showRegions!=='true'?
             settings.showRegions.split(','):[];
 
         this.imageCache = {};
