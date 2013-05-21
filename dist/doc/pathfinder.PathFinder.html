@@ -513,7 +513,7 @@ of the form x,y,x,y,x,y...
         
             
 <dt>
-    <h4 class="name" id="routeToDirections"><span class="type-signature"></span>routeToDirections<span class="signature">(route, <span class="optional">widen</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="routeToDirections"><span class="type-signature"></span>routeToDirections<span class="signature">(route, <span class="optional">widen</span>, <span class="optional">wideroute</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
     
 </dt>
@@ -637,6 +637,45 @@ order.</td>
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>wideroute</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">If widen is true, the returned route will have more tiles
+than the input route. If you want a new route array that matches the output, pass
+an empty array in here and it will be populated with the output tiles.</td>
+        </tr>
+	
+	
 	</tbody>
 </table>
     
@@ -704,7 +743,7 @@ order.</td>
         
             
 <dt>
-    <h4 class="name" id="routeToVectors"><span class="type-signature"></span>routeToVectors<span class="signature">(route, <span class="optional">widen</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    <h4 class="name" id="routeToVectors"><span class="type-signature"></span>routeToVectors<span class="signature">(route, <span class="optional">widen</span>, <span class="optional">wideroute</span>)</span><span class="type-signature"> &rarr; {Array}</span></h4>
     
     
 </dt>
@@ -825,6 +864,45 @@ movements (n,s,e and w on isometric maps). Note that this modifies the passed in
 route array by adding new tiles onto the end as well as returning a larger
 set of output. The tiles in the route will no longer be usable in any sequential
 order.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wideroute</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">If widen is true, the returned route will have more tiles
+than the input route. If you want a new route array that matches the output, pass
+an empty array in here and it will be populated with the output tiles.</td>
         </tr>
 	
 	

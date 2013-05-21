@@ -139,6 +139,23 @@ define('util/js',[],function() {
         },
 
         /**
+         * Copy properties from one object to another, but only if the destination
+         * does not have those properties, or if it has undefined values.
+         * @function module:util/js#setProps
+         * @param {Object} s The source object
+         * @param {Object} d The destination object
+         * @return {Object} The destination object
+         */
+        setProps: function(s,d) {
+            for (var prop in s) {
+                if (s.hasOwnProperty(prop) && (!d.hasOwnProperty(prop) || d[prop]===undefined)) {
+                    d[prop] = s[prop];
+                }
+            }
+            return d;
+        },
+
+        /**
          * Create a shallow clone of an object
          * @function module:util/js#clone
          * @param {Object} s The source object
@@ -1721,9 +1738,11 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
 });
 
 /*global define*/
-define('map/tile',['util/uid'], function(uid) {
+define('map/tile',['util/uid', 'util/js'], function(uid, js) {
 
     
+
+    var copyProps = js.copyProps;
 
     /**
      * @module map/tile
@@ -1791,6 +1810,51 @@ define('map/tile',['util/uid'], function(uid) {
         return undefined;
     };
 
+    /** Gets multiple properties from a tile. If any of
+     * the properties are missing, the value is set to undefined.
+     * @method module:map/tile.Tile#getProperties
+     * @param {Array} props The properties to get
+     * @return {Object} An object describing the properties.
+     */
+    Tile.prototype.getProperties = function(props) {
+        var result = {};
+        for (var i = props.length - 1; i >= 0; i--) {
+            var prop = props[i];
+
+            if (this.properties.hasOwnProperty(prop)) {
+                result[prop] = this.properties[prop];
+                continue;
+            }
+
+            if (this.defaultProps.hasOwnProperty(prop)) {
+                result[prop] = this.defaultProps[prop];
+                continue;
+            }
+
+            result[prop] = undefined;
+        }
+
+        return result;
+    };
+
+    /** Sets a property value on a tile.
+     * @method module:map/tile.Tile#setProperty
+     * @param {String} prop The property to set.
+     * @param {*} val The value to set
+     */
+    Tile.prototype.setProperty = function(prop, val) {
+        this.properties[prop] = val;
+    };
+
+    /** Sets multiple properties on a tile.
+     * @method module:map/tile.Tile#setProperties
+     * @param {Object} props An object containing all the properties
+     * to copy into the tile's properties.
+     */
+    Tile.prototype.setProperties = function(props) {
+        copyProps(props, this.properties);
+    };
+
     return Tile;
 
 });
@@ -1806,6 +1870,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
     var debugText = debug.debugText;
     var copyProps = js.copyProps;
+    var setProps  = js.setProps;
 
     var xy = [0,0]; // work area
 
@@ -2049,10 +2114,10 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      * @method module:map/staggered-isometric.StaggeredIsometric#drawDebugRegions
      * @private
      */
-    StaggeredIsometric.prototype.drawDebugRegions = function(ctx) {
+    StaggeredIsometric.prototype.drawDebugRegions = function(ctx, props) {
 
         var map = this.data;
-        var l, layerEndY, layerEndX, r, x, y, i, stagger;
+        var l, layerEndY, layerEndX, r, x, y, stagger;
 
         var xstep = map.tilewidth;
         var ystep = map.tileheight / 2;
@@ -2110,10 +2175,23 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
             r = l.rows[y];
             stagger = y&1?map.tilewidth/2:0;
             for (x = r.length-1; x >= 0; x--) {
-                debugText(ctx,
-                        x+","+y,
-                        85+Math.floor(-this.xoffset) + stagger + x * xstep,
-                        55+Math.floor(-this.yoffset) + y * ystep);
+                if (props.length>0) {
+                    var valList = [];
+                    var vals = this.getTilePropsAtTilePos(props, x, y);
+
+                    for (var i = 0; i < props.length; i++) {
+                        valList.push(vals[props[i]]);
+                    }
+                    debugText(ctx,
+                            valList.join(),
+                            85+Math.floor(-this.xoffset) + stagger + x * xstep,
+                            55+Math.floor(-this.yoffset) + y * ystep);
+                } else {
+                    debugText(ctx,
+                            x+","+y,
+                            85+Math.floor(-this.xoffset) + stagger + x * xstep,
+                            55+Math.floor(-this.yoffset) + y * ystep);
+                }
             }
         }
     };
@@ -2214,13 +2292,55 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      * Tiles are checked from the top-most layer down until a tile is found that
      * holds that property. This means that top-most tiles can override property
      * values from lower tiles.
-     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropAtTilePos
-     * @param {String} prop The property to get
-     * @param {Number} x A world x position
-     * @param {Number} y A world y position
-     * @return {String} The property value, or <code>undefined</code> if not found.
+     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropsAtTilePos
+     * @param {String|Array} prop The property or properties to get.
+     * @param {Number} x A tile x column position
+     * @param {Number} y A tile y row position
+     * @return {String|Array} The property value, or <code>undefined</code> if not found.
+     * If the prop parameter was an array, the return value will be an object describing
+     * all the properties required.
      */
-    StaggeredIsometric.prototype.getTilePropAtTilePos = function(prop, x, y) {
+    StaggeredIsometric.prototype.getTilePropsAtTilePos = function(prop, x, y) {
+        var layers = this.data.layers;
+        var propval;
+        var resultset;
+        var propset = typeof prop !== 'string';
+        for (var i = layers.length - 1; i >= 0; i--) {
+            var rows = layers[i].rows;
+            if (rows!==undefined) {
+                if (y>=0&&y<rows.length) {
+                    var t = rows[y][x];
+                    if (t) {
+                        if (propset) {
+                            var set = t.getProperties(prop);
+                            if (resultset) {
+                                setProps(set, resultset);
+                            } else {
+                                resultset = set;
+                            }
+                        } else {
+                            propval = t.getProperty(prop);
+                            if (propval!==undefined) {
+                                return propval;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return propset?resultset:undefined;
+    };
+
+    /** Takes a tile position and sets a property value on the topmost tile at a
+     * given tile position. If no tile is found, no property is set.
+     * @method module:map/staggered-isometric.StaggeredIsometric#setTilePropAtTilePos
+     * @param {String|Object} prop The property to set, or an object that contains
+     * a set of properties to set on the tile.
+     * @param {*} [val] The property value. Ignored if prop is an object.
+     * @param {Number} x A tile x column position
+     * @param {Number} y A tile y row position
+     */
+    StaggeredIsometric.prototype.setTilePropsAtTilePos = function(prop, val, x, y) {
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
@@ -2229,15 +2349,16 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                 if (y>=0&&y<rows.length) {
                     var t = rows[y][x];
                     if (t) {
-                        propval = t.getProperty(prop);
-                        if (propval!==undefined) {
-                            return propval;
+                        if (typeof prop === 'string') {
+                            t.setProperty(prop, val);
+                        } else {
+                            t.setProperties(prop);
                         }
+                        return;
                     }
                 }
             }
         }
-        return undefined;
     };
 
     /** Takes a world position and returns a property value as defined by the tiles
@@ -2245,15 +2366,17 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      * Tiles are checked from the top-most layer down until a tile is found that
      * holds that property. This means that top-most tiles can override property
      * values from lower tiles.
-     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropAtWorldPos
-     * @param {String} prop The property to get
+     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropsAtWorldPos
+     * @param {String|Array} prop The property or properties to get
      * @param {Number} x A world x position
      * @param {Number} y A world y position
-     * @return {String} The property value, or <code>undefined</code> if not found.
+     * @return {String|Object} The property value, or <code>undefined</code> if not found.
+     * If the prop parameter was an array, the return value will be an object describing
+     * all the requested properties.
      */
-    StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
+    StaggeredIsometric.prototype.getTilePropsAtWorldPos = function(prop, x, y) {
         /*(void)*/this.worldToTilePos(x, y, xy);
-        return this.getTilePropAtTilePos(prop, xy[0], xy[1]);
+        return this.getTilePropsAtTilePos(prop, xy[0], xy[1]);
     };
 
     /** Takes a screen position and tells you what tile it lies on. Take
@@ -3950,7 +4073,7 @@ define('plugins/collision/lib/prop-scanner',[],function() {
                 break;
             }
 
-            sampleHeight = sn.getTilePropAtWorldPos(prop,x0,y0);
+            sampleHeight = sn.getTilePropsAtWorldPos(prop,x0,y0);
 
             if(sampleHeight>h) {
                 collided = true;
@@ -4046,18 +4169,18 @@ define('plugins/collision/lib/local-scanner',[],function() {
 
             /* nw/se */
 
-            if (sn.getTilePropAtWorldPos('height',x+1,y-1)>h &&    //  .##
-                    sn.getTilePropAtWorldPos('height',x,y-1)>h &&  //  .o#
-                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  ...
+            if (sn.getTilePropsAtWorldPos('height',x+1,y-1)>h &&    //  .##
+                    sn.getTilePropsAtWorldPos('height',x,y-1)>h &&  //  .o#
+                    sn.getTilePropsAtWorldPos('height',x+1,y)>h) {  //  ...
 
                 /* Technically we should test that our shifted y position is not solid,
                  * but really if you are using collision maps that look like that then
                  * you're asking for trouble. */
                 return 1;
 
-            } else if(sn.getTilePropAtWorldPos('height',x-1,y+1)>h &&  //  ...
-                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
-                    sn.getTilePropAtWorldPos('height',x,y+1)>h) {      //  ##.
+            } else if(sn.getTilePropsAtWorldPos('height',x-1,y+1)>h &&  //  ...
+                    sn.getTilePropsAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropsAtWorldPos('height',x,y+1)>h) {      //  ##.
 
                 return -1;
             }
@@ -4066,15 +4189,15 @@ define('plugins/collision/lib/local-scanner',[],function() {
 
             /* sw/ne */
 
-            if (sn.getTilePropAtWorldPos('height',x+1,y+1)>h &&    //  ...
-                    sn.getTilePropAtWorldPos('height',x,y+1)>h &&  //  .o#
-                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  .##
+            if (sn.getTilePropsAtWorldPos('height',x+1,y+1)>h &&    //  ...
+                    sn.getTilePropsAtWorldPos('height',x,y+1)>h &&  //  .o#
+                    sn.getTilePropsAtWorldPos('height',x+1,y)>h) {  //  .##
 
                 return -1;
 
-            } else if(sn.getTilePropAtWorldPos('height',x-1,y-1)>h &&  //  ##.
-                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
-                    sn.getTilePropAtWorldPos('height',x,y-1)>h) {      //  ...
+            } else if(sn.getTilePropsAtWorldPos('height',x-1,y-1)>h &&  //  ##.
+                    sn.getTilePropsAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropsAtWorldPos('height',x,y-1)>h) {      //  ...
 
                 return 1;
             }
@@ -4396,7 +4519,7 @@ function(traceProp, midPtEllipse, localScan) {
                 rx = route[i];
                 ry = route[i+1];
 
-                var sampleHeight = sn.getTilePropAtWorldPos('height',rx+sxo,ry+syo);
+                var sampleHeight = sn.getTilePropsAtWorldPos('height',rx+sxo,ry+syo);
 
                 if(sampleHeight>h) {
                     collided = true;
@@ -5165,7 +5288,6 @@ define('ai/pathfinder',[],function() {
      * the more likely it is that the water will be avoided.
      */
     function PathFinder(sn, solid, diagonals, cutcorners, cost) {
-
         this.sn = sn;
         var map = sn.map;
         this.ground = map.groundLayer();
@@ -5186,7 +5308,7 @@ define('ai/pathfinder',[],function() {
         }
 
         solid = solid || function(x, y) {
-            return sn.getTilePropAtTilePos('height', x, y) > 0;
+            return sn.getTilePropsAtTilePos('height', x, y) > 0;
         };
 
         var r2=Math.sqrt(2); /* ~1.414 */
@@ -5206,7 +5328,7 @@ define('ai/pathfinder',[],function() {
              * differs on odd and even rows. Trust me though, these values check out fine. */
 
             /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
-            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal */
+            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
             this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
 
             /*                                E  SE   S  SW   W  NW   N  NE   E   S   W   N */
@@ -5222,7 +5344,7 @@ define('ai/pathfinder',[],function() {
             } else {
                 this.distance = function(idx,x0,y0) {
                     /* In the case where we are moving diagonally past a solid tile, we return the cost as 3, which is
-                     * > sqrt(2) */
+                     * > 2*sqrt(2) */
                     var even = (y0&1)===0;
                     var dirsx = even?this.xdirectionsEven:this.xdirectionsOdd;
                     var dirsy = even?this.ydirectionsEven:this.ydirectionsOdd;
@@ -5344,20 +5466,30 @@ define('ai/pathfinder',[],function() {
      * route array by adding new tiles onto the end as well as returning a larger
      * set of output. The tiles in the route will no longer be usable in any sequential
      * order.
+     * @param {Array} [wideroute] If widen is true, the returned route will have more tiles
+     * than the input route. If you want a new route array that matches the output, pass
+     * an empty array in here and it will be populated with the output tiles.
      * @return {Array} The transformed route
      */
-    var transformRoute = function(route, nesw, span, widen) {
+    var transformRoute = function(route, nesw, span, widen, wideroute) {
         if (route.length<=2) {
             return [];
         }
 
         var map = this.sn.map;
         var columns = map.columns;
-        var newroute = new Array(route.length/2-1);
+        var newroute = new Array(span*(route.length/2-1));
         var newrouteext = [];
         var x0, y0, x1, y1, i, tid, lastout = -1;
 
         widen = !!widen;
+
+        if (widen && wideroute) {
+            if (wideroute.length!==0) {
+                throw "wideroute output array length must be 0";
+            }
+            wideroute.push.apply(wideroute, route);
+        }
 
         /* In nesw:
          * 0   1   2   3   4   5   6   7
@@ -5414,10 +5546,12 @@ define('ai/pathfinder',[],function() {
                     return;
             }
 
+            if (wideroute) {
+                wideroute.push(x1+lx, y1+ly);
+                wideroute.push(x1+rx, y1+ry);
+            }
             if (lastout===nextout) {
-                route.push(x1+lx, y1+ly);
                 newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
-                route.push(x1+rx, y1+ry);
                 newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
             } else {
                 switch(lastout) {
@@ -5434,9 +5568,7 @@ define('ai/pathfinder',[],function() {
                     lc=7; rc=5;
                     break;
                 }
-                route.push(x1+lx, y1+ly);
                 newrouteext.push.apply(newrouteext, nesw.slice(lc*span, (lc+1)*span));
-                route.push(x1+rx, y1+ry);
                 newrouteext.push.apply(newrouteext, nesw.slice(rc*span, (rc+1)*span));
             }
 
@@ -5454,70 +5586,32 @@ define('ai/pathfinder',[],function() {
                 var dx = x0-x1;
                 var dy = y0-y1;
                 var cut = [span*i/2, span];
+                var d;
 
                 switch(dy) {
+                    /* I know, right? */
                     case -2:
-                        /* n */
-                        if (widen) {
-                            enwidenStaggered(0, x1, y1);
-                        }
-                        newroute.splice.apply(newroute, cut.concat(nesw.slice(0, span)));
+                        d = 0; /* n */
                         break;
                     case -1:
-                        /*          xor           */
-                        if ((dx===0)!==((y0&1)!==0)) {
-                            /* nw */
-                            if (widen) {
-                                enwidenStaggered(7, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(7*span, 8*span)));
-                        } else {
-                            /* ne */
-                            if (widen) {
-                                enwidenStaggered(1, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(1*span, 2*span)));
-                        }
+                        d = ((dx===0)!==((y0&1)!==0))? 7:1; /* nw:ne */
                         break;
                     case 0:
-                        if (dx===1) {
-                            /* e */
-                            if (widen) {
-                                enwidenStaggered(2, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(2*span, 3*span)));
-                        } else {
-                            /* w */
-                            if (widen) {
-                                enwidenStaggered(6, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(6*span, 7*span)));
-                        }
+                        d = (dx===1)? 2:6; /* e:w */
                         break;
                     case 1:
-                        if ((dx===0)!==((y0&1)!==0)) {
-                            /* sw */
-                            if (widen) {
-                                enwidenStaggered(5, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(5*span, 6*span)));
-                        } else {
-                            /* se */
-                            if (widen) {
-                                enwidenStaggered(3, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(3*span, 4*span)));
-                        }
+                        d = ((dx===0)!==((y0&1)!==0))? 5:3; /* sw:se */
                         break;
                     default:
-                        /* s */
-                        if (widen) {
-                            enwidenStaggered(4, x1, y1);
-                        }
-                        newroute.splice.apply(newroute, cut.concat(nesw.slice(4*span, 5*span)));
+                        d = 4; /* s */
                         break;
                 }
-            } /* for */
+
+                if (widen) {
+                    enwidenStaggered(d, x1, y1);
+                }
+                newroute.splice.apply(newroute, cut.concat(nesw.slice(d*span, (d+1)*span)));
+            }
 
             if (widen) {
                 enwidenStaggered(-1, x0, y0);
@@ -5545,9 +5639,12 @@ define('ai/pathfinder',[],function() {
      * route array by adding new tiles onto the end as well as returning a larger
      * set of output. The tiles in the route will no longer be usable in any sequential
      * order.
+     * @param {Array} [wideroute] If widen is true, the returned route will have more tiles
+     * than the input route. If you want a new route array that matches the output, pass
+     * an empty array in here and it will be populated with the output tiles.
      * @return {Array} A spanned array of 2D vectors in the form x,y,x,y,x,y...
      */
-    PathFinder.prototype.routeToVectors = function(route, widen) {
+    PathFinder.prototype.routeToVectors = function(route, widen, wideroute) {
         return transformRoute.call(this,route,
             [ 0, -1,  // n
               1, -1,  // ne
@@ -5557,7 +5654,7 @@ define('ai/pathfinder',[],function() {
              -1,  1,  // sw
              -1,  0,  // w
              -1, -1], // ne
-            2, widen);
+            2, widen, wideroute);
     };
 
     /** Takes a route generated by {@link module:ai/pathfinder.PathFinder#route|route}
@@ -5571,10 +5668,13 @@ define('ai/pathfinder',[],function() {
      * route array by adding new tiles onto the end as well as returning a larger
      * set of output. The tiles in the route will no longer be usable in any sequential
      * order.
+     * @param {Array} [wideroute] If widen is true, the returned route will have more tiles
+     * than the input route. If you want a new route array that matches the output, pass
+     * an empty array in here and it will be populated with the output tiles.
      * @return {Array} An array of directions, e.g. <code>['e', 'se', 's']</code>
      */
-    PathFinder.prototype.routeToDirections = function(route, widen) {
-        return transformRoute.call(this,route, ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'], 1, widen);
+    PathFinder.prototype.routeToDirections = function(route, widen, wideroute) {
+        return transformRoute.call(this,route, ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'], 1, widen, wideroute);
     };
 
     /** Calculates a route from one position to another
@@ -5838,8 +5938,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         settings = settings || {};
         this.dbgShowMouse     = !!settings.showMouse;
         this.dbgShowCounts    = !!settings.showCounts;
-        this.dbgShowRegions   = !!settings.showRegions;
         this.dbgShowMouseTile = !!settings.showMouseTile;
+        /* If regions is true, then the x,y is shown for tiles. If it's a comma-separated list
+         * then those property values are shown on each tile. */
+        this.dbgShowRegions   = !!settings.showRegions;
+        this.dbgRegionProps   = settings.showRegions!==undefined&&settings.showRegions.length>0&&settings.showRegions!=='true'?
+            settings.showRegions.split(','):[];
 
         this.imageCache = {};
 
@@ -6227,7 +6331,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
             draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {
-                _this.map.drawDebugRegions(_this.ctx);
+                _this.map.drawDebugRegions(_this.ctx, _this.dbgRegionProps);
             }
 
             drawDebug();
@@ -6414,26 +6518,39 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /** Get a tile property from a world position. Starts at the topmost
          * map layer and world down to the ground.
-         * @method module:snaps.Snaps#getTilePropAtWorldPos
-         * @param  {String} prop The property to get
+         * @method module:snaps.Snaps#getTilePropsAtWorldPos
+         * @param {String|Array} prop The property or properties to get.
          * @param  {Number} x The x world position
          * @param  {Number} y The y world position
-         * @return {String} The property or undefined.
+         * @return {String|Array} The property value, or <code>undefined</code> if not found.
+         * If the prop parameter was an array, the return value will be an object describing
+         * all the properties required.
          */
-        this.getTilePropAtWorldPos = function(prop, x, y) {
-            return this.map.getTilePropAtWorldPos(prop, x,y);
+        this.getTilePropsAtWorldPos = function(prop, x, y) {
+            return this.map.getTilePropsAtWorldPos(prop, x,y);
+        };
+
+        /** Sets multiple properties on the topmost tile at a given tile position.
+         * @method module:snaps.Snaps#getTilePropsAtWorldPos
+         * @param {Object} props An object containing all the properties
+         * to copy into the tile's properties.
+         * @param  {Number} x The x tile column position
+         * @param  {Number} y The y tile row position
+         */
+        this.setTilePropsAtTilePos = function(props, x, y) {
+            this.map.setTilePropsAtTilePos(props, undefined, x,y);
         };
 
         /** Get a tile property from a tile column and row in the original map data.
          * Starts at the topmost map layer and world down to the ground.
-         * @method module:snaps.Snaps#getTilePropAtTilePos
+         * @method module:snaps.Snaps#getTilePropsAtTilePos
          * @param  {String} prop The property to get
          * @param  {Number} x The x tile column position
          * @param  {Number} y The y tile row position
          * @return {String} The property or undefined.
          */
-        this.getTilePropAtTilePos = function(prop, x, y) {
-            return this.map.getTilePropAtTilePos(prop, x,y);
+        this.getTilePropsAtTilePos = function(prop, x, y) {
+            return this.map.getTilePropsAtTilePos(prop, x,y);
         };
 
         /**

@@ -38,6 +38,23 @@ define(function() {
         },
 
         /**
+         * Copy properties from one object to another, but only if the destination
+         * does not have those properties, or if it has undefined values.
+         * @function module:util/js#setProps
+         * @param {Object} s The source object
+         * @param {Object} d The destination object
+         * @return {Object} The destination object
+         */
+        setProps: function(s,d) {
+            for (var prop in s) {
+                if (s.hasOwnProperty(prop) && (!d.hasOwnProperty(prop) || d[prop]===undefined)) {
+                    d[prop] = s[prop];
+                }
+            }
+            return d;
+        },
+
+        /**
          * Create a shallow clone of an object
          * @function module:util/js#clone
          * @param {Object} s The source object

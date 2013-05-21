@@ -141,7 +141,7 @@ function(traceProp, midPtEllipse, localScan) {
                 rx = route[i];
                 ry = route[i+1];
 
-                var sampleHeight = sn.getTilePropAtWorldPos('height',rx+sxo,ry+syo);
+                var sampleHeight = sn.getTilePropsAtWorldPos('height',rx+sxo,ry+syo);
 
                 if(sampleHeight>h) {
                     collided = true;

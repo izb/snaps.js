@@ -9,6 +9,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
     var debugText = debug.debugText;
     var copyProps = js.copyProps;
+    var setProps  = js.setProps;
 
     var xy = [0,0]; // work area
 
@@ -252,10 +253,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      * @method module:map/staggered-isometric.StaggeredIsometric#drawDebugRegions
      * @private
      */
-    StaggeredIsometric.prototype.drawDebugRegions = function(ctx) {
+    StaggeredIsometric.prototype.drawDebugRegions = function(ctx, props) {
 
         var map = this.data;
-        var l, layerEndY, layerEndX, r, x, y, i, stagger;
+        var l, layerEndY, layerEndX, r, x, y, stagger;
 
         var xstep = map.tilewidth;
         var ystep = map.tileheight / 2;
@@ -313,10 +314,23 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             r = l.rows[y];
             stagger = y&1?map.tilewidth/2:0;
             for (x = r.length-1; x >= 0; x--) {
-                debugText(ctx,
-                        x+","+y,
-                        85+Math.floor(-this.xoffset) + stagger + x * xstep,
-                        55+Math.floor(-this.yoffset) + y * ystep);
+                if (props.length>0) {
+                    var valList = [];
+                    var vals = this.getTilePropsAtTilePos(props, x, y);
+
+                    for (var i = 0; i < props.length; i++) {
+                        valList.push(vals[props[i]]);
+                    }
+                    debugText(ctx,
+                            valList.join(),
+                            85+Math.floor(-this.xoffset) + stagger + x * xstep,
+                            55+Math.floor(-this.yoffset) + y * ystep);
+                } else {
+                    debugText(ctx,
+                            x+","+y,
+                            85+Math.floor(-this.xoffset) + stagger + x * xstep,
+                            55+Math.floor(-this.yoffset) + y * ystep);
+                }
             }
         }
     };
@@ -417,13 +431,55 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      * Tiles are checked from the top-most layer down until a tile is found that
      * holds that property. This means that top-most tiles can override property
      * values from lower tiles.
-     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropAtTilePos
-     * @param {String} prop The property to get
-     * @param {Number} x A world x position
-     * @param {Number} y A world y position
-     * @return {String} The property value, or <code>undefined</code> if not found.
+     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropsAtTilePos
+     * @param {String|Array} prop The property or properties to get.
+     * @param {Number} x A tile x column position
+     * @param {Number} y A tile y row position
+     * @return {String|Array} The property value, or <code>undefined</code> if not found.
+     * If the prop parameter was an array, the return value will be an object describing
+     * all the properties required.
      */
-    StaggeredIsometric.prototype.getTilePropAtTilePos = function(prop, x, y) {
+    StaggeredIsometric.prototype.getTilePropsAtTilePos = function(prop, x, y) {
+        var layers = this.data.layers;
+        var propval;
+        var resultset;
+        var propset = typeof prop !== 'string';
+        for (var i = layers.length - 1; i >= 0; i--) {
+            var rows = layers[i].rows;
+            if (rows!==undefined) {
+                if (y>=0&&y<rows.length) {
+                    var t = rows[y][x];
+                    if (t) {
+                        if (propset) {
+                            var set = t.getProperties(prop);
+                            if (resultset) {
+                                setProps(set, resultset);
+                            } else {
+                                resultset = set;
+                            }
+                        } else {
+                            propval = t.getProperty(prop);
+                            if (propval!==undefined) {
+                                return propval;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return propset?resultset:undefined;
+    };
+
+    /** Takes a tile position and sets a property value on the topmost tile at a
+     * given tile position. If no tile is found, no property is set.
+     * @method module:map/staggered-isometric.StaggeredIsometric#setTilePropAtTilePos
+     * @param {String|Object} prop The property to set, or an object that contains
+     * a set of properties to set on the tile.
+     * @param {*} [val] The property value. Ignored if prop is an object.
+     * @param {Number} x A tile x column position
+     * @param {Number} y A tile y row position
+     */
+    StaggeredIsometric.prototype.setTilePropsAtTilePos = function(prop, val, x, y) {
         var layers = this.data.layers;
         var propval;
         for (var i = layers.length - 1; i >= 0; i--) {
@@ -432,15 +488,16 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 if (y>=0&&y<rows.length) {
                     var t = rows[y][x];
                     if (t) {
-                        propval = t.getProperty(prop);
-                        if (propval!==undefined) {
-                            return propval;
+                        if (typeof prop === 'string') {
+                            t.setProperty(prop, val);
+                        } else {
+                            t.setProperties(prop);
                         }
+                        return;
                     }
                 }
             }
         }
-        return undefined;
     };
 
     /** Takes a world position and returns a property value as defined by the tiles
@@ -448,15 +505,17 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      * Tiles are checked from the top-most layer down until a tile is found that
      * holds that property. This means that top-most tiles can override property
      * values from lower tiles.
-     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropAtWorldPos
-     * @param {String} prop The property to get
+     * @method module:map/staggered-isometric.StaggeredIsometric#getTilePropsAtWorldPos
+     * @param {String|Array} prop The property or properties to get
      * @param {Number} x A world x position
      * @param {Number} y A world y position
-     * @return {String} The property value, or <code>undefined</code> if not found.
+     * @return {String|Object} The property value, or <code>undefined</code> if not found.
+     * If the prop parameter was an array, the return value will be an object describing
+     * all the requested properties.
      */
-    StaggeredIsometric.prototype.getTilePropAtWorldPos = function(prop, x, y) {
+    StaggeredIsometric.prototype.getTilePropsAtWorldPos = function(prop, x, y) {
         /*(void)*/this.worldToTilePos(x, y, xy);
-        return this.getTilePropAtTilePos(prop, xy[0], xy[1]);
+        return this.getTilePropsAtTilePos(prop, xy[0], xy[1]);
     };
 
     /** Takes a screen position and tells you what tile it lies on. Take

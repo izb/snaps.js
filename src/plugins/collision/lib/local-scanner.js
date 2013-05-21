@@ -30,18 +30,18 @@ define(function() {
 
             /* nw/se */
 
-            if (sn.getTilePropAtWorldPos('height',x+1,y-1)>h &&    //  .##
-                    sn.getTilePropAtWorldPos('height',x,y-1)>h &&  //  .o#
-                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  ...
+            if (sn.getTilePropsAtWorldPos('height',x+1,y-1)>h &&    //  .##
+                    sn.getTilePropsAtWorldPos('height',x,y-1)>h &&  //  .o#
+                    sn.getTilePropsAtWorldPos('height',x+1,y)>h) {  //  ...
 
                 /* Technically we should test that our shifted y position is not solid,
                  * but really if you are using collision maps that look like that then
                  * you're asking for trouble. */
                 return 1;
 
-            } else if(sn.getTilePropAtWorldPos('height',x-1,y+1)>h &&  //  ...
-                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
-                    sn.getTilePropAtWorldPos('height',x,y+1)>h) {      //  ##.
+            } else if(sn.getTilePropsAtWorldPos('height',x-1,y+1)>h &&  //  ...
+                    sn.getTilePropsAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropsAtWorldPos('height',x,y+1)>h) {      //  ##.
 
                 return -1;
             }
@@ -50,15 +50,15 @@ define(function() {
 
             /* sw/ne */
 
-            if (sn.getTilePropAtWorldPos('height',x+1,y+1)>h &&    //  ...
-                    sn.getTilePropAtWorldPos('height',x,y+1)>h &&  //  .o#
-                    sn.getTilePropAtWorldPos('height',x+1,y)>h) {  //  .##
+            if (sn.getTilePropsAtWorldPos('height',x+1,y+1)>h &&    //  ...
+                    sn.getTilePropsAtWorldPos('height',x,y+1)>h &&  //  .o#
+                    sn.getTilePropsAtWorldPos('height',x+1,y)>h) {  //  .##
 
                 return -1;
 
-            } else if(sn.getTilePropAtWorldPos('height',x-1,y-1)>h &&  //  ##.
-                    sn.getTilePropAtWorldPos('height',x-1,y)>h &&      //  #o.
-                    sn.getTilePropAtWorldPos('height',x,y-1)>h) {      //  ...
+            } else if(sn.getTilePropsAtWorldPos('height',x-1,y-1)>h &&  //  ##.
+                    sn.getTilePropsAtWorldPos('height',x-1,y)>h &&      //  #o.
+                    sn.getTilePropsAtWorldPos('height',x,y-1)>h) {      //  ...
 
                 return 1;
             }

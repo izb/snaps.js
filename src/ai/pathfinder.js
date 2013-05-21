@@ -42,7 +42,6 @@ define(function() {
      * the more likely it is that the water will be avoided.
      */
     function PathFinder(sn, solid, diagonals, cutcorners, cost) {
-
         this.sn = sn;
         var map = sn.map;
         this.ground = map.groundLayer();
@@ -63,7 +62,7 @@ define(function() {
         }
 
         solid = solid || function(x, y) {
-            return sn.getTilePropAtTilePos('height', x, y) > 0;
+            return sn.getTilePropsAtTilePos('height', x, y) > 0;
         };
 
         var r2=Math.sqrt(2); /* ~1.414 */
@@ -83,7 +82,7 @@ define(function() {
              * differs on odd and even rows. Trust me though, these values check out fine. */
 
             /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
-            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal */
+            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
             this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
 
             /*                                E  SE   S  SW   W  NW   N  NE   E   S   W   N */
@@ -99,7 +98,7 @@ define(function() {
             } else {
                 this.distance = function(idx,x0,y0) {
                     /* In the case where we are moving diagonally past a solid tile, we return the cost as 3, which is
-                     * > sqrt(2) */
+                     * > 2*sqrt(2) */
                     var even = (y0&1)===0;
                     var dirsx = even?this.xdirectionsEven:this.xdirectionsOdd;
                     var dirsy = even?this.ydirectionsEven:this.ydirectionsOdd;
@@ -221,20 +220,30 @@ define(function() {
      * route array by adding new tiles onto the end as well as returning a larger
      * set of output. The tiles in the route will no longer be usable in any sequential
      * order.
+     * @param {Array} [wideroute] If widen is true, the returned route will have more tiles
+     * than the input route. If you want a new route array that matches the output, pass
+     * an empty array in here and it will be populated with the output tiles.
      * @return {Array} The transformed route
      */
-    var transformRoute = function(route, nesw, span, widen) {
+    var transformRoute = function(route, nesw, span, widen, wideroute) {
         if (route.length<=2) {
             return [];
         }
 
         var map = this.sn.map;
         var columns = map.columns;
-        var newroute = new Array(route.length/2-1);
+        var newroute = new Array(span*(route.length/2-1));
         var newrouteext = [];
         var x0, y0, x1, y1, i, tid, lastout = -1;
 
         widen = !!widen;
+
+        if (widen && wideroute) {
+            if (wideroute.length!==0) {
+                throw "wideroute output array length must be 0";
+            }
+            wideroute.push.apply(wideroute, route);
+        }
 
         /* In nesw:
          * 0   1   2   3   4   5   6   7
@@ -291,10 +300,12 @@ define(function() {
                     return;
             }
 
+            if (wideroute) {
+                wideroute.push(x1+lx, y1+ly);
+                wideroute.push(x1+rx, y1+ry);
+            }
             if (lastout===nextout) {
-                route.push(x1+lx, y1+ly);
                 newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
-                route.push(x1+rx, y1+ry);
                 newrouteext.push.apply(newrouteext, nesw.slice(nextout*span, (nextout+1)*span));
             } else {
                 switch(lastout) {
@@ -311,9 +322,7 @@ define(function() {
                     lc=7; rc=5;
                     break;
                 }
-                route.push(x1+lx, y1+ly);
                 newrouteext.push.apply(newrouteext, nesw.slice(lc*span, (lc+1)*span));
-                route.push(x1+rx, y1+ry);
                 newrouteext.push.apply(newrouteext, nesw.slice(rc*span, (rc+1)*span));
             }
 
@@ -331,70 +340,32 @@ define(function() {
                 var dx = x0-x1;
                 var dy = y0-y1;
                 var cut = [span*i/2, span];
+                var d;
 
                 switch(dy) {
+                    /* I know, right? */
                     case -2:
-                        /* n */
-                        if (widen) {
-                            enwidenStaggered(0, x1, y1);
-                        }
-                        newroute.splice.apply(newroute, cut.concat(nesw.slice(0, span)));
+                        d = 0; /* n */
                         break;
                     case -1:
-                        /*          xor           */
-                        if ((dx===0)!==((y0&1)!==0)) {
-                            /* nw */
-                            if (widen) {
-                                enwidenStaggered(7, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(7*span, 8*span)));
-                        } else {
-                            /* ne */
-                            if (widen) {
-                                enwidenStaggered(1, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(1*span, 2*span)));
-                        }
+                        d = ((dx===0)!==((y0&1)!==0))? 7:1; /* nw:ne */
                         break;
                     case 0:
-                        if (dx===1) {
-                            /* e */
-                            if (widen) {
-                                enwidenStaggered(2, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(2*span, 3*span)));
-                        } else {
-                            /* w */
-                            if (widen) {
-                                enwidenStaggered(6, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(6*span, 7*span)));
-                        }
+                        d = (dx===1)? 2:6; /* e:w */
                         break;
                     case 1:
-                        if ((dx===0)!==((y0&1)!==0)) {
-                            /* sw */
-                            if (widen) {
-                                enwidenStaggered(5, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(5*span, 6*span)));
-                        } else {
-                            /* se */
-                            if (widen) {
-                                enwidenStaggered(3, x1, y1);
-                            }
-                            newroute.splice.apply(newroute, cut.concat(nesw.slice(3*span, 4*span)));
-                        }
+                        d = ((dx===0)!==((y0&1)!==0))? 5:3; /* sw:se */
                         break;
                     default:
-                        /* s */
-                        if (widen) {
-                            enwidenStaggered(4, x1, y1);
-                        }
-                        newroute.splice.apply(newroute, cut.concat(nesw.slice(4*span, 5*span)));
+                        d = 4; /* s */
                         break;
                 }
-            } /* for */
+
+                if (widen) {
+                    enwidenStaggered(d, x1, y1);
+                }
+                newroute.splice.apply(newroute, cut.concat(nesw.slice(d*span, (d+1)*span)));
+            }
 
             if (widen) {
                 enwidenStaggered(-1, x0, y0);
@@ -422,9 +393,12 @@ define(function() {
      * route array by adding new tiles onto the end as well as returning a larger
      * set of output. The tiles in the route will no longer be usable in any sequential
      * order.
+     * @param {Array} [wideroute] If widen is true, the returned route will have more tiles
+     * than the input route. If you want a new route array that matches the output, pass
+     * an empty array in here and it will be populated with the output tiles.
      * @return {Array} A spanned array of 2D vectors in the form x,y,x,y,x,y...
      */
-    PathFinder.prototype.routeToVectors = function(route, widen) {
+    PathFinder.prototype.routeToVectors = function(route, widen, wideroute) {
         return transformRoute.call(this,route,
             [ 0, -1,  // n
               1, -1,  // ne
@@ -434,7 +408,7 @@ define(function() {
              -1,  1,  // sw
              -1,  0,  // w
              -1, -1], // ne
-            2, widen);
+            2, widen, wideroute);
     };
 
     /** Takes a route generated by {@link module:ai/pathfinder.PathFinder#route|route}
@@ -448,10 +422,13 @@ define(function() {
      * route array by adding new tiles onto the end as well as returning a larger
      * set of output. The tiles in the route will no longer be usable in any sequential
      * order.
+     * @param {Array} [wideroute] If widen is true, the returned route will have more tiles
+     * than the input route. If you want a new route array that matches the output, pass
+     * an empty array in here and it will be populated with the output tiles.
      * @return {Array} An array of directions, e.g. <code>['e', 'se', 's']</code>
      */
-    PathFinder.prototype.routeToDirections = function(route, widen) {
-        return transformRoute.call(this,route, ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'], 1, widen);
+    PathFinder.prototype.routeToDirections = function(route, widen, wideroute) {
+        return transformRoute.call(this,route, ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'], 1, widen, wideroute);
     };
 
     /** Calculates a route from one position to another

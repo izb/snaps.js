@@ -2809,7 +2809,7 @@ sn.drawImage('logo', 50, 30);
         
             
 <dt>
-    <h4 class="name" id="getTilePropAtTilePos"><span class="type-signature"></span>getTilePropAtTilePos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="getTilePropsAtTilePos"><span class="type-signature"></span>getTilePropsAtTilePos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String}</span></h4>
     
     
 </dt>
@@ -2985,7 +2985,7 @@ Starts at the topmost map layer and world down to the ground.
         
             
 <dt>
-    <h4 class="name" id="getTilePropAtWorldPos"><span class="type-signature"></span>getTilePropAtWorldPos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="getTilePropsAtWorldPos"><span class="type-signature"></span>getTilePropsAtWorldPos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String|Array}</span></h4>
     
     
 </dt>
@@ -3035,6 +3035,9 @@ map layer and world down to the ground.
             
                 
 <span class="param-type">String</span>
+|
+
+<span class="param-type">Array</span>
 
 
             
@@ -3044,7 +3047,7 @@ map layer and world down to the ground.
             
             
             
-            <td class="description last">The property to get</td>
+            <td class="description last">The property or properties to get.</td>
         </tr>
 	
 	
@@ -3135,7 +3138,9 @@ map layer and world down to the ground.
     
             
 <div class="param-desc">
-    The property or undefined.
+    The property value, or <code>undefined</code> if not found.
+If the prop parameter was an array, the return value will be an object describing
+all the properties required.
 </div>
 
 
@@ -3147,6 +3152,9 @@ map layer and world down to the ground.
 	<dd class="oneline">
 		
 <span class="param-type">String</span>
+|
+
+<span class="param-type">Array</span>
 
 
 	</dd>
@@ -3154,6 +3162,159 @@ map layer and world down to the ground.
 
 
         
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getTilePropsAtWorldPos"><span class="type-signature"></span>getTilePropsAtWorldPos<span class="signature">(props, x, y)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Sets multiple properties on the topmost tile at a given tile position.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">An object containing all the properties
+to copy into the tile's properties.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The x tile column position</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The y tile row position</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
     
     
 </dd>

@@ -92,7 +92,7 @@ define(function() {
                 break;
             }
 
-            sampleHeight = sn.getTilePropAtWorldPos(prop,x0,y0);
+            sampleHeight = sn.getTilePropsAtWorldPos(prop,x0,y0);
 
             if(sampleHeight>h) {
                 collided = true;

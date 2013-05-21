@@ -578,7 +578,7 @@ runtime statistics, for debug purposes.</td>
         
             
 <dt>
-    <h4 class="name" id="getTilePropAtTilePos"><span class="type-signature"></span>getTilePropAtTilePos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="getTilePropsAtTilePos"><span class="type-signature"></span>getTilePropsAtTilePos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String|Array}</span></h4>
     
     
 </dt>
@@ -630,6 +630,9 @@ values from lower tiles.
             
                 
 <span class="param-type">String</span>
+|
+
+<span class="param-type">Array</span>
 
 
             
@@ -639,7 +642,7 @@ values from lower tiles.
             
             
             
-            <td class="description last">The property to get</td>
+            <td class="description last">The property or properties to get.</td>
         </tr>
 	
 	
@@ -662,7 +665,7 @@ values from lower tiles.
             
             
             
-            <td class="description last">A world x position</td>
+            <td class="description last">A tile x column position</td>
         </tr>
 	
 	
@@ -685,7 +688,7 @@ values from lower tiles.
             
             
             
-            <td class="description last">A world y position</td>
+            <td class="description last">A tile y row position</td>
         </tr>
 	
 	
@@ -731,6 +734,8 @@ values from lower tiles.
             
 <div class="param-desc">
     The property value, or <code>undefined</code> if not found.
+If the prop parameter was an array, the return value will be an object describing
+all the properties required.
 </div>
 
 
@@ -742,6 +747,9 @@ values from lower tiles.
 	<dd class="oneline">
 		
 <span class="param-type">String</span>
+|
+
+<span class="param-type">Array</span>
 
 
 	</dd>
@@ -756,7 +764,7 @@ values from lower tiles.
         
             
 <dt>
-    <h4 class="name" id="getTilePropAtWorldPos"><span class="type-signature"></span>getTilePropAtWorldPos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="getTilePropsAtWorldPos"><span class="type-signature"></span>getTilePropsAtWorldPos<span class="signature">(prop, x, y)</span><span class="type-signature"> &rarr; {String|Object}</span></h4>
     
     
 </dt>
@@ -809,6 +817,9 @@ values from lower tiles.
             
                 
 <span class="param-type">String</span>
+|
+
+<span class="param-type">Array</span>
 
 
             
@@ -818,7 +829,7 @@ values from lower tiles.
             
             
             
-            <td class="description last">The property to get</td>
+            <td class="description last">The property or properties to get</td>
         </tr>
 	
 	
@@ -910,6 +921,8 @@ values from lower tiles.
             
 <div class="param-desc">
     The property value, or <code>undefined</code> if not found.
+If the prop parameter was an array, the return value will be an object describing
+all the requested properties.
 </div>
 
 
@@ -921,6 +934,9 @@ values from lower tiles.
 	<dd class="oneline">
 		
 <span class="param-type">String</span>
+|
+
+<span class="param-type">Object</span>
 
 
 	</dd>
@@ -1832,6 +1848,222 @@ bounds.
             
             
             <td class="description last">The Y world position to scroll to</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setTilePropAtTilePos"><span class="type-signature"></span>setTilePropAtTilePos<span class="signature">(prop, <span class="optional">val</span>, x, y)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Takes a tile position and sets a property value on the topmost tile at a
+given tile position. If no tile is found, no property is set.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Argument</th>
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>prop</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The property to set, or an object that contains
+a set of properties to set on the tile.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>val</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">The property value. Ignored if prop is an object.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">A tile x column position</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">A tile y row position</td>
         </tr>
 	
 	

@@ -109,8 +109,12 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         settings = settings || {};
         this.dbgShowMouse     = !!settings.showMouse;
         this.dbgShowCounts    = !!settings.showCounts;
-        this.dbgShowRegions   = !!settings.showRegions;
         this.dbgShowMouseTile = !!settings.showMouseTile;
+        /* If regions is true, then the x,y is shown for tiles. If it's a comma-separated list
+         * then those property values are shown on each tile. */
+        this.dbgShowRegions   = !!settings.showRegions;
+        this.dbgRegionProps   = settings.showRegions!==undefined&&settings.showRegions.length>0&&settings.showRegions!=='true'?
+            settings.showRegions.split(','):[];
 
         this.imageCache = {};
 
@@ -498,7 +502,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
             draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {
-                _this.map.drawDebugRegions(_this.ctx);
+                _this.map.drawDebugRegions(_this.ctx, _this.dbgRegionProps);
             }
 
             drawDebug();
@@ -685,26 +689,39 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /** Get a tile property from a world position. Starts at the topmost
          * map layer and world down to the ground.
-         * @method module:snaps.Snaps#getTilePropAtWorldPos
-         * @param  {String} prop The property to get
+         * @method module:snaps.Snaps#getTilePropsAtWorldPos
+         * @param {String|Array} prop The property or properties to get.
          * @param  {Number} x The x world position
          * @param  {Number} y The y world position
-         * @return {String} The property or undefined.
+         * @return {String|Array} The property value, or <code>undefined</code> if not found.
+         * If the prop parameter was an array, the return value will be an object describing
+         * all the properties required.
          */
-        this.getTilePropAtWorldPos = function(prop, x, y) {
-            return this.map.getTilePropAtWorldPos(prop, x,y);
+        this.getTilePropsAtWorldPos = function(prop, x, y) {
+            return this.map.getTilePropsAtWorldPos(prop, x,y);
+        };
+
+        /** Sets multiple properties on the topmost tile at a given tile position.
+         * @method module:snaps.Snaps#getTilePropsAtWorldPos
+         * @param {Object} props An object containing all the properties
+         * to copy into the tile's properties.
+         * @param  {Number} x The x tile column position
+         * @param  {Number} y The y tile row position
+         */
+        this.setTilePropsAtTilePos = function(props, x, y) {
+            this.map.setTilePropsAtTilePos(props, undefined, x,y);
         };
 
         /** Get a tile property from a tile column and row in the original map data.
          * Starts at the topmost map layer and world down to the ground.
-         * @method module:snaps.Snaps#getTilePropAtTilePos
+         * @method module:snaps.Snaps#getTilePropsAtTilePos
          * @param  {String} prop The property to get
          * @param  {Number} x The x tile column position
          * @param  {Number} y The y tile row position
          * @return {String} The property or undefined.
          */
-        this.getTilePropAtTilePos = function(prop, x, y) {
-            return this.map.getTilePropAtTilePos(prop, x,y);
+        this.getTilePropsAtTilePos = function(prop, x, y) {
+            return this.map.getTilePropsAtTilePos(prop, x,y);
         };
 
         /**

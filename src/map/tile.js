@@ -1,7 +1,9 @@
 /*global define*/
-define(['util/uid'], function(uid) {
+define(['util/uid', 'util/js'], function(uid, js) {
 
     'use strict';
+
+    var copyProps = js.copyProps;
 
     /**
      * @module map/tile
@@ -67,6 +69,51 @@ define(['util/uid'], function(uid) {
         }
 
         return undefined;
+    };
+
+    /** Gets multiple properties from a tile. If any of
+     * the properties are missing, the value is set to undefined.
+     * @method module:map/tile.Tile#getProperties
+     * @param {Array} props The properties to get
+     * @return {Object} An object describing the properties.
+     */
+    Tile.prototype.getProperties = function(props) {
+        var result = {};
+        for (var i = props.length - 1; i >= 0; i--) {
+            var prop = props[i];
+
+            if (this.properties.hasOwnProperty(prop)) {
+                result[prop] = this.properties[prop];
+                continue;
+            }
+
+            if (this.defaultProps.hasOwnProperty(prop)) {
+                result[prop] = this.defaultProps[prop];
+                continue;
+            }
+
+            result[prop] = undefined;
+        }
+
+        return result;
+    };
+
+    /** Sets a property value on a tile.
+     * @method module:map/tile.Tile#setProperty
+     * @param {String} prop The property to set.
+     * @param {*} val The value to set
+     */
+    Tile.prototype.setProperty = function(prop, val) {
+        this.properties[prop] = val;
+    };
+
+    /** Sets multiple properties on a tile.
+     * @method module:map/tile.Tile#setProperties
+     * @param {Object} props An object containing all the properties
+     * to copy into the tile's properties.
+     */
+    Tile.prototype.setProperties = function(props) {
+        copyProps(props, this.properties);
     };
 
     return Tile;

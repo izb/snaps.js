@@ -51,6 +51,10 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
             ex = e;
         }
 
+        it('should have a testable engine', function() {
+            expect(ex).to.equal(undefined);
+        });
+
         var isSolid = function(grid,x,y) {
             return grid.charAt(x+10*y)==='#';
         };
@@ -84,7 +88,6 @@ define('spec/pathfinding', ['snaps'], function(Snaps) {
                        ".........." +
                        ".........." +
                        "..........";
-
 
             var pf = new sn.PathFinder(isSolid.bind(this,grid));
 
