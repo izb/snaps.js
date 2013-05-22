@@ -255,17 +255,17 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      */
     StaggeredIsometric.prototype.drawDebugRegions = function(ctx, props) {
 
-        var map = this.data;
+        var map    = this.data;
         var l, layerEndY, layerEndX, r, x, y, stagger;
 
-        var xstep = map.tilewidth;
-        var ystep = map.tileheight / 2;
+        var xstep  = map.tilewidth;
+        var ystep  = map.tileheight / 2;
 
         var starty = Math.floor((this.yoffset-ystep) / ystep);
-        var endy = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
+        var endy   = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
 
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
-        var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
+        var endx   = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
         l = map.layers[0];
 
@@ -399,8 +399,8 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
         var map = this.data;
 
-        var tw = map.tilewidth;
-        var th = map.tileheight;
+        var tw  = map.tilewidth;
+        var th  = map.tileheight;
 
         x=x|0;
         y=y|0;
@@ -571,7 +571,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      */
     StaggeredIsometric.prototype.updateLayers = function(now) {
         var epoch = +new Date();
-        var map = this.data;
+        var map   = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
             if (l.hasOwnProperty('update')) {
@@ -606,11 +606,11 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      * @private
      */
     StaggeredIsometric.prototype.onResize = function(w, h) {
-        this.clientWidth = w;
+        this.clientWidth  = w;
         this.clientHeight = h;
 
-        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
-        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+        this.maxxoffset   = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset   = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
     };
 
 
@@ -620,18 +620,18 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      */
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
 
-        var map = this.data;
+        var map    = this.data;
 
         var epoch;
 
-        var xstep = map.tilewidth;
-        var ystep = map.tileheight / 2;
+        var xstep  = map.tilewidth;
+        var ystep  = map.tileheight / 2;
 
         var starty = Math.floor((this.yoffset-ystep) / ystep);
-        var endy = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
+        var endy   = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
 
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
-        var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
+        var endx   = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
         epoch = +new Date();
         /* Sort sprites first by y-axis, then by height, then creation order */

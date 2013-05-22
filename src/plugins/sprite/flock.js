@@ -59,8 +59,8 @@ define(function() {
     function Flock() {
         /* TODO: Docs - Show an example of a complete flocked sprite with all required plugins. */
         /* TODO: Add support for phased updates */
-        this.xy=[0,0];
-        this.xy2=[0,0];
+        this.xy  = [0,0];
+        this.xy2 = [0,0];
     }
 
     /** Called with the update options as the function context, one of which
@@ -96,11 +96,11 @@ define(function() {
          */
 
         var weightSeparation = 2.5;
-        var weightAlignment = 1;
-        var weightCohesion = 1.8;
-        var weightSteering = 0.9;
-        var weightInertia =1.5;
-        var hweightInertia =weightInertia/2;
+        var weightAlignment  = 1;
+        var weightCohesion   = 1.8;
+        var weightSteering   = 0.9;
+        var weightInertia    =1.5;
+        var hweightInertia   =weightInertia/2;
 
         /* TODO: I have a vague suspicion that not all the vertical components are being
          * halved correctly. */

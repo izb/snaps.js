@@ -27,15 +27,15 @@ define(['util/uid', 'util/js'], function(uid, js) {
      * the defaults.
      */
     function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties) {
-        this.img = img;
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.xoverdraw = xoverdraw;
-        this.yoverdraw = yoverdraw;
+        this.img          = img;
+        this.x            = x;
+        this.y            = y;
+        this.w            = w;
+        this.h            = h;
+        this.xoverdraw    = xoverdraw;
+        this.yoverdraw    = yoverdraw;
         this.defaultProps = defaultProps||{};
-        this.properties = properties||{};
+        this.properties   = properties||{};
     }
 
     /**

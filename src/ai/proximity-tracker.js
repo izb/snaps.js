@@ -74,8 +74,8 @@ define(function() {
         r = Math.ceil(r/this.cellw);
 
         if(this.candidateCache.hasOwnProperty(r)) {
-            var cache = this.candidateCache[r];
-            this.certains = cache.certains;
+            var cache       = this.candidateCache[r];
+            this.certains   = cache.certains;
             this.uncertains = cache.uncertains;
             return;
         }
@@ -89,7 +89,7 @@ define(function() {
             this.uncertains = [-s-1,-s,-s+1,-1,0,1,s-1,s,s+1];
 
         } else {
-            this.certains = [];
+            this.certains   = [];
             this.uncertains = [];
 
             var rmax = (r+1)*(r+1);
@@ -145,7 +145,7 @@ define(function() {
 
         var cx = (x/this.cellw)|0;
         var cy = (y/this.cellh)|0;
-        var c = cy*this.span+cx;
+        var c  = cy*this.span+cx;
 
         /* Cells that are certain to be within the radius are easy */
         for (i = this.certains.length - 1; i >= 0; i--) {
@@ -176,7 +176,7 @@ define(function() {
                 cell = this.cells[oc];
                 if (cell!==undefined) {
                     for (j = cell.sprites.length - 1; j >= 0; j--) {
-                        s = cell.sprites[j];
+                        s  = cell.sprites[j];
                         dx = x-s.x;
                         dy = (y-s.y)*2;
                         s.tmpDist2=(dx*dx+dy*dy);
@@ -216,9 +216,9 @@ define(function() {
     ProximityTracker.prototype.track = function(sprite) {
         var pd = sprite.proximityData[this.id];
 
-        var x = (sprite.x/this.cellw)|0;
-        var y = (sprite.y/this.cellh)|0;
-        var c = y*this.span+x;
+        var x  = (sprite.x/this.cellw)|0;
+        var y  = (sprite.y/this.cellh)|0;
+        var c  = y*this.span+x;
 
         if(c!==pd.cell) {
             removeFromItsCell.call(this, sprite);
