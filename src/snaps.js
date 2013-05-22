@@ -116,14 +116,13 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.dbgRegionProps   = settings.showRegions&&settings.showRegions.length>0&&settings.showRegions!=='true'?
             settings.showRegions.split(','):[];
 
-        this.imageCache = {};
-
+        this.imageCache     = {};
         this.spriteUpdaters = {};
-        this.colliders = {};
-        this.fxUpdaters = {};
-        this.layerPlugins = {};
-        this.cameraPlugins = {};
-        this.phaserPlugins = {};
+        this.colliders      = {};
+        this.fxUpdaters     = {};
+        this.layerPlugins   = {};
+        this.cameraPlugins  = {};
+        this.phaserPlugins  = {};
 
         /**
          * Exposes some standard running stats
@@ -132,24 +131,24 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.stats = new Stats();
 
-        this.timers = {};
-        this.cameras = {};
-        this.camera = null;
+        this.timers     = {};
+        this.cameras    = {};
+        this.camera     = null;
 
-        this.activeFX = [];
+        this.activeFX   = [];
 
         this.taskQueues = [];
 
-        this.now = 0;
+        this.now   = 0;
         this.epoch = 0; /* 0 in chrome, but moz passes unix time. Epoch will be adjusted on first repaint */
 
         var c = document.getElementById(canvasID);
-        this.clientWidth = c.clientWidth;
+        this.clientWidth  = c.clientWidth;
         this.clientHeight = c.clientHeight;
-        this.ctx = c.getContext("2d");
+        this.ctx          = c.getContext("2d");
 
         this.keyboard = new Keyboard();
-        this.mouse = new Mouse(c);
+        this.mouse    = new Mouse(c);
 
         this.ctx.fillStyle='#000022';
         this.ctx.fillRect (0,0,c.clientWidth,c.clientHeight);
@@ -166,13 +165,13 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.hideBuildings = !!settings.hideBuildings;
         }
 
-        var draw = _this.game.draw;
+        var draw   = _this.game.draw;
         var update = _this.game.update;
 
         this.spriteDefs = {};
-        this.sprites = [];
-        this.phasers = [];
-        this.spriteMap = {};
+        this.sprites    = [];
+        this.phasers    = [];
+        this.spriteMap  = {};
 
         this.lastFrameTime = 0;
 
@@ -252,7 +251,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         var preloader = new Preloader();
 
         if (this.map!==undefined) {
-
             this.map.primePreloader(preloader);
         }
 
@@ -262,6 +260,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var storePreloaded = function(image, tag){
                 _this.imageCache[tag] = image;
             };
+
             for(var pathName in game.preloadImages) {
                 preloader.add(game.preloadImages[pathName], pathName, storePreloaded);
             }

@@ -24,9 +24,9 @@ function(Sprite, uid) {
      * for this layer plugin though, so feel free not to pass any in.
      */
     function GroundSprites(layerName, opts) {
-        this.opts = opts||{};
-        this.name = layerName;
-        this.sprites = [];
+        this.opts      = opts||{};
+        this.name      = layerName;
+        this.sprites   = [];
         this.spriteMap = {};
     }
 

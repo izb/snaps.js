@@ -65,13 +65,14 @@ define(['util/js'], function(js) {
 
         opts = opts||{};
 
-        this.def = def;
-        this.sn = sn;
-        this.x = typeof x === 'function'?x():x;
-        this.y = typeof y === 'function'?y():y;
-        this.h = typeof h === 'function'?h():h;
-        this.state = null;
+        this.def    = def;
+        this.sn     = sn;
+        this.x      = typeof x === 'function'?x():x;
+        this.y      = typeof y === 'function'?y():y;
+        this.h      = typeof h === 'function'?h():h;
+        this.state  = null;
         this.active = true;
+
         if (opts.maxloops === undefined) {
             this.maxloops = 0;
         } else {

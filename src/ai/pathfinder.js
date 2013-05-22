@@ -42,11 +42,11 @@ define(function() {
      * the more likely it is that the water will be avoided.
      */
     function PathFinder(sn, solid, diagonals, cutcorners, cost) {
-        this.sn = sn;
-        var map = sn.map;
-        this.ground = map.groundLayer();
-        this.xcount = map.data.width;
-        this.ycount = map.data.height;
+        this.sn       = sn;
+        var map       = sn.map;
+        this.ground   = map.groundLayer();
+        this.xcount   = map.data.width;
+        this.ycount   = map.data.height;
         this.nodeRows = new Array(this.ycount);
 
         if (cutcorners===undefined) {
@@ -123,14 +123,14 @@ define(function() {
 
             /* Orthogonal map */
 
-            /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
-            this.xdirectionsOdd = diagonals?[1,  1, 0, -1, -1, -1,  0,  1]:[1, 0, -1,  0];
-            this.ydirectionsOdd = diagonals?[0,  1, 1,  1,  0, -1, -1, -1]:[0, 1,  0, -1];
+            /*                                E  SE  S  SW   W  NW   N  NE   E  S   W   N */
+            this.xdirectionsOdd  = diagonals?[1,  1, 0, -1, -1, -1,  0,  1]:[1, 0, -1,  0];
+            this.ydirectionsOdd  = diagonals?[0,  1, 1,  1,  0, -1, -1, -1]:[0, 1,  0, -1];
 
             this.xdirectionsEven = this.xdirectionsOdd;
             this.ydirectionsEven = this.ydirectionsOdd;
 
-            this.distances   = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
+            this.distances       = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
 
             if (cutcorners) {
                 this.distance = function(idx) {
@@ -333,12 +333,12 @@ define(function() {
             /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
              * 1 pair ahead of the current pair to determine direction. */
             for (i = route.length - 4; i >= 0; i-=2) {
-                x0 = route[i];
-                y0 = route[i+1];
-                x1 = route[i+2];
-                y1 = route[i+3];
-                var dx = x0-x1;
-                var dy = y0-y1;
+                x0      = route[i];
+                y0      = route[i+1];
+                x1      = route[i+2];
+                y1      = route[i+3];
+                var dx  = x0-x1;
+                var dy  = y0-y1;
                 var cut = [span*i/2, span];
                 var d;
 
