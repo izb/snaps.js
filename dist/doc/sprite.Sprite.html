@@ -1262,7 +1262,7 @@ if the sprite moves, but you can then override direction by calling this.
         
             
 <dt>
-    <h4 class="name" id="setState"><span class="type-signature"></span>setState<span class="signature">(state, ext)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setState"><span class="type-signature"></span>setState<span class="signature">(state, ext, <span class="optional">epoch</span>)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
     
     
 </dt>
@@ -1294,6 +1294,8 @@ See morphState for an alternative option.
 		<th>Type</th>
 		
 		
+		<th>Argument</th>
+		
 		
 		
 		
@@ -1319,6 +1321,14 @@ See morphState for an alternative option.
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
             
             
             
@@ -1343,10 +1353,52 @@ definition.</td>
             </td>
             
             
+                <td class="attributes">
+                
+                    
+                
+                    
+                
+                </td>
+            
             
             
             
             <td class="description last">The state extension to set, or undefined.</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>epoch</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+                    
+                
+                    
+                
+                </td>
+            
+            
+            
+            
+            <td class="description last">If omitted, the state will begin now. Override this by passing in a
+time in order to skew the animation jog position.</td>
         </tr>
 	
 	
@@ -1387,6 +1439,30 @@ definition.</td>
     
     
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    true if the state was changed. False if, for example, the state was already
+the one requested.
+</div>
+
+
+
+<dl>
+	<dt class="oneline">
+		Type
+	</dt>
+	<dd class="oneline">
+		
+<span class="param-type">Boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
     
     
 </dd>

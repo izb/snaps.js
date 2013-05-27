@@ -59,6 +59,8 @@ define(function() {
     function Flock() {
         /* TODO: Docs - Show an example of a complete flocked sprite with all required plugins. */
         /* TODO: Add support for phased updates */
+        /* TODO: Try making a flock of 1. It just spins round and acts weird. Work out if that's expected
+         * or indicative of some bug. */
         this.xy  = [0,0];
         this.xy2 = [0,0];
     }

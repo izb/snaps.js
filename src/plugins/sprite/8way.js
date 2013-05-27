@@ -23,7 +23,15 @@ define(function() {
      * <p>
      * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
      * <p>
-     * This plugin takes no options.
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>anti_jitter</dt><dd>Creates a buffer between direction changes. Waits a certain number
+     *  of frames before changing the direction. The direction only changes if the new direction
+     *  is not the current direction for a set number of frames. Defaults to 0.</dd>
+     *  <dt>bounce_base</dt><dd>Where is the 'floor'? E.g. a bounce_base of 25 and an bounce height
+     *  of 100 will bounce up 100px on top of the floor level of 25. The height value will
+     *  be 125 at its apex, midway through the state animation.</dd>
+     * </dl>
      * @constructor module:plugins/sprite/8way.Face8Way
      */
     function Face8Way() {
@@ -78,12 +86,26 @@ define(function() {
             }
         }
 
-        this.direction = d;
-
         this.oldx = s.x;
         this.oldy = s.y;
 
-        s.setState(s.stateName, this.direction);
+        if (this.anti_jitter) {
+            this.jitterBuffer.push(d);
+            if (this.jitterBuffer.length>this.anti_jitter) {
+                this.jitterBuffer = this.jitterBuffer.slice(1);
+            }
+            for (var i = this.jitterBuffer.length - 1; i >= 0; i--) {
+                var jd = this.jitterBuffer[i];
+                if(jd===this.direction) {
+                    return;
+                }
+            }
+            this.jitterBuffer = new Array(this.anti_jitter);
+        }
+
+        this.direction = d;
+
+        s.morphState(s.stateName, this.direction);
 
         return true;
     };
@@ -95,6 +117,10 @@ define(function() {
     Face8Way.prototype.init = function(sprite) {
         this.sprite = sprite;
         this.direction = 'e';
+
+        if (this.anti_jitter) {
+            this.jitterBuffer = new Array(this.anti_jitter);
+        }
     };
 
     /**

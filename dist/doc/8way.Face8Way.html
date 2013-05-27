@@ -63,7 +63,15 @@ property in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.
 <p>
 See The <code>opts<code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a>
 <p>
-This plugin takes no options.
+Alongside the name, you can pass the following options
+<dl>
+ <dt>anti_jitter</dt><dd>Creates a buffer between direction changes. Waits a certain number
+ of frames before changing the direction. The direction only changes if the new direction
+ is not the current direction for a set number of frames. Defaults to 0.</dd>
+ <dt>bounce_base</dt><dd>Where is the 'floor'? E.g. a bounce_base of 25 and an bounce height
+ of 100 will bounce up 100px on top of the floor level of 25. The height value will
+ be 125 at its apex, midway through the state animation.</dd>
+</dl>
     </div>
     
 

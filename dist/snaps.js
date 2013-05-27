@@ -185,7 +185,7 @@ define('sprites/sprite',['util/js'], function(js) {
     
 
     var copyProps = js.copyProps;
-    var clone = js.clone;
+    var clone     = js.clone;
 
     /** Creates a new sprite object. Note that you shouldn't normally call this constructor directly.
      * Call the factory method {@link module:snaps.Snaps#spawnSprite|spawnSprite} instead.
@@ -242,13 +242,14 @@ define('sprites/sprite',['util/js'], function(js) {
 
         opts = opts||{};
 
-        this.def = def;
-        this.sn = sn;
-        this.x = typeof x === 'function'?x():x;
-        this.y = typeof y === 'function'?y():y;
-        this.h = typeof h === 'function'?h():h;
-        this.state = null;
+        this.def    = def;
+        this.sn     = sn;
+        this.x      = typeof x === 'function'?x():x;
+        this.y      = typeof y === 'function'?y():y;
+        this.h      = typeof h === 'function'?h():h;
+        this.state  = null;
         this.active = true;
+
         if (opts.maxloops === undefined) {
             this.maxloops = 0;
         } else {
@@ -355,9 +356,13 @@ define('sprites/sprite',['util/js'], function(js) {
      * @method module:sprites/sprite.Sprite#setState
      * @param {String} state The state of the sprite as specified in its sprite
      * definition.
-     * @param {String} ext   The state extension to set, or undefined.
+     * @param {String} ext The state extension to set, or undefined.
+     * @param {Number} [epoch] If omitted, the state will begin now. Override this by passing in a
+     * time in order to skew the animation jog position.
+     * @return {Boolean} true if the state was changed. False if, for example, the state was already
+     * the one requested.
      */
-    Sprite.prototype.setState = function(state, ext) {
+    Sprite.prototype.setState = function(state, ext, epoch) {
 
         this.active = true;
 
@@ -377,7 +382,7 @@ define('sprites/sprite',['util/js'], function(js) {
         }
 
         this.state = this.def.states[state];
-        this.epoch = this.sn.getNow();
+        this.epoch = epoch||this.sn.getNow();
     };
 
     /** Finds the current state name, i.e. the state without the extension.
@@ -413,9 +418,8 @@ define('sprites/sprite',['util/js'], function(js) {
      * @param {String} ext   The state extension to set, or undefined.
      */
     Sprite.prototype.morphState = function(state, ext) {
-        /* TODO: Make a state transition, but maintain the jog position. Note that the jog position
-         * may be clamped to the last frame if autoRemove is false and the internal active flag is set.
-         */
+        var now = this.sn.getNow();
+        this.setState(state, ext, now - this.state.dur * this.state.jogPos(this.epoch, now));
     };
 
     /**
@@ -968,104 +972,104 @@ define('input/keyboard',[],function() {
          */
         this.keymap = {
             backspace: 8,
-            tab: 9,
-            enter: 13,
-            pause: 19,
-            capsLock: 20,
-            escape: 27,
-            space: 32,
-            pageUp: 33,
-            pageDown: 34,
-            end: 35,
-            home: 36,
-            left: 37,
-            up: 38,
-            right: 39,
-            down: 40,
-            ins: 45,
-            del: 46,
+            tab      : 9,
+            enter    : 13,
+            pause    : 19,
+            capsLock : 20,
+            escape   : 27,
+            space    : 32,
+            pageUp   : 33,
+            pageDown : 34,
+            end      : 35,
+            home     : 36,
+            left     : 37,
+            up       : 38,
+            right    : 39,
+            down     : 40,
+            ins      : 45,
+            del      : 46,
 
             /* Main keyboard */
-            plus: 187,
-            comma: 188,
-            minus: 189,
-            period: 190,
+            plus     : 187,
+            comma    : 188,
+            minus    : 189,
+            period   : 190,
 
-            shift: 16,
-            ctrl: 17,
-            alt: 18,
+            shift    : 16,
+            ctrl     : 17,
+            alt      : 18,
 
             /* top row */
-            zero: 48,
-            one: 49,
-            two: 50,
-            three: 51,
-            four: 52,
-            five: 53,
-            six: 54,
-            seven: 55,
-            eight: 56,
-            nine: 57,
+            zero     : 48,
+            one      : 49,
+            two      : 50,
+            three    : 51,
+            four     : 52,
+            five     : 53,
+            six      : 54,
+            seven    : 55,
+            eight    : 56,
+            nine     : 57,
 
-            a: 65,
-            b: 66,
-            c: 67,
-            d: 68,
-            e: 69,
-            f: 70,
-            g: 71,
-            h: 72,
-            i: 73,
-            j: 74,
-            k: 75,
-            l: 76,
-            m: 77,
-            n: 78,
-            o: 79,
-            p: 80,
-            q: 81,
-            r: 82,
-            s: 83,
-            t: 84,
-            u: 85,
-            v: 86,
-            w: 87,
-            x: 88,
-            y: 89,
-            z: 90,
+            a        : 65,
+            b        : 66,
+            c        : 67,
+            d        : 68,
+            e        : 69,
+            f        : 70,
+            g        : 71,
+            h        : 72,
+            i        : 73,
+            j        : 74,
+            k        : 75,
+            l        : 76,
+            m        : 77,
+            n        : 78,
+            o        : 79,
+            p        : 80,
+            q        : 81,
+            r        : 82,
+            s        : 83,
+            t        : 84,
+            u        : 85,
+            v        : 86,
+            w        : 87,
+            x        : 88,
+            y        : 89,
+            z        : 90,
 
             /* Number pad */
-            num0: 96,
-            num1: 97,
-            num2: 98,
-            num3: 99,
-            num4: 100,
-            num5: 101,
-            num6: 102,
-            num7: 103,
-            num8: 104,
-            num9: 105,
+            num0     : 96,
+            num1     : 97,
+            num2     : 98,
+            num3     : 99,
+            num4     : 100,
+            num5     : 101,
+            num6     : 102,
+            num7     : 103,
+            num8     : 104,
+            num9     : 105,
 
             /* More number pad */
-            multiply: 106,
-            add: 107,
+            multiply : 106,
+            add      : 107,
             substract: 109,
-            decimal: 110,
-            divide: 111,
+            decimal  : 110,
+            divide   : 111,
 
             /* Function keys */
-            F1: 112,
-            F2: 113,
-            F3: 114,
-            F4: 115,
-            F5: 116,
-            F6: 117,
-            F7: 118,
-            F8: 119,
-            F9: 120,
-            F10: 121,
-            F11: 122,
-            F12: 123
+            F1       : 112,
+            F2       : 113,
+            F3       : 114,
+            F4       : 115,
+            F5       : 116,
+            F6       : 117,
+            F7       : 118,
+            F8       : 119,
+            F9       : 120,
+            F10      : 121,
+            F11      : 122,
+            F12      : 123
         };
 
         this.actions = [];
@@ -1086,8 +1090,7 @@ define('input/keyboard',[],function() {
 
         var keydown = function(e) {
             var tag = e.target.tagName;
-            if (e.type !== 'keydown' || tag === 'INPUT' || tag === 'TEXTAREA')
-            {
+            if (e.type !== 'keydown' || tag === 'INPUT' || tag === 'TEXTAREA') {
                 return;
             }
             e.preventDefault();
@@ -1100,8 +1103,7 @@ define('input/keyboard',[],function() {
         };
 
         var keyup = function(e) {
-            if (e.type !== 'keyup')
-            {
+            if (e.type !== 'keyup') {
                 return;
             }
             e.preventDefault();
@@ -1167,16 +1169,16 @@ define('input/mouse',[],function() {
         this.y = 0;
 
         this.inputmap = {
-            mouse1: -1,
-            mouse2: -3,
-            wheelUp: -4,
+            mouse1   : -1,
+            mouse2   : -3,
+            wheelUp  : -4,
             wheelDown: -5
         };
 
         var mousemoved = function(e) {
             var rect = canvas.getBoundingClientRect();
-            _this.x = e.clientX - rect.left;
-            _this.y = e.clientY - rect.top;
+            _this.x  = e.clientX - rect.left;
+            _this.y  = e.clientY - rect.top;
         };
 
         canvas.addEventListener('mousemove', mousemoved, false);
@@ -1766,15 +1768,15 @@ define('map/tile',['util/uid', 'util/js'], function(uid, js) {
      * the defaults.
      */
     function Tile(img, x, y, w, h, xoverdraw, yoverdraw, defaultProps, properties) {
-        this.img = img;
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.xoverdraw = xoverdraw;
-        this.yoverdraw = yoverdraw;
+        this.img          = img;
+        this.x            = x;
+        this.y            = y;
+        this.w            = w;
+        this.h            = h;
+        this.xoverdraw    = xoverdraw;
+        this.yoverdraw    = yoverdraw;
         this.defaultProps = defaultProps||{};
-        this.properties = properties||{};
+        this.properties   = properties||{};
     }
 
     /**
@@ -2116,17 +2118,17 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      */
     StaggeredIsometric.prototype.drawDebugRegions = function(ctx, props) {
 
-        var map = this.data;
+        var map    = this.data;
         var l, layerEndY, layerEndX, r, x, y, stagger;
 
-        var xstep = map.tilewidth;
-        var ystep = map.tileheight / 2;
+        var xstep  = map.tilewidth;
+        var ystep  = map.tileheight / 2;
 
         var starty = Math.floor((this.yoffset-ystep) / ystep);
-        var endy = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
+        var endy   = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
 
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
-        var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
+        var endx   = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
         l = map.layers[0];
 
@@ -2260,8 +2262,8 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
         var map = this.data;
 
-        var tw = map.tilewidth;
-        var th = map.tileheight;
+        var tw  = map.tilewidth;
+        var th  = map.tileheight;
 
         x=x|0;
         y=y|0;
@@ -2432,7 +2434,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      */
     StaggeredIsometric.prototype.updateLayers = function(now) {
         var epoch = +new Date();
-        var map = this.data;
+        var map   = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
             if (l.hasOwnProperty('update')) {
@@ -2467,11 +2469,11 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      * @private
      */
     StaggeredIsometric.prototype.onResize = function(w, h) {
-        this.clientWidth = w;
+        this.clientWidth  = w;
         this.clientHeight = h;
 
-        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
-        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+        this.maxxoffset   = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset   = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
     };
 
 
@@ -2481,18 +2483,18 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      */
     StaggeredIsometric.prototype.drawWorld = function(ctx, now, sprites) {
 
-        var map = this.data;
+        var map    = this.data;
 
         var epoch;
 
-        var xstep = map.tilewidth;
-        var ystep = map.tileheight / 2;
+        var xstep  = map.tilewidth;
+        var ystep  = map.tileheight / 2;
 
         var starty = Math.floor((this.yoffset-ystep) / ystep);
-        var endy = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
+        var endy   = Math.floor((this.yoffset+this.clientHeight-ystep+this.maxYOverdraw) / ystep)+1;
 
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
-        var endx = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
+        var endx   = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
         epoch = +new Date();
         /* Sort sprites first by y-axis, then by height, then creation order */
@@ -2839,7 +2841,15 @@ define('plugins/sprite/8way',[],function() {
      * <p>
      * See The <code>opts<code> parameter in the {@link module:sprites/sprite.Sprite|Sprite constructor}
      * <p>
-     * This plugin takes no options.
+     * Alongside the name, you can pass the following options
+     * <dl>
+     *  <dt>anti_jitter</dt><dd>Creates a buffer between direction changes. Waits a certain number
+     *  of frames before changing the direction. The direction only changes if the new direction
+     *  is not the current direction for a set number of frames. Defaults to 0.</dd>
+     *  <dt>bounce_base</dt><dd>Where is the 'floor'? E.g. a bounce_base of 25 and an bounce height
+     *  of 100 will bounce up 100px on top of the floor level of 25. The height value will
+     *  be 125 at its apex, midway through the state animation.</dd>
+     * </dl>
      * @constructor module:plugins/sprite/8way.Face8Way
      */
     function Face8Way() {
@@ -2894,12 +2904,26 @@ define('plugins/sprite/8way',[],function() {
             }
         }
 
-        this.direction = d;
-
         this.oldx = s.x;
         this.oldy = s.y;
 
-        s.setState(s.stateName, this.direction);
+        if (this.anti_jitter) {
+            this.jitterBuffer.push(d);
+            if (this.jitterBuffer.length>this.anti_jitter) {
+                this.jitterBuffer = this.jitterBuffer.slice(1);
+            }
+            for (var i = this.jitterBuffer.length - 1; i >= 0; i--) {
+                var jd = this.jitterBuffer[i];
+                if(jd===this.direction) {
+                    return;
+                }
+            }
+            this.jitterBuffer = new Array(this.anti_jitter);
+        }
+
+        this.direction = d;
+
+        s.morphState(s.stateName, this.direction);
 
         return true;
     };
@@ -2911,6 +2935,10 @@ define('plugins/sprite/8way',[],function() {
     Face8Way.prototype.init = function(sprite) {
         this.sprite = sprite;
         this.direction = 'e';
+
+        if (this.anti_jitter) {
+            this.jitterBuffer = new Array(this.anti_jitter);
+        }
     };
 
     /**
@@ -3102,8 +3130,10 @@ define('plugins/sprite/flock',[],function() {
     function Flock() {
         /* TODO: Docs - Show an example of a complete flocked sprite with all required plugins. */
         /* TODO: Add support for phased updates */
-        this.xy=[0,0];
-        this.xy2=[0,0];
+        /* TODO: Try making a flock of 1. It just spins round and acts weird. Work out if that's expected
+         * or indicative of some bug. */
+        this.xy  = [0,0];
+        this.xy2 = [0,0];
     }
 
     /** Called with the update options as the function context, one of which
@@ -3139,11 +3169,11 @@ define('plugins/sprite/flock',[],function() {
          */
 
         var weightSeparation = 2.5;
-        var weightAlignment = 1;
-        var weightCohesion = 1.8;
-        var weightSteering = 0.9;
-        var weightInertia =1.5;
-        var hweightInertia =weightInertia/2;
+        var weightAlignment  = 1;
+        var weightCohesion   = 1.8;
+        var weightSteering   = 0.9;
+        var weightInertia    =1.5;
+        var hweightInertia   =weightInertia/2;
 
         /* TODO: I have a vague suspicion that not all the vertical components are being
          * halved correctly. */
@@ -3421,9 +3451,9 @@ function(Sprite, uid) {
      * for this layer plugin though, so feel free not to pass any in.
      */
     function GroundSprites(layerName, opts) {
-        this.opts = opts||{};
-        this.name = layerName;
-        this.sprites = [];
+        this.opts      = opts||{};
+        this.name      = layerName;
+        this.sprites   = [];
         this.spriteMap = {};
     }
 
@@ -4421,9 +4451,9 @@ function(traceProp, midPtEllipse, localScan) {
             throw "Circle trace requires a radius >0 in its options.";
         }
 
-        this.radius = opts.radius;
+        this.radius  = opts.radius;
 
-        this.edges = sn.getWorldEdges();
+        this.edges   = sn.getWorldEdges();
 
         /* We call this a circle trace, but we use a half-height ellipse
          * to represent the perspective distortion of the isometric
@@ -5045,8 +5075,8 @@ define('ai/proximity-tracker',[],function() {
         r = Math.ceil(r/this.cellw);
 
         if(this.candidateCache.hasOwnProperty(r)) {
-            var cache = this.candidateCache[r];
-            this.certains = cache.certains;
+            var cache       = this.candidateCache[r];
+            this.certains   = cache.certains;
             this.uncertains = cache.uncertains;
             return;
         }
@@ -5060,7 +5090,7 @@ define('ai/proximity-tracker',[],function() {
             this.uncertains = [-s-1,-s,-s+1,-1,0,1,s-1,s,s+1];
 
         } else {
-            this.certains = [];
+            this.certains   = [];
             this.uncertains = [];
 
             var rmax = (r+1)*(r+1);
@@ -5116,7 +5146,7 @@ define('ai/proximity-tracker',[],function() {
 
         var cx = (x/this.cellw)|0;
         var cy = (y/this.cellh)|0;
-        var c = cy*this.span+cx;
+        var c  = cy*this.span+cx;
 
         /* Cells that are certain to be within the radius are easy */
         for (i = this.certains.length - 1; i >= 0; i--) {
@@ -5147,7 +5177,7 @@ define('ai/proximity-tracker',[],function() {
                 cell = this.cells[oc];
                 if (cell!==undefined) {
                     for (j = cell.sprites.length - 1; j >= 0; j--) {
-                        s = cell.sprites[j];
+                        s  = cell.sprites[j];
                         dx = x-s.x;
                         dy = (y-s.y)*2;
                         s.tmpDist2=(dx*dx+dy*dy);
@@ -5187,9 +5217,9 @@ define('ai/proximity-tracker',[],function() {
     ProximityTracker.prototype.track = function(sprite) {
         var pd = sprite.proximityData[this.id];
 
-        var x = (sprite.x/this.cellw)|0;
-        var y = (sprite.y/this.cellh)|0;
-        var c = y*this.span+x;
+        var x  = (sprite.x/this.cellw)|0;
+        var y  = (sprite.y/this.cellh)|0;
+        var c  = y*this.span+x;
 
         if(c!==pd.cell) {
             removeFromItsCell.call(this, sprite);
@@ -5291,11 +5321,11 @@ define('ai/pathfinder',[],function() {
      * the more likely it is that the water will be avoided.
      */
     function PathFinder(sn, solid, diagonals, cutcorners, cost) {
-        this.sn = sn;
-        var map = sn.map;
-        this.ground = map.groundLayer();
-        this.xcount = map.data.width;
-        this.ycount = map.data.height;
+        this.sn       = sn;
+        var map       = sn.map;
+        this.ground   = map.groundLayer();
+        this.xcount   = map.data.width;
+        this.ycount   = map.data.height;
         this.nodeRows = new Array(this.ycount);
 
         if (cutcorners===undefined) {
@@ -5372,14 +5402,14 @@ define('ai/pathfinder',[],function() {
 
             /* Orthogonal map */
 
-            /*                               E  SE  S  SW   W  NW   N  NE   E  S   W   N */
-            this.xdirectionsOdd = diagonals?[1,  1, 0, -1, -1, -1,  0,  1]:[1, 0, -1,  0];
-            this.ydirectionsOdd = diagonals?[0,  1, 1,  1,  0, -1, -1, -1]:[0, 1,  0, -1];
+            /*                                E  SE  S  SW   W  NW   N  NE   E  S   W   N */
+            this.xdirectionsOdd  = diagonals?[1,  1, 0, -1, -1, -1,  0,  1]:[1, 0, -1,  0];
+            this.ydirectionsOdd  = diagonals?[0,  1, 1,  1,  0, -1, -1, -1]:[0, 1,  0, -1];
 
             this.xdirectionsEven = this.xdirectionsOdd;
             this.ydirectionsEven = this.ydirectionsOdd;
 
-            this.distances   = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
+            this.distances       = diagonals?[1, r2, 1, r2,  1, r2,  1, r2]:[1, 1,  1, -1];
 
             if (cutcorners) {
                 this.distance = function(idx) {
@@ -5582,12 +5612,12 @@ define('ai/pathfinder',[],function() {
             /* Route is 1D array arranged as x,y,x,y,x,y... We start 4 from the end and look
              * 1 pair ahead of the current pair to determine direction. */
             for (i = route.length - 4; i >= 0; i-=2) {
-                x0 = route[i];
-                y0 = route[i+1];
-                x1 = route[i+2];
-                y1 = route[i+3];
-                var dx = x0-x1;
-                var dy = y0-y1;
+                x0      = route[i];
+                y0      = route[i+1];
+                x1      = route[i+2];
+                y1      = route[i+3];
+                var dx  = x0-x1;
+                var dy  = y0-y1;
                 var cut = [span*i/2, span];
                 var d;
 
@@ -5952,14 +5982,13 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.dbgRegionProps   = settings.showRegions&&settings.showRegions.length>0&&settings.showRegions!=='true'?
             settings.showRegions.split(','):[];
 
-        this.imageCache = {};
-
+        this.imageCache     = {};
         this.spriteUpdaters = {};
-        this.colliders = {};
-        this.fxUpdaters = {};
-        this.layerPlugins = {};
-        this.cameraPlugins = {};
-        this.phaserPlugins = {};
+        this.colliders      = {};
+        this.fxUpdaters     = {};
+        this.layerPlugins   = {};
+        this.cameraPlugins  = {};
+        this.phaserPlugins  = {};
 
         /**
          * Exposes some standard running stats
@@ -5968,24 +5997,24 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.stats = new Stats();
 
-        this.timers = {};
-        this.cameras = {};
-        this.camera = null;
+        this.timers     = {};
+        this.cameras    = {};
+        this.camera     = null;
 
-        this.activeFX = [];
+        this.activeFX   = [];
 
         this.taskQueues = [];
 
-        this.now = 0;
+        this.now   = 0;
         this.epoch = 0; /* 0 in chrome, but moz passes unix time. Epoch will be adjusted on first repaint */
 
         var c = document.getElementById(canvasID);
-        this.clientWidth = c.clientWidth;
+        this.clientWidth  = c.clientWidth;
         this.clientHeight = c.clientHeight;
-        this.ctx = c.getContext("2d");
+        this.ctx          = c.getContext("2d");
 
         this.keyboard = new Keyboard();
-        this.mouse = new Mouse(c);
+        this.mouse    = new Mouse(c);
 
         this.ctx.fillStyle='#000022';
         this.ctx.fillRect (0,0,c.clientWidth,c.clientHeight);
@@ -6002,13 +6031,13 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.hideBuildings = !!settings.hideBuildings;
         }
 
-        var draw = _this.game.draw;
+        var draw   = _this.game.draw;
         var update = _this.game.update;
 
         this.spriteDefs = {};
-        this.sprites = [];
-        this.phasers = [];
-        this.spriteMap = {};
+        this.sprites    = [];
+        this.phasers    = [];
+        this.spriteMap  = {};
 
         this.lastFrameTime = 0;
 
@@ -6088,7 +6117,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         var preloader = new Preloader();
 
         if (this.map!==undefined) {
-
             this.map.primePreloader(preloader);
         }
 
@@ -6098,6 +6126,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var storePreloaded = function(image, tag){
                 _this.imageCache[tag] = image;
             };
+
             for(var pathName in game.preloadImages) {
                 preloader.add(game.preloadImages[pathName], pathName, storePreloaded);
             }

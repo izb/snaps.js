@@ -8,7 +8,7 @@ define(['util/js'], function(js) {
     'use strict';
 
     var copyProps = js.copyProps;
-    var clone = js.clone;
+    var clone     = js.clone;
 
     /** Creates a new sprite object. Note that you shouldn't normally call this constructor directly.
      * Call the factory method {@link module:snaps.Snaps#spawnSprite|spawnSprite} instead.
@@ -179,9 +179,13 @@ define(['util/js'], function(js) {
      * @method module:sprites/sprite.Sprite#setState
      * @param {String} state The state of the sprite as specified in its sprite
      * definition.
-     * @param {String} ext   The state extension to set, or undefined.
+     * @param {String} ext The state extension to set, or undefined.
+     * @param {Number} [epoch] If omitted, the state will begin now. Override this by passing in a
+     * time in order to skew the animation jog position.
+     * @return {Boolean} true if the state was changed. False if, for example, the state was already
+     * the one requested.
      */
-    Sprite.prototype.setState = function(state, ext) {
+    Sprite.prototype.setState = function(state, ext, epoch) {
 
         this.active = true;
 
@@ -201,7 +205,7 @@ define(['util/js'], function(js) {
         }
 
         this.state = this.def.states[state];
-        this.epoch = this.sn.getNow();
+        this.epoch = epoch||this.sn.getNow();
     };
 
     /** Finds the current state name, i.e. the state without the extension.
@@ -237,9 +241,8 @@ define(['util/js'], function(js) {
      * @param {String} ext   The state extension to set, or undefined.
      */
     Sprite.prototype.morphState = function(state, ext) {
-        /* TODO: Make a state transition, but maintain the jog position. Note that the jog position
-         * may be clamped to the last frame if autoRemove is false and the internal active flag is set.
-         */
+        var now = this.sn.getNow();
+        this.setState(state, ext, now - this.state.dur * this.state.jogPos(this.epoch, now));
     };
 
     /**
