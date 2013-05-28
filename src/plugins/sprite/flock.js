@@ -100,9 +100,8 @@ define(function() {
         var weightSeparation = 1;
         var weightAlignment  = 1;
         var weightCohesion   = 1.5;
-        var weightSteering   = 2;
+        var weightSteering   = 4;
         var weightInertia    = 1.5;
-        var hweightInertia   = weightInertia / 2;
 
         /* TODO: I have a vague suspicion that not all the vertical components are being
          * halved correctly. */
@@ -139,10 +138,8 @@ define(function() {
                 x+=this.xy2[0];
                 y+=this.xy2[1];
             }
-            x/=count;
-            y/=count;
             this.xy[0] = this.xy[0] + weightAlignment * x/count;
-            this.xy[1] = this.xy[1] + weightAlignment * y/count;
+            this.xy[1] = this.xy[1] + weightAlignment * y/(count/2); /* /2 count because we assume isometric, so this converts from screen to world-space */
         }
 
         /* separation: Any flockmates that are too close should repel the sprite. */
@@ -150,7 +147,7 @@ define(function() {
         for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
             n = neighbors[i];
             dx = s.x - n.x;
-            dy = s.y - n.y;
+            dy = 2*(s.y - n.y);
             d2 = (dx*dx)+(dy+dy);
             if (d2>this.flock_separation2) {
                 break;
@@ -163,6 +160,7 @@ define(function() {
 
         if (count>0) {
             x/=count;
+            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
             y/=count;
             this.xy[0] = this.xy[0] + weightSeparation*x;
             this.xy[1] = this.xy[1] + weightSeparation*y;
@@ -170,8 +168,8 @@ define(function() {
 
         /* update velocity */
 
-        s.velocityx = weightInertia  * s.velocityx + this.xy[0];
-        s.velocityy = hweightInertia * s.velocityy + this.xy[1];
+        s.velocityx = weightInertia * s.velocityx + this.xy[0];
+        s.velocityy = weightInertia * s.velocityy + this.xy[1];
 
         var maxSpeed = this.flock_speed * dt/1000;
         var mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);

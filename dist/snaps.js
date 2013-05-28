@@ -285,8 +285,17 @@ define('sprites/sprite',['util/js'], function(js) {
         this.directionx = x;
         this.directiony = y+1;
 
-        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself. */
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.
+         * This is world-space velocity.
+         * @member module:sprites/sprite.Sprite#velocityx
+         */
         this.velocityx = 0;
+
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.
+         * This is world-space velocity, so to update a sprite's position based upon it, and in an isometric
+         * map, only half of this value should be applied.
+         * @member module:sprites/sprite.Sprite#velocityy
+         */
         this.velocityy = 0;
     }
 
@@ -3171,9 +3180,8 @@ define('plugins/sprite/flock',[],function() {
         var weightSeparation = 1;
         var weightAlignment  = 1;
         var weightCohesion   = 1.5;
-        var weightSteering   = 2;
+        var weightSteering   = 4;
         var weightInertia    = 1.5;
-        var hweightInertia   = weightInertia / 2;
 
         /* TODO: I have a vague suspicion that not all the vertical components are being
          * halved correctly. */
@@ -3210,10 +3218,8 @@ define('plugins/sprite/flock',[],function() {
                 x+=this.xy2[0];
                 y+=this.xy2[1];
             }
-            x/=count;
-            y/=count;
             this.xy[0] = this.xy[0] + weightAlignment * x/count;
-            this.xy[1] = this.xy[1] + weightAlignment * y/count;
+            this.xy[1] = this.xy[1] + weightAlignment * y/(count/2); /* /2 count because we assume isometric, so this converts from screen to world-space */
         }
 
         /* separation: Any flockmates that are too close should repel the sprite. */
@@ -3221,7 +3227,7 @@ define('plugins/sprite/flock',[],function() {
         for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
             n = neighbors[i];
             dx = s.x - n.x;
-            dy = s.y - n.y;
+            dy = 2*(s.y - n.y);
             d2 = (dx*dx)+(dy+dy);
             if (d2>this.flock_separation2) {
                 break;
@@ -3234,6 +3240,7 @@ define('plugins/sprite/flock',[],function() {
 
         if (count>0) {
             x/=count;
+            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
             y/=count;
             this.xy[0] = this.xy[0] + weightSeparation*x;
             this.xy[1] = this.xy[1] + weightSeparation*y;
@@ -3241,8 +3248,8 @@ define('plugins/sprite/flock',[],function() {
 
         /* update velocity */
 
-        s.velocityx = weightInertia  * s.velocityx + this.xy[0];
-        s.velocityy = hweightInertia * s.velocityy + this.xy[1];
+        s.velocityx = weightInertia * s.velocityx + this.xy[0];
+        s.velocityy = weightInertia * s.velocityy + this.xy[1];
 
         var maxSpeed = this.flock_speed * dt/1000;
         var mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
@@ -3347,7 +3354,9 @@ define('plugins/sprite/apply-velocity',[],function() {
      */
     ApplyVelocity.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
-        if(s.move(s.velocityx, s.velocityy) && this.on_collision!==undefined) {
+        if(s.move(s.velocityx, s.velocityy/2) && this.on_collision!==undefined) {
+            /* y/2 because we're assuming an isometric map and the velocity is in
+             * world-space. */
             this.on_collision.call(s);
         }
         return true;

@@ -108,8 +108,17 @@ define(['util/js'], function(js) {
         this.directionx = x;
         this.directiony = y+1;
 
-        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself. */
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.
+         * This is world-space velocity.
+         * @member module:sprites/sprite.Sprite#velocityx
+         */
         this.velocityx = 0;
+
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.
+         * This is world-space velocity, so to update a sprite's position based upon it, and in an isometric
+         * map, only half of this value should be applied.
+         * @member module:sprites/sprite.Sprite#velocityy
+         */
         this.velocityy = 0;
     }
 

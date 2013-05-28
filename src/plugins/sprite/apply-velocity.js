@@ -49,7 +49,9 @@ define(function() {
      */
     ApplyVelocity.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
-        if(s.move(s.velocityx, s.velocityy) && this.on_collision!==undefined) {
+        if(s.move(s.velocityx, s.velocityy/2) && this.on_collision!==undefined) {
+            /* y/2 because we're assuming an isometric map and the velocity is in
+             * world-space. */
             this.on_collision.call(s);
         }
         return true;
