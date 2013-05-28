@@ -48,7 +48,7 @@ define('sprites/spritedef',[],function() {
                 pos[0], pos[1],
                 def.w, def.h,
                 /*dest*/
-                x, y,
+                x|0, y|0,
                 def.w, def.h
             );
     };
@@ -365,7 +365,8 @@ define('sprites/sprite',['util/js'], function(js) {
      * @method module:sprites/sprite.Sprite#setState
      * @param {String} state The state of the sprite as specified in its sprite
      * definition.
-     * @param {String} ext The state extension to set, or undefined.
+     * @param {String} [ext] The state extension to set, or undefined to leave unaltered, or an empty
+     * string to clear.
      * @param {Number} [epoch] If omitted, the state will begin now. Override this by passing in a
      * time in order to skew the animation jog position.
      * @return {Boolean} true if the state was changed. False if, for example, the state was already
@@ -380,10 +381,12 @@ define('sprites/sprite',['util/js'], function(js) {
         }
 
         this.stateName = state;
-        this.stateExt = ext;
+        if (ext!==undefined) {
+            this.stateExt = ext;
+        }
 
-        if (ext!==undefined && this.def.states.hasOwnProperty(state + '_' + ext)) {
-            state = state + '_' + ext;
+        if (this.stateExt!=='' && this.def.states.hasOwnProperty(state + '_' + this.stateExt)) {
+            state = state + '_' + this.stateExt;
         }
 
         if (!this.def.states.hasOwnProperty(state)) {
@@ -540,6 +543,7 @@ define('sprites/sprite',['util/js'], function(js) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;
+
                 return true;
             } else {
                 this.h+=dh;
@@ -642,8 +646,8 @@ define('sprites/sprite',['util/js'], function(js) {
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
         this.drawAt(
                 ctx,
-                (this.x - offsetx - this.def.x)|0,
-                (this.y - offsety - this.def.y - this.h)|0,
+                (this.x - (offsetx|0) - this.def.x),
+                (this.y - (offsety|0) - this.def.y - this.h),
                 now);
     };
 
@@ -3010,6 +3014,14 @@ define('plugins/sprite/track',[],function() {
      *    }
      *    </pre>
      *    </dd>
+     *  <dt>always</dt><dd>A function to call on every frame, regardless of whether the position
+     *    changed. If you specify this and <code>fn</code> together, then fn will be called first.
+     *    <pre>
+     *    function(sprite) {
+     *        // track sprite
+     *    }
+     *    </pre>
+     *    </dd>
      * </dl>
      * The register and deregister functions are useful when combined with the
      * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker}
@@ -3038,10 +3050,15 @@ define('plugins/sprite/track',[],function() {
         var s = this.sprite;
 
         if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
-            this.fn(s);
+            if (this.fn) {
+                this.fn(s);
+            }
             this.x=s.x;
             this.y=s.y;
             this.h=s.h;
+        }
+        if (this.always) {
+            this.always(s);
         }
 
         return true;
@@ -3167,7 +3184,7 @@ define('plugins/sprite/flock',[],function() {
         }
         this.lastTime = now;
 
-        var x = 0, y = 0, i, dx, dy, d2, n;
+        var x = 0, y = 0, i, dx, dy, d, d2, n;
         var s = this.sprite;
 
         var neighbors = this.tracker.find(s.x, s.y, this.flock_neighborhood, true);
@@ -3175,16 +3192,16 @@ define('plugins/sprite/flock',[],function() {
         /* TODO: Maintain current direction.
          *
          * TODO: Should phasing alter weights?
+         *
+         * TODO: We assume flock_neighborhood>=flock_separation. Enforce this with a check, or
+         * make it so it doesn't need to be.
          */
 
         var weightSeparation = 1;
-        var weightAlignment  = 1; /* Acts as a limiter on the magnitude of this vector */
-        var weightCohesion   = 1;
-        var weightSteering   = 1;
-        var weightInertia    = 1;
-
-        /* TODO: I have a vague suspicion that not all the vertical components are being
-         * halved correctly. */
+        var weightAlignment  = 0; /* Acts as a limiter on the magnitude of this vector */
+        var weightCohesion   = 0;
+        var weightSteering   = 0;
+        var weightInertia    = 0;
 
         /* steering */
 
@@ -3202,9 +3219,8 @@ define('plugins/sprite/flock',[],function() {
                 x+=n.x;
                 y+=n.y;
             }
-            x/=count;
-            count/=2; /* /2 to convert from screen to world space for isometric */
-            y/=count;
+            x=x/count;
+            y=y/(count/2); /* /2 to convert from screen to world space for isometric */
             s.vectorTo(x, y, this.xy2);
             this.xy[0] = this.xy[0] + weightCohesion * this.xy2[0];
             this.xy[1] = this.xy[1] + weightCohesion * this.xy2[1];
@@ -3218,9 +3234,8 @@ define('plugins/sprite/flock',[],function() {
                 x+=n.velocityx;
                 y+=n.velocityy;
             }
-            x/=count;
-            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
-            y/=count;
+            x=x/count;
+            y=y/(count/2); /* /2 to convert from screen to world space for isometric */
             mag = (x*x)+(y*y);
             if (mag>(weightAlignment*weightAlignment)) {
                 mag = Math.sqrt(mag);
@@ -3235,6 +3250,9 @@ define('plugins/sprite/flock',[],function() {
         count = 0;
         for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
             n = neighbors[i];
+            if (s.nuid===n.nuid) {
+                continue;
+            }
             dx = s.x - n.x;
             dy = 2*(s.y - n.y); /* Double to convert from screen to world-space in isometric */
             d2 = (dx*dx)+(dy*dy);
@@ -3242,15 +3260,24 @@ define('plugins/sprite/flock',[],function() {
             if (d2>this.flock_separation2) {
                 break;
             }
+
             count++;
-            var prop = 1-Math.sqrt(d2/this.flock_separation2);
-            x+=prop*dx;
-            y+=prop*dy;
+
+            d=Math.sqrt(d2);
+            dx=dx/d;
+            dy=dy/d;
+
+            dx*=d/this.flock_separation;
+            dy*=d/this.flock_separation;
+
+            //var prop = 1-Math.sqrt(d2/this.flock_separation2);
+            x+=dx;
+            y+=dy;
         }
 
         if (count>0) {
-            x/=count;
-            y/=count;
+            x=x/count;
+            y=y/count;
             this.xy[0] = this.xy[0] + weightSeparation*x;
             this.xy[1] = this.xy[1] + weightSeparation*y;
         }
@@ -3266,6 +3293,10 @@ define('plugins/sprite/flock',[],function() {
             mag = Math.sqrt(mag);
             s.velocityx = maxSpeed * s.velocityx/mag;
             s.velocityy = maxSpeed * s.velocityy/mag;
+        }
+
+        if (s.velocityx<0.01 && s.velocityx>-0.01 && s.velocityy<0.01 && s.velocityy>-0.01) {
+            s.velocityy = s.velocityx = 0;
         }
 
         return true;
@@ -4596,9 +4627,14 @@ function(traceProp, midPtEllipse, localScan) {
             }
         }
 
+        if (route.length===2&&collisionRatio===1) {
+            out[0] = x0+dx;
+            out[1] = y0+dy;
+            return 1;
+        }
+
         out[0] = x0;
         out[1] = y0;
-
         return 0;
     };
 

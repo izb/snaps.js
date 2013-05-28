@@ -188,7 +188,8 @@ define(['util/js'], function(js) {
      * @method module:sprites/sprite.Sprite#setState
      * @param {String} state The state of the sprite as specified in its sprite
      * definition.
-     * @param {String} ext The state extension to set, or undefined.
+     * @param {String} [ext] The state extension to set, or undefined to leave unaltered, or an empty
+     * string to clear.
      * @param {Number} [epoch] If omitted, the state will begin now. Override this by passing in a
      * time in order to skew the animation jog position.
      * @return {Boolean} true if the state was changed. False if, for example, the state was already
@@ -203,10 +204,12 @@ define(['util/js'], function(js) {
         }
 
         this.stateName = state;
-        this.stateExt = ext;
+        if (ext!==undefined) {
+            this.stateExt = ext;
+        }
 
-        if (ext!==undefined && this.def.states.hasOwnProperty(state + '_' + ext)) {
-            state = state + '_' + ext;
+        if (this.stateExt!=='' && this.def.states.hasOwnProperty(state + '_' + this.stateExt)) {
+            state = state + '_' + this.stateExt;
         }
 
         if (!this.def.states.hasOwnProperty(state)) {
@@ -363,6 +366,7 @@ define(['util/js'], function(js) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;
+
                 return true;
             } else {
                 this.h+=dh;
@@ -465,8 +469,8 @@ define(['util/js'], function(js) {
     Sprite.prototype.draw = function(ctx, offsetx, offsety, now) {
         this.drawAt(
                 ctx,
-                (this.x - offsetx - this.def.x)|0,
-                (this.y - offsety - this.def.y - this.h)|0,
+                (this.x - (offsetx|0) - this.def.x),
+                (this.y - (offsety|0) - this.def.y - this.h),
                 now);
     };
 

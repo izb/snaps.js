@@ -52,7 +52,54 @@
     
     
     <div class="description">
-        A plugin that gets triggered whenever a sprite's position changes.<p>Note that this should not be constructed directly, but rather via the updates or commitproperty in your spawnSprite data, e.g. <code>update:[{name:'track'}]</code>.<p>See The <code>opts<code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a><p>Alongside the name, you can pass the following options<dl> <dt>fn</dt><dd>A function to call whenever the position changes. If the position hasn't   changed since the last frame, this function will not be called. The function is of the   form   <pre>   function(sprite) {       // track sprite   }   </pre>   </dd> <dt>register</dt><dd>A function to call when the sprite is registered with this plugin. The function is of the form   <pre>   function(sprite) {       // register sprite   }   </pre>   </dd> <dt>deregister</dt><dd>A function to call when the sprite is removed from the stage. The function is of the form   <pre>   function(sprite) {       // deregister sprite   }   </pre>   </dd></dl>The register and deregister functions are useful when combined with the<a href="proximity-tracker.ProximityTracker.html"><code>ProximityTracker</code></a>to track large numbers of autonomous sprites. See<a href="proximity-tracker.ProximityTracker.html"><code>ProximityTracker.track</code></a> foran example of how to set that up.
+        A plugin that gets triggered whenever a sprite's position changes.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>update:[{name:'track'}]</code>.
+<p>
+See The <code>opts<code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a>
+<p>
+Alongside the name, you can pass the following options
+<dl>
+ <dt>fn</dt><dd>A function to call whenever the position changes. If the position hasn't
+   changed since the last frame, this function will not be called. The function is of the
+   form
+   <pre>
+   function(sprite) {
+       // track sprite
+   }
+   </pre>
+   </dd>
+ <dt>register</dt><dd>A function to call when the sprite is registered with this plugin.
+ The function is of the form
+   <pre>
+   function(sprite) {
+       // register sprite
+   }
+   </pre>
+   </dd>
+ <dt>deregister</dt><dd>A function to call when the sprite is removed from the stage.
+ The function is of the form
+   <pre>
+   function(sprite) {
+       // deregister sprite
+   }
+   </pre>
+   </dd>
+ <dt>always</dt><dd>A function to call on every frame, regardless of whether the position
+   changed. If you specify this and <code>fn</code> together, then fn will be called first.
+   <pre>
+   function(sprite) {
+       // track sprite
+   }
+   </pre>
+   </dd>
+</dl>
+The register and deregister functions are useful when combined with the
+<a href="proximity-tracker.ProximityTracker.html"><code>ProximityTracker</code></a>
+to track large numbers of autonomous sprites. See
+<a href="proximity-tracker.ProximityTracker.html"><code>ProximityTracker.track</code></a> for
+an example of how to set that up.
     </div>
     
 

@@ -52,7 +52,9 @@
     
     
     <div class="description">
-        Implementation of a slow task queue. Task items are dequeued based on an allotted amountof processing time per frame. Normally you would not construct this directly, but rather youwould use the engine's <a href="module-snaps.Snaps.html#createTaskQueue"><code>createTaskQueue  factory method</code></a>.
+        Implementation of a slow task queue. Task items are dequeued based on an allotted amount
+of processing time per frame. Normally you would not construct this directly, but rather you
+would use the engine's <a href="module-snaps.Snaps.html#createTaskQueue"><code>createTaskQueue  factory method</code></a>.
     </div>
     
 
@@ -102,7 +104,9 @@
             
             
             
-            <td class="description last">The max time permitted on each frame for processingitems on the queue. Tasks may take more than one time slot to complete. Queue processingmay exceed this if a task does not honour its promise to return within the given time.</td>
+            <td class="description last">The max time permitted on each frame for processing
+items on the queue. Tasks may take more than one time slot to complete. Queue processing
+may exceed this if a task does not honour its promise to return within the given time.</td>
         </tr>
 	
 	
@@ -281,7 +285,9 @@
                 </td>
             
             
-            <td class="description last">The task priority. High priority tasks will bedone before low ones. Partially completed tasks always have top priority. Low numbersare higher priority than high numbers.</td>
+            <td class="description last">The task priority. High priority tasks will be
+done before low ones. Partially completed tasks always have top priority. Low numbers
+are higher priority than high numbers.</td>
         </tr>
 	
 	
@@ -337,7 +343,8 @@
     
     
     <div class="description">
-        Runs the task queue. The queue will make a best effort to return within theconfigured max frame time.
+        Runs the task queue. The queue will make a best effort to return within the
+configured max frame time.
     </div>
     
 

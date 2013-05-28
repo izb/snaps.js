@@ -87,7 +87,7 @@ define(function() {
         }
         this.lastTime = now;
 
-        var x = 0, y = 0, i, dx, dy, d2, n;
+        var x = 0, y = 0, i, dx, dy, d, d2, n;
         var s = this.sprite;
 
         var neighbors = this.tracker.find(s.x, s.y, this.flock_neighborhood, true);
@@ -95,13 +95,16 @@ define(function() {
         /* TODO: Maintain current direction.
          *
          * TODO: Should phasing alter weights?
+         *
+         * TODO: We assume flock_neighborhood>=flock_separation. Enforce this with a check, or
+         * make it so it doesn't need to be.
          */
 
         var weightSeparation = 1;
-        var weightAlignment  = 1; /* Acts as a limiter on the magnitude of this vector */
-        var weightCohesion   = 1;
-        var weightSteering   = 1;
-        var weightInertia    = 1;
+        var weightAlignment  = 0; /* Acts as a limiter on the magnitude of this vector */
+        var weightCohesion   = 0;
+        var weightSteering   = 0;
+        var weightInertia    = 0;
 
         /* steering */
 
@@ -119,9 +122,8 @@ define(function() {
                 x+=n.x;
                 y+=n.y;
             }
-            x/=count;
-            count/=2; /* /2 to convert from screen to world space for isometric */
-            y/=count;
+            x=x/count;
+            y=y/(count/2); /* /2 to convert from screen to world space for isometric */
             s.vectorTo(x, y, this.xy2);
             this.xy[0] = this.xy[0] + weightCohesion * this.xy2[0];
             this.xy[1] = this.xy[1] + weightCohesion * this.xy2[1];
@@ -135,9 +137,8 @@ define(function() {
                 x+=n.velocityx;
                 y+=n.velocityy;
             }
-            x/=count;
-            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
-            y/=count;
+            x=x/count;
+            y=y/(count/2); /* /2 to convert from screen to world space for isometric */
             mag = (x*x)+(y*y);
             if (mag>(weightAlignment*weightAlignment)) {
                 mag = Math.sqrt(mag);
@@ -152,6 +153,9 @@ define(function() {
         count = 0;
         for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
             n = neighbors[i];
+            if (s.nuid===n.nuid) {
+                continue;
+            }
             dx = s.x - n.x;
             dy = 2*(s.y - n.y); /* Double to convert from screen to world-space in isometric */
             d2 = (dx*dx)+(dy*dy);
@@ -159,15 +163,24 @@ define(function() {
             if (d2>this.flock_separation2) {
                 break;
             }
+
             count++;
-            var prop = 1-Math.sqrt(d2/this.flock_separation2);
-            x+=prop*dx;
-            y+=prop*dy;
+
+            d=Math.sqrt(d2);
+            dx=dx/d;
+            dy=dy/d;
+
+            dx*=d/this.flock_separation;
+            dy*=d/this.flock_separation;
+
+            //var prop = 1-Math.sqrt(d2/this.flock_separation2);
+            x+=dx;
+            y+=dy;
         }
 
         if (count>0) {
-            x/=count;
-            y/=count;
+            x=x/count;
+            y=y/count;
             this.xy[0] = this.xy[0] + weightSeparation*x;
             this.xy[1] = this.xy[1] + weightSeparation*y;
         }
@@ -183,6 +196,10 @@ define(function() {
             mag = Math.sqrt(mag);
             s.velocityx = maxSpeed * s.velocityx/mag;
             s.velocityy = maxSpeed * s.velocityy/mag;
+        }
+
+        if (s.velocityx<0.01 && s.velocityx>-0.01 && s.velocityy<0.01 && s.velocityy>-0.01) {
+            s.velocityy = s.velocityx = 0;
         }
 
         return true;

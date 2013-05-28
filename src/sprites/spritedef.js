@@ -47,7 +47,7 @@ define(function() {
                 pos[0], pos[1],
                 def.w, def.h,
                 /*dest*/
-                x, y,
+                x|0, y|0,
                 def.w, def.h
             );
     };

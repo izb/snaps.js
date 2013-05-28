@@ -167,9 +167,14 @@ function(traceProp, midPtEllipse, localScan) {
             }
         }
 
+        if (route.length===2&&collisionRatio===1) {
+            out[0] = x0+dx;
+            out[1] = y0+dy;
+            return 1;
+        }
+
         out[0] = x0;
         out[1] = y0;
-
         return 0;
     };
 

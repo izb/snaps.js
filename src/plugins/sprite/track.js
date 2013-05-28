@@ -44,6 +44,14 @@ define(function() {
      *    }
      *    </pre>
      *    </dd>
+     *  <dt>always</dt><dd>A function to call on every frame, regardless of whether the position
+     *    changed. If you specify this and <code>fn</code> together, then fn will be called first.
+     *    <pre>
+     *    function(sprite) {
+     *        // track sprite
+     *    }
+     *    </pre>
+     *    </dd>
      * </dl>
      * The register and deregister functions are useful when combined with the
      * {@link module:ai/proximity-tracker.ProximityTracker|ProximityTracker}
@@ -72,10 +80,15 @@ define(function() {
         var s = this.sprite;
 
         if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
-            this.fn(s);
+            if (this.fn) {
+                this.fn(s);
+            }
             this.x=s.x;
             this.y=s.y;
             this.h=s.h;
+        }
+        if (this.always) {
+            this.always(s);
         }
 
         return true;
