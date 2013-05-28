@@ -33,28 +33,28 @@ define(function() {
             throw "Cell size must be an even integer > 0";
         }
 
-        this.cellw=cellSize;
-        this.cellh=cellSize/2;
+        this.cellw = cellSize;
+        this.cellh = cellSize/2;
 
-        this.sn = sn;
+        this.sn    = sn;
 
-        var edges = sn.getWorldEdges();
+        var edges  = sn.getWorldEdges();
 
-        this.le = edges.le;
-        this.re = edges.re;
-        this.te = edges.te;
-        this.be = edges.be;
+        this.le    = edges.le;
+        this.re    = edges.re;
+        this.te    = edges.te;
+        this.be    = edges.be;
 
-        var h = this.be-this.te;
-        var w = this.re-this.le;
-        this.span = w;
+        var h      = this.be-this.te;
+        var w      = this.re-this.le;
+        this.span  = w;
 
-        h = Math.ceil(h / this.cellh);
-        w = Math.ceil(w / this.cellw);
+        h          = Math.ceil(h / this.cellh);
+        w          = Math.ceil(w / this.cellw);
 
         this.cells = new Array(h*w);
 
-        this.id = sn.util.uid();
+        this.id    = sn.util.uid();
 
         this.candidateCache = {};
     }
@@ -156,7 +156,7 @@ define(function() {
                     if (sort===true) {
                         /* Store distances in the sprite for sorting later */
                         for (j = cell.sprites.length - 1; j >= 0; j--) {
-                            s = cell.sprites[j];
+                            s  = cell.sprites[j];
                             dx = x-s.x;
                             dy = (y-s.y)*2;
                             s.tmpDist2=(dx*dx+dy*dy);

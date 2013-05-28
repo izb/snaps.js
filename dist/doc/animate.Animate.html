@@ -52,33 +52,7 @@
     
     
     <div class="description">
-        A sprite updater that animates one or more properties on the sprite. Properties are modified
-directly, so handle with care. Be aware that property updates on things such as position will bypass
-the automatic direction setting you'd get if you had called <a href="sprite.Sprite.html#move"><code>move</code></a>
-on your sprite.
-<p>
-Note that this should not be constructed directly, but rather via the updates or commit
-property in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.
-<p>
-See The <code>opts</code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a>
-<p>
-Alongside the name, you can pass the following options
-<dl>
- <dt>tween</dt><dd>The name of the tween function. See the tweens module for a full list of options.</dd>
- <dt>props</dt><dd>An object describing the properties to adjust. Values are relative adjustments, not
-    absolute values. E.g.
-    <pre>
-    props: {
-        x: 20,
-        y: 30
-    }
-    </pre>
-    Will increase x by 20 and y by 30.
-    </dd>
- <dt>duration</dt><dd>The duration of the tween in milliseconds. If omitted, the duration will
-     be automatically calculated from the maxloops lifespan of the sprite. The tweener assumes
-     from this that the state will not change.</dd>
-</dl>
+        A sprite updater that animates one or more properties on the sprite. Properties are modifieddirectly, so handle with care. Be aware that property updates on things such as position will bypassthe automatic direction setting you'd get if you had called <a href="sprite.Sprite.html#move"><code>move</code></a>on your sprite.<p>Note that this should not be constructed directly, but rather via the updates or commitproperty in your spawnSprite data, e.g. <code>updates:[{name:'animate'}]</code>.<p>See The <code>opts</code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a><p>Alongside the name, you can pass the following options<dl> <dt>tween</dt><dd>The name of the tween function. See the tweens module for a full list of options.</dd> <dt>props</dt><dd>An object describing the properties to adjust. Values are relative adjustments, not    absolute values. E.g.    <pre>    props: {        x: 20,        y: 30    }    </pre>    Will increase x by 20 and y by 30.    </dd> <dt>duration</dt><dd>The duration of the tween in milliseconds. If omitted, the duration will     be automatically calculated from the maxloops lifespan of the sprite. The tweener assumes     from this that the state will not change.</dd></dl>
     </div>
     
 

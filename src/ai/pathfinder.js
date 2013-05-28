@@ -15,8 +15,8 @@ define(function() {
      * @param {Number} y Y position of the node.
      */
     function Node(x,y) {
-        this.x = x;
-        this.y = y;
+        this.x        = x;
+        this.y        = y;
         this.priority = 0;
     }
 
@@ -81,9 +81,9 @@ define(function() {
              * the offset jumps in the original orthogonally arranged tile data looks peculiar and
              * differs on odd and even rows. Trust me though, these values check out fine. */
 
-            /*                               E  SE  S  SW   W  NW   N  NE : E  S   W   N */
-            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
-            this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
+            /*                                E  SE  S  SW   W  NW   N  NE : E  S   W   N */
+            this.xdirectionsOdd  = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
+            this.ydirectionsOdd  = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
 
             /*                                E  SE   S  SW   W  NW   N  NE : E   S   W   N */
             this.xdirectionsEven = diagonals?[1,  0,  0, -1, -1, -1,  0,  0]:[1,  0, -1,  0];

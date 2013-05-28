@@ -1899,39 +1899,39 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      * runtime statistics, for debug purposes.
      */
     function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight, stats) {
-        this.data = tileData;
-        this.hitTests = hitTests;
-        this.maxXOverdraw = 0;
-        this.maxYOverdraw = 0;
+        this.data          = tileData;
+        this.hitTests      = hitTests;
+        this.maxXOverdraw  = 0;
+        this.maxYOverdraw  = 0;
 
         /**
          * The canvas width
          * @type {Number}
          * @member module:map/staggered-isometric.StaggeredIsometric#clientWidth
          */
-        this.clientWidth = clientWidth;
+        this.clientWidth   = clientWidth;
 
         /**
          * The canvas height
          * @type {Number}
          * @member module:map/staggered-isometric.StaggeredIsometric#clientHeight
          */
-        this.clientHeight = clientHeight;
+        this.clientHeight  = clientHeight;
         this.hideBuildings = false;
 
-        this.type = this.data.orientation;
+        this.type          = this.data.orientation;
 
-        this.minxoffset = this.data.tilewidth/2;
-        this.minyoffset = this.data.tileheight/2;
+        this.minxoffset    = this.data.tilewidth/2;
+        this.minyoffset    = this.data.tileheight/2;
 
-        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
-        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+        this.maxxoffset    = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset    = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
 
         /* Start in SW-corner by default */
-        this.xoffset = this.minxoffset;
-        this.yoffset = this.maxyoffset;
+        this.xoffset       = this.minxoffset;
+        this.yoffset       = this.maxyoffset;
 
-        this.stats = stats;
+        this.stats         = stats;
     }
 
     /**
@@ -1979,7 +1979,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
 
         /* TODO Docs link to preloader class. */
 
-        var map = this.data;
+        var map   = this.data;
         var _this = this;
 
         /* Add tiles to the preloader */
@@ -3159,7 +3159,7 @@ define('plugins/sprite/flock',[],function() {
      */
     Flock.prototype.update = function(now, phaseOn) {
 
-        var dt;
+        var dt, mag, count;
         if (this.lastTime===undefined) {
             dt = 16;
         } else {
@@ -3178,10 +3178,10 @@ define('plugins/sprite/flock',[],function() {
          */
 
         var weightSeparation = 1;
-        var weightAlignment  = 1;
-        var weightCohesion   = 1.5;
-        var weightSteering   = 4;
-        var weightInertia    = 1.5;
+        var weightAlignment  = 1; /* Acts as a limiter on the magnitude of this vector */
+        var weightCohesion   = 1;
+        var weightSteering   = 1;
+        var weightInertia    = 1;
 
         /* TODO: I have a vague suspicion that not all the vertical components are being
          * halved correctly. */
@@ -3195,7 +3195,7 @@ define('plugins/sprite/flock',[],function() {
 
         /* cohesion: Find average location of neighbours for cohesion vector */
 
-        var count = Math.min(this.flock_neighbor_limit, neighbors.length);
+        count = Math.min(this.flock_neighbor_limit, neighbors.length);
         if (count>0) {
             for (i = count - 1; i >= 0; i--) {
                 n = neighbors[i];
@@ -3203,6 +3203,7 @@ define('plugins/sprite/flock',[],function() {
                 y+=n.y;
             }
             x/=count;
+            count/=2; /* /2 to convert from screen to world space for isometric */
             y/=count;
             s.vectorTo(x, y, this.xy2);
             this.xy[0] = this.xy[0] + weightCohesion * this.xy2[0];
@@ -3214,12 +3215,20 @@ define('plugins/sprite/flock',[],function() {
         if (count>0) {
             for (x = 0, y = 0, i = count - 1; i >= 0; i--) {
                 n = neighbors[i];
-                s.vector(this.xy2);
-                x+=this.xy2[0];
-                y+=this.xy2[1];
+                x+=n.velocityx;
+                y+=n.velocityy;
             }
-            this.xy[0] = this.xy[0] + weightAlignment * x/count;
-            this.xy[1] = this.xy[1] + weightAlignment * y/(count/2); /* /2 count because we assume isometric, so this converts from screen to world-space */
+            x/=count;
+            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
+            y/=count;
+            mag = (x*x)+(y*y);
+            if (mag>(weightAlignment*weightAlignment)) {
+                mag = Math.sqrt(mag);
+                x = weightAlignment * x/mag;
+                y = weightAlignment * y/mag;
+            }
+            this.xy[0] = this.xy[0] + x;
+            this.xy[1] = this.xy[1] + y;
         }
 
         /* separation: Any flockmates that are too close should repel the sprite. */
@@ -3227,8 +3236,9 @@ define('plugins/sprite/flock',[],function() {
         for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
             n = neighbors[i];
             dx = s.x - n.x;
-            dy = 2*(s.y - n.y);
-            d2 = (dx*dx)+(dy+dy);
+            dy = 2*(s.y - n.y); /* Double to convert from screen to world-space in isometric */
+            d2 = (dx*dx)+(dy*dy);
+
             if (d2>this.flock_separation2) {
                 break;
             }
@@ -3240,7 +3250,6 @@ define('plugins/sprite/flock',[],function() {
 
         if (count>0) {
             x/=count;
-            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
             y/=count;
             this.xy[0] = this.xy[0] + weightSeparation*x;
             this.xy[1] = this.xy[1] + weightSeparation*y;
@@ -3252,7 +3261,7 @@ define('plugins/sprite/flock',[],function() {
         s.velocityy = weightInertia * s.velocityy + this.xy[1];
 
         var maxSpeed = this.flock_speed * dt/1000;
-        var mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
+        mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
         if (mag>(maxSpeed*maxSpeed)) {
             mag = Math.sqrt(mag);
             s.velocityx = maxSpeed * s.velocityx/mag;
@@ -3711,15 +3720,15 @@ define('plugins/ai/phasers/time-phaser',[],function() {
      * </dl>
      */
     function TimePhaser(id, opts) {
-        this.id = id;
-        opts = opts || {};
+        this.id               = id;
+        opts                  = opts || {};
         if (opts.updatesPerSecond===undefined || opts.updatesPerSecond<1) {
             throw "Time phasers must define a >0 number of updates per second.";
         }
         this.updatesPerSecond = opts.updatesPerSecond;
-        this.lastUpdate = 0;
+        this.lastUpdate       = 0;
         this.updatesThisFrame = 0;
-        this.sprites = [];
+        this.sprites          = [];
 
         if (opts.frameCap===undefined) {
             this.frameCap = 750; /* Frames will pretend they took no more than 750ms */
@@ -3775,14 +3784,14 @@ define('plugins/ai/phasers/time-phaser',[],function() {
      */
     TimePhaser.prototype.rebalance = function(now) {
         var timeSinceLastFrame = Math.min(this.frameCap, now - this.lastUpdate);
-        this.lastUpdate = now;
-        var updateBudget = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
+        this.lastUpdate        = now;
+        var updateBudget       = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
 
         var i, s;
 
-        var id = this.id;
+        var id                 = this.id;
 
-        var sprites = this.sprites;
+        var sprites            = this.sprites;
 
         sprites.sort(function(a, b) {
             return b.phaserData[id].lastUpdate - a.phaserData[id].lastUpdate;
@@ -3845,14 +3854,14 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
         /* TODO: All plugins should link to their factory methods via doc link tags */
         /* TODO: All plgins: Passing IDs into things and promising it's unique is a bit smelly. */
         this.id = id;
-        opts = opts || {};
+        opts    = opts || {};
         if (opts.phases===undefined || opts.phases<2) {
             throw "Frame phasers must have at least 2 phases.";
         }
-        this.phases = opts.phases;
-        this.buckets = new Array(opts.phases);
+        this.phases    = opts.phases;
+        this.buckets   = new Array(opts.phases);
         this.bucketMax = new Array(opts.phases);
-        this.sprites = [];
+        this.sprites   = [];
     }
 
     /**
@@ -3900,9 +3909,9 @@ define('plugins/ai/phasers/frame-phaser',[],function() {
      */
     FramePhaser.prototype.rebalance = function(now) {
         var i, s, data, max = 0;
-        var buckets = this.buckets;
+        var buckets    = this.buckets;
 
-        var sprites = this.sprites;
+        var sprites    = this.sprites;
 
         var desiredMax = sprites.length/this.phases;
 
@@ -4370,17 +4379,17 @@ define('plugins/collision/lib/ellipse',[],function() {
      * not describe a continuous path, but is complete.
      */
     return function(rx,ry) {
-        var rx2 = rx * rx;
-        var ry2 = ry * ry;
+        var rx2   = rx * rx;
+        var ry2   = ry * ry;
         var twoa2 = 2 * rx2;
         var twob2 = 2 * ry2;
         var p;
-        var x = 0;
-        var y = ry;
-        var px = 0;
-        var py = twoa2 * y;
+        var x     = 0;
+        var y     = ry;
+        var px    = 0;
+        var py    = twoa2 * y;
 
-        var s = [];
+        var s     = [];
 
         /* Initial point in each quadrant. */
         s.push(x,y,-x,y,x,-y,-x,-y);
@@ -5043,28 +5052,28 @@ define('ai/proximity-tracker',[],function() {
             throw "Cell size must be an even integer > 0";
         }
 
-        this.cellw=cellSize;
-        this.cellh=cellSize/2;
+        this.cellw = cellSize;
+        this.cellh = cellSize/2;
 
-        this.sn = sn;
+        this.sn    = sn;
 
-        var edges = sn.getWorldEdges();
+        var edges  = sn.getWorldEdges();
 
-        this.le = edges.le;
-        this.re = edges.re;
-        this.te = edges.te;
-        this.be = edges.be;
+        this.le    = edges.le;
+        this.re    = edges.re;
+        this.te    = edges.te;
+        this.be    = edges.be;
 
-        var h = this.be-this.te;
-        var w = this.re-this.le;
-        this.span = w;
+        var h      = this.be-this.te;
+        var w      = this.re-this.le;
+        this.span  = w;
 
-        h = Math.ceil(h / this.cellh);
-        w = Math.ceil(w / this.cellw);
+        h          = Math.ceil(h / this.cellh);
+        w          = Math.ceil(w / this.cellw);
 
         this.cells = new Array(h*w);
 
-        this.id = sn.util.uid();
+        this.id    = sn.util.uid();
 
         this.candidateCache = {};
     }
@@ -5166,7 +5175,7 @@ define('ai/proximity-tracker',[],function() {
                     if (sort===true) {
                         /* Store distances in the sprite for sorting later */
                         for (j = cell.sprites.length - 1; j >= 0; j--) {
-                            s = cell.sprites[j];
+                            s  = cell.sprites[j];
                             dx = x-s.x;
                             dy = (y-s.y)*2;
                             s.tmpDist2=(dx*dx+dy*dy);
@@ -5303,8 +5312,8 @@ define('ai/pathfinder',[],function() {
      * @param {Number} y Y position of the node.
      */
     function Node(x,y) {
-        this.x = x;
-        this.y = y;
+        this.x        = x;
+        this.y        = y;
         this.priority = 0;
     }
 
@@ -5369,9 +5378,9 @@ define('ai/pathfinder',[],function() {
              * the offset jumps in the original orthogonally arranged tile data looks peculiar and
              * differs on odd and even rows. Trust me though, these values check out fine. */
 
-            /*                               E  SE  S  SW   W  NW   N  NE : E  S   W   N */
-            this.xdirectionsOdd = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
-            this.ydirectionsOdd = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
+            /*                                E  SE  S  SW   W  NW   N  NE : E  S   W   N */
+            this.xdirectionsOdd  = diagonals?[1,  1, 0,  0, -1,  0,  0,  1]:[1, 0, -1,  0]; /* TODO: On an isometric map, n,s,e,w are not diagonal in screen-space */
+            this.ydirectionsOdd  = diagonals?[0,  1, 2,  1,  0, -1, -2, -1]:[0, 2,  0, -2];
 
             /*                                E  SE   S  SW   W  NW   N  NE : E   S   W   N */
             this.xdirectionsEven = diagonals?[1,  0,  0, -1, -1, -1,  0,  0]:[1,  0, -1,  0];

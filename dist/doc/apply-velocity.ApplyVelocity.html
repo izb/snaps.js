@@ -52,25 +52,7 @@
     
     
     <div class="description">
-        A sprite updater that simply takes the velocityx and velocityy properties on the sprite and
-applies it to the position via <a href="sprite.Sprite.html#move"><code>move</code></a>. This is useful
-in situations where another plugin is updating valocities but those velocities depend upon
-the momentary positions of sprites. E.g. you have a flock update which updates velocity.
-In that case you would have this plugin as a commit to apply the velocity calculated by flock.
-<p>
-Snaps runs all sprite updates first, then runs all sprite commits.
-<p>
-Note that this should not be constructed directly, but rather via the updates or commit
-property in your spawnSprite data, e.g. <code>commit:[{name:'apply-velocity'}]</code>.
-<p>
-See The <code>opts<code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a>
-<p>
-Alongside the name, you can pass the following options
-<dl>
- <dt>on_collision</dt><dd>An optional function that is called if the sprite could not
- be moved to it's target position due to collision. This function will be called with the
- sprite as the function context.</dd>
-</dl>
+        A sprite updater that simply takes the velocityx and velocityy properties on the sprite andapplies it to the position via <a href="sprite.Sprite.html#move"><code>move</code></a>. This is usefulin situations where another plugin is updating valocities but those velocities depend uponthe momentary positions of sprites. E.g. you have a flock update which updates velocity.In that case you would have this plugin as a commit to apply the velocity calculated by flock.<p>Snaps runs all sprite updates first, then runs all sprite commits.<p>Note that this should not be constructed directly, but rather via the updates or commitproperty in your spawnSprite data, e.g. <code>commit:[{name:'apply-velocity'}]</code>.<p>See The <code>opts<code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a><p>Alongside the name, you can pass the following options<dl> <dt>on_collision</dt><dd>An optional function that is called if the sprite could not be moved to it's target position due to collision. This function will be called with the sprite as the function context.</dd></dl>
     </div>
     
 

@@ -25,15 +25,15 @@ define(function() {
      * </dl>
      */
     function TimePhaser(id, opts) {
-        this.id = id;
-        opts = opts || {};
+        this.id               = id;
+        opts                  = opts || {};
         if (opts.updatesPerSecond===undefined || opts.updatesPerSecond<1) {
             throw "Time phasers must define a >0 number of updates per second.";
         }
         this.updatesPerSecond = opts.updatesPerSecond;
-        this.lastUpdate = 0;
+        this.lastUpdate       = 0;
         this.updatesThisFrame = 0;
-        this.sprites = [];
+        this.sprites          = [];
 
         if (opts.frameCap===undefined) {
             this.frameCap = 750; /* Frames will pretend they took no more than 750ms */
@@ -89,14 +89,14 @@ define(function() {
      */
     TimePhaser.prototype.rebalance = function(now) {
         var timeSinceLastFrame = Math.min(this.frameCap, now - this.lastUpdate);
-        this.lastUpdate = now;
-        var updateBudget = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
+        this.lastUpdate        = now;
+        var updateBudget       = Math.floor(timeSinceLastFrame * this.updatesPerSecond / 1000);
 
         var i, s;
 
-        var id = this.id;
+        var id                 = this.id;
 
-        var sprites = this.sprites;
+        var sprites            = this.sprites;
 
         sprites.sort(function(a, b) {
             return b.phaserData[id].lastUpdate - a.phaserData[id].lastUpdate;

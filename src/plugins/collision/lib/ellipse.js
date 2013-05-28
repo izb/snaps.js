@@ -18,17 +18,17 @@ define(function() {
      * not describe a continuous path, but is complete.
      */
     return function(rx,ry) {
-        var rx2 = rx * rx;
-        var ry2 = ry * ry;
+        var rx2   = rx * rx;
+        var ry2   = ry * ry;
         var twoa2 = 2 * rx2;
         var twob2 = 2 * ry2;
         var p;
-        var x = 0;
-        var y = ry;
-        var px = 0;
-        var py = twoa2 * y;
+        var x     = 0;
+        var y     = ry;
+        var px    = 0;
+        var py    = twoa2 * y;
 
-        var s = [];
+        var s     = [];
 
         /* Initial point in each quadrant. */
         s.push(x,y,-x,y,x,-y,-x,-y);

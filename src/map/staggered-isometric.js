@@ -27,39 +27,39 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      * runtime statistics, for debug purposes.
      */
     function StaggeredIsometric(tileData, hitTests, clientWidth, clientHeight, stats) {
-        this.data = tileData;
-        this.hitTests = hitTests;
-        this.maxXOverdraw = 0;
-        this.maxYOverdraw = 0;
+        this.data          = tileData;
+        this.hitTests      = hitTests;
+        this.maxXOverdraw  = 0;
+        this.maxYOverdraw  = 0;
 
         /**
          * The canvas width
          * @type {Number}
          * @member module:map/staggered-isometric.StaggeredIsometric#clientWidth
          */
-        this.clientWidth = clientWidth;
+        this.clientWidth   = clientWidth;
 
         /**
          * The canvas height
          * @type {Number}
          * @member module:map/staggered-isometric.StaggeredIsometric#clientHeight
          */
-        this.clientHeight = clientHeight;
+        this.clientHeight  = clientHeight;
         this.hideBuildings = false;
 
-        this.type = this.data.orientation;
+        this.type          = this.data.orientation;
 
-        this.minxoffset = this.data.tilewidth/2;
-        this.minyoffset = this.data.tileheight/2;
+        this.minxoffset    = this.data.tilewidth/2;
+        this.minyoffset    = this.data.tileheight/2;
 
-        this.maxxoffset = this.data.width * this.data.tilewidth - this.clientWidth - 1;
-        this.maxyoffset = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
+        this.maxxoffset    = this.data.width * this.data.tilewidth - this.clientWidth - 1;
+        this.maxyoffset    = this.data.height * (this.data.tileheight/2) - this.clientHeight - 1;
 
         /* Start in SW-corner by default */
-        this.xoffset = this.minxoffset;
-        this.yoffset = this.maxyoffset;
+        this.xoffset       = this.minxoffset;
+        this.yoffset       = this.maxyoffset;
 
-        this.stats = stats;
+        this.stats         = stats;
     }
 
     /**
@@ -107,7 +107,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
 
         /* TODO Docs link to preloader class. */
 
-        var map = this.data;
+        var map   = this.data;
         var _this = this;
 
         /* Add tiles to the preloader */

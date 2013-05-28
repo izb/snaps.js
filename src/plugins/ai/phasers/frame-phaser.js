@@ -23,14 +23,14 @@ define(function() {
         /* TODO: All plugins should link to their factory methods via doc link tags */
         /* TODO: All plgins: Passing IDs into things and promising it's unique is a bit smelly. */
         this.id = id;
-        opts = opts || {};
+        opts    = opts || {};
         if (opts.phases===undefined || opts.phases<2) {
             throw "Frame phasers must have at least 2 phases.";
         }
-        this.phases = opts.phases;
-        this.buckets = new Array(opts.phases);
+        this.phases    = opts.phases;
+        this.buckets   = new Array(opts.phases);
         this.bucketMax = new Array(opts.phases);
-        this.sprites = [];
+        this.sprites   = [];
     }
 
     /**
@@ -78,9 +78,9 @@ define(function() {
      */
     FramePhaser.prototype.rebalance = function(now) {
         var i, s, data, max = 0;
-        var buckets = this.buckets;
+        var buckets    = this.buckets;
 
-        var sprites = this.sprites;
+        var sprites    = this.sprites;
 
         var desiredMax = sprites.length/this.phases;
 

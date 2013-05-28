@@ -79,7 +79,7 @@ define(function() {
      */
     Flock.prototype.update = function(now, phaseOn) {
 
-        var dt;
+        var dt, mag, count;
         if (this.lastTime===undefined) {
             dt = 16;
         } else {
@@ -98,13 +98,10 @@ define(function() {
          */
 
         var weightSeparation = 1;
-        var weightAlignment  = 1;
-        var weightCohesion   = 1.5;
-        var weightSteering   = 4;
-        var weightInertia    = 1.5;
-
-        /* TODO: I have a vague suspicion that not all the vertical components are being
-         * halved correctly. */
+        var weightAlignment  = 1; /* Acts as a limiter on the magnitude of this vector */
+        var weightCohesion   = 1;
+        var weightSteering   = 1;
+        var weightInertia    = 1;
 
         /* steering */
 
@@ -115,7 +112,7 @@ define(function() {
 
         /* cohesion: Find average location of neighbours for cohesion vector */
 
-        var count = Math.min(this.flock_neighbor_limit, neighbors.length);
+        count = Math.min(this.flock_neighbor_limit, neighbors.length);
         if (count>0) {
             for (i = count - 1; i >= 0; i--) {
                 n = neighbors[i];
@@ -123,6 +120,7 @@ define(function() {
                 y+=n.y;
             }
             x/=count;
+            count/=2; /* /2 to convert from screen to world space for isometric */
             y/=count;
             s.vectorTo(x, y, this.xy2);
             this.xy[0] = this.xy[0] + weightCohesion * this.xy2[0];
@@ -134,12 +132,20 @@ define(function() {
         if (count>0) {
             for (x = 0, y = 0, i = count - 1; i >= 0; i--) {
                 n = neighbors[i];
-                s.vector(this.xy2);
-                x+=this.xy2[0];
-                y+=this.xy2[1];
+                x+=n.velocityx;
+                y+=n.velocityy;
             }
-            this.xy[0] = this.xy[0] + weightAlignment * x/count;
-            this.xy[1] = this.xy[1] + weightAlignment * y/(count/2); /* /2 count because we assume isometric, so this converts from screen to world-space */
+            x/=count;
+            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
+            y/=count;
+            mag = (x*x)+(y*y);
+            if (mag>(weightAlignment*weightAlignment)) {
+                mag = Math.sqrt(mag);
+                x = weightAlignment * x/mag;
+                y = weightAlignment * y/mag;
+            }
+            this.xy[0] = this.xy[0] + x;
+            this.xy[1] = this.xy[1] + y;
         }
 
         /* separation: Any flockmates that are too close should repel the sprite. */
@@ -147,8 +153,9 @@ define(function() {
         for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
             n = neighbors[i];
             dx = s.x - n.x;
-            dy = 2*(s.y - n.y);
-            d2 = (dx*dx)+(dy+dy);
+            dy = 2*(s.y - n.y); /* Double to convert from screen to world-space in isometric */
+            d2 = (dx*dx)+(dy*dy);
+
             if (d2>this.flock_separation2) {
                 break;
             }
@@ -160,7 +167,6 @@ define(function() {
 
         if (count>0) {
             x/=count;
-            count/=2; /* /2 count because we assume isometric, so this converts from screen to world-space */
             y/=count;
             this.xy[0] = this.xy[0] + weightSeparation*x;
             this.xy[1] = this.xy[1] + weightSeparation*y;
@@ -172,7 +178,7 @@ define(function() {
         s.velocityy = weightInertia * s.velocityy + this.xy[1];
 
         var maxSpeed = this.flock_speed * dt/1000;
-        var mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
+        mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
         if (mag>(maxSpeed*maxSpeed)) {
             mag = Math.sqrt(mag);
             s.velocityx = maxSpeed * s.velocityx/mag;
