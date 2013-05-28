@@ -3168,12 +3168,12 @@ define('plugins/sprite/flock',[],function() {
          * TODO: Should phasing alter weights?
          */
 
-        var weightSeparation = 2.5;
+        var weightSeparation = 1;
         var weightAlignment  = 1;
-        var weightCohesion   = 1.8;
-        var weightSteering   = 0.9;
-        var weightInertia    =1.5;
-        var hweightInertia   =weightInertia/2;
+        var weightCohesion   = 1.5;
+        var weightSteering   = 2;
+        var weightInertia    = 1.5;
+        var hweightInertia   = weightInertia / 2;
 
         /* TODO: I have a vague suspicion that not all the vertical components are being
          * halved correctly. */
@@ -3227,16 +3227,16 @@ define('plugins/sprite/flock',[],function() {
                 break;
             }
             count++;
-            x+=n.x; /* TODO: Normalize and weight by distance */
-            y+=n.y;
+            var prop = 1-Math.sqrt(d2/this.flock_separation2);
+            x+=prop*dx;
+            y+=prop*dy;
         }
 
         if (count>0) {
             x/=count;
             y/=count;
-            s.vectorTo(x, y, this.xy2);
-            this.xy[0] = this.xy[0] - weightSeparation*this.xy2[0];
-            this.xy[1] = this.xy[1] - weightSeparation*this.xy2[1];
+            this.xy[0] = this.xy[0] + weightSeparation*x;
+            this.xy[1] = this.xy[1] + weightSeparation*y;
         }
 
         /* update velocity */
