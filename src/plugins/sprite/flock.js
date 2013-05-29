@@ -90,6 +90,9 @@ define(function() {
         var x = 0, y = 0, i, dx, dy, d, d2, n;
         var s = this.sprite;
 
+        var xy = this.xy;
+        var xy2 = this.xy2;
+
         var neighbors = this.tracker.find(s.x, s.y, this.flock_neighborhood, true);
 
         /* TODO: Maintain current direction.
@@ -100,7 +103,7 @@ define(function() {
          * make it so it doesn't need to be.
          */
 
-        var weightSeparation = 1;
+        var weightSeparation = 3;
         var weightAlignment  = 1.2; /* Acts as a limiter on the magnitude of this vector */
         var weightCohesion   = 1;
         var weightSteering   = 3;
@@ -108,10 +111,10 @@ define(function() {
 
         /* steering */
 
-        this.flock_steering(s, this.xy);
+        this.flock_steering(s, xy);
 
-        this.xy[0] = this.xy[0] * weightSteering;
-        this.xy[1] = this.xy[1] * weightSteering;
+        xy[0] = xy[0] * weightSteering;
+        xy[1] = xy[1] * weightSteering;
 
         /* cohesion: Find average location of neighbours for cohesion vector */
 
@@ -123,10 +126,10 @@ define(function() {
                 y+=n.y;
             }
             x=x/count;
-            y=y/(count/2); /* /2 to convert from screen to world space for isometric */
-            s.vectorTo(x, y, this.xy2);
-            this.xy[0] = this.xy[0] + weightCohesion * this.xy2[0];
-            this.xy[1] = this.xy[1] + weightCohesion * this.xy2[1];
+            y=y/count;
+            s.vectorTo(x, y, xy2);
+            xy[0] = xy[0] + weightCohesion * xy2[0];
+            xy[1] = xy[1] + weightCohesion * (2*xy2[1]); /* *2 to convert from screen to world space for isometric */
         }
 
         /* alignment: average vector of neighbours */
@@ -138,15 +141,17 @@ define(function() {
                 y+=n.velocityy;
             }
             x=x/count;
-            y=y/(count/2); /* /2 to convert from screen to world space for isometric */
+            y=2*y/count; /* *2 to convert from screen to world space for isometric */
             mag = (x*x)+(y*y);
             if (mag>(weightAlignment*weightAlignment)) {
                 mag = Math.sqrt(mag);
-                x = weightAlignment * x/mag;
-                y = weightAlignment * y/mag;
+                if (mag>0) {
+                    x = weightAlignment * x/mag;
+                    y = weightAlignment * y/mag;
+                }
             }
-            this.xy[0] = this.xy[0] + x;
-            this.xy[1] = this.xy[1] + y;
+            xy[0] = xy[0] + x;
+            xy[1] = xy[1] + y;
         }
 
         /* separation: Any flockmates that are too close should repel the sprite. */
@@ -181,14 +186,16 @@ define(function() {
 
         if (count>0) {
             mag = Math.sqrt((x*x)+(y*y));
-            this.xy[0] = this.xy[0] + weightSeparation*(x/mag);
-            this.xy[1] = this.xy[1] + weightSeparation*(y/mag);
+            if (mag>0) {
+                xy[0] = xy[0] + weightSeparation*(x/mag);
+                xy[1] = xy[1] + weightSeparation*(y/mag);
+            }
         }
 
         /* update velocity */
 
-        s.velocityx = weightInertia * s.velocityx + this.xy[0];
-        s.velocityy = weightInertia * s.velocityy + this.xy[1];
+        s.velocityx = weightInertia * s.velocityx + xy[0];
+        s.velocityy = weightInertia * s.velocityy + xy[1];
 
         var maxSpeed = this.flock_speed * dt/1000;
         mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);

@@ -477,6 +477,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             }
         }
 
+        this.halt = function() {
+            _this.halt = true;
+        };
+
         function loop(now) {
             if (now>315532800 && _this.epoch===0) {
                 /* Hack due to differences between moz and chrome implementations of
@@ -525,6 +529,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
 
                 /* Start the paint loop */
+                this.halt = false;
                 setTimeout(function(){loop(0);}, 0);
             },
 
@@ -905,7 +910,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             var epoch = +new Date();
             var keepsprites = [];
             var i, s;
-            for (i = 0; i < _this.sprites.length; i++) {
+            for ( i = _this.sprites.length - 1; i >= 0; i--) {
+            //     _this.sprites[i]
+            // }
+            // for (i = 0; i < _this.sprites.length; i++) {
                 s = _this.sprites[i];
                 if (s.isActive(_this.now)) {
                     s.update(_this.now);
