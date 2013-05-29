@@ -3198,10 +3198,10 @@ define('plugins/sprite/flock',[],function() {
          */
 
         var weightSeparation = 1;
-        var weightAlignment  = 0; /* Acts as a limiter on the magnitude of this vector */
-        var weightCohesion   = 0;
-        var weightSteering   = 0;
-        var weightInertia    = 0;
+        var weightAlignment  = 1.2; /* Acts as a limiter on the magnitude of this vector */
+        var weightCohesion   = 1;
+        var weightSteering   = 3;
+        var weightInertia    = 0.95;
 
         /* steering */
 
@@ -3261,25 +3261,25 @@ define('plugins/sprite/flock',[],function() {
                 break;
             }
 
+            if (d2===0) {
+                /* Force coincident sprites apart, just in case they have no inertia */
+                dx = s.nuid>n.nuid?0.5:-0.5;
+                d2 = 0.25;
+            }
+
             count++;
 
-            d=Math.sqrt(d2);
-            dx=dx/d;
-            dy=dy/d;
+            dx=dx/d2;
+            dy=dy/d2;
 
-            dx*=d/this.flock_separation;
-            dy*=d/this.flock_separation;
-
-            //var prop = 1-Math.sqrt(d2/this.flock_separation2);
             x+=dx;
             y+=dy;
         }
 
         if (count>0) {
-            x=x/count;
-            y=y/count;
-            this.xy[0] = this.xy[0] + weightSeparation*x;
-            this.xy[1] = this.xy[1] + weightSeparation*y;
+            mag = Math.sqrt((x*x)+(y*y));
+            this.xy[0] = this.xy[0] + weightSeparation*(x/mag);
+            this.xy[1] = this.xy[1] + weightSeparation*(y/mag);
         }
 
         /* update velocity */
@@ -3291,6 +3291,9 @@ define('plugins/sprite/flock',[],function() {
         mag = (s.velocityx*s.velocityx)+(s.velocityy*s.velocityy);
         if (mag>(maxSpeed*maxSpeed)) {
             mag = Math.sqrt(mag);
+            if (mag<1) {
+                mag = 1;
+            }
             s.velocityx = maxSpeed * s.velocityx/mag;
             s.velocityy = maxSpeed * s.velocityy/mag;
         }

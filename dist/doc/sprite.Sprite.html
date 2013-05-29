@@ -52,26 +52,7 @@
     
     
     <div class="description">
-        Creates a new sprite object. Note that you shouldn't normally call this constructor directly.
-Call the factory method <a href="module-snaps.Snaps.html#spawnSprite"><code>spawnSprite</code></a> instead.
-<p>
-Some parameters or options accept functions. An example of how to pass a random range into any
-Function/Number parameters would be to bind the rnd function in util/rnd. E.g.
-
-<pre>
-// Random range between -20 and 20:
-var posRange = rnd.bind(rnd,-20,20);
-// Fast cached random number set
-var fastRand = rnd.fastRand(10,20);
-
-new Sprite(sn,def,
-    posRange,posRange,
-    0,
-    {maxloops:fastRand});
-</pre>
-
-Alternatively of course, you could provide your own custom parameterless number
-generator and pass it in.
+        Creates a new sprite object. Note that you shouldn't normally call this constructor directly.Call the factory method <a href="module-snaps.Snaps.html#spawnSprite"><code>spawnSprite</code></a> instead.<p>Some parameters or options accept functions. An example of how to pass a random range into anyFunction/Number parameters would be to bind the rnd function in util/rnd. E.g.<pre>// Random range between -20 and 20:var posRange = rnd.bind(rnd,-20,20);// Fast cached random number setvar fastRand = rnd.fastRand(10,20);new Sprite(sn,def,    posRange,posRange,    0,    {maxloops:fastRand});</pre>Alternatively of course, you could provide your own custom parameterless numbergenerator and pass it in.
     </div>
     
 
@@ -193,8 +174,7 @@ generator and pass it in.
             
             
             
-            <td class="description last">X world position. You may also pass a parameterless function that returns
-a number.</td>
+            <td class="description last">X world position. You may also pass a parameterless function that returnsa number.</td>
         </tr>
 	
 	
@@ -225,8 +205,7 @@ a number.</td>
             
             
             
-            <td class="description last">Y world position. You may also pass a parameterless function that returns
-a number.</td>
+            <td class="description last">Y world position. You may also pass a parameterless function that returnsa number.</td>
         </tr>
 	
 	
@@ -257,8 +236,7 @@ a number.</td>
             
             
             
-            <td class="description last">Height from the ground. You may also pass a parameterless function that returns
-a number.</td>
+            <td class="description last">Height from the ground. You may also pass a parameterless function that returnsa number.</td>
         </tr>
 	
 	
@@ -291,27 +269,7 @@ a number.</td>
             
             
             
-            <td class="description last">Optional configuration options. All properties are optional.
-<dl>
- <dt>id</dt><dd>If you want to be able to find your sprite again</dd>
- <dt>maxloops</dt><dd>How many times should the initial state loop
-   before the sprite is automatically destroyed? Set to 0 or undefined
-   if it does not automatically expire. Can also be a parameterless function that returns a number.</dd>
- <dt>autoRemove</dt><dd>Defaults to true. If set, the sprite will be removed
-   from the scene once it expires. If maxloops is set and it is not
-   removed, it will remain on the final frame.</dd>
- <dt>updates</dt><dd>An array of sprite update plugin instances that will be called
-   with each update of this sprite.</dd>
- <dt>commits</dt><dd>An array of sprite update plugin instances that will be called
-   after all the 'updates' updates are called on each sprite. Think of it as a second phase of
-   updates.</dd>
- <dt>collider</dt><dd>A collider to test for collisions during movement</dd>
- <dt>endCallback</dt><dd>An optional function to call when the sprite is destroyed, i.e. removed from the stage</dd>
- <dt>quantizedHeight</dt><dd>Defaults to false. If you move x,y, and h at the
-   same time and the movement collides, then h will by default be altered
-   by the proportion of the path travelled. If this flag is true, then h will
-   be altered entirely, regardless of the collision.</dd>
-</dl></td>
+            <td class="description last">Optional configuration options. All properties are optional.<dl> <dt>id</dt><dd>If you want to be able to find your sprite again</dd> <dt>maxloops</dt><dd>How many times should the initial state loop   before the sprite is automatically destroyed? Set to 0 or undefined   if it does not automatically expire. Can also be a parameterless function that returns a number.</dd> <dt>autoRemove</dt><dd>Defaults to true. If set, the sprite will be removed   from the scene once it expires. If maxloops is set and it is not   removed, it will remain on the final frame.</dd> <dt>updates</dt><dd>An array of sprite update plugin instances that will be called   with each update of this sprite.</dd> <dt>commits</dt><dd>An array of sprite update plugin instances that will be called   after all the 'updates' updates are called on each sprite. Think of it as a second phase of   updates.</dd> <dt>collider</dt><dd>A collider to test for collisions during movement</dd> <dt>endCallback</dt><dd>An optional function to call when the sprite is destroyed, i.e. removed from the stage</dd> <dt>quantizedHeight</dt><dd>Defaults to false. If you move x,y, and h at the   same time and the movement collides, then h will by default be altered   by the proportion of the path travelled. If this flag is true, then h will   be altered entirely, regardless of the collision.</dd></dl></td>
         </tr>
 	
 	
@@ -382,8 +340,7 @@ a number.</td>
 <dd>
     
     <div class="description">
-        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.
-This is world-space velocity.
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.This is world-space velocity.
     </div>
     
     
@@ -428,9 +385,7 @@ This is world-space velocity.
 <dd>
     
     <div class="description">
-        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.
-This is world-space velocity, so to update a sprite's position based upon it, and in an isometric
-map, only half of this value should be applied.
+        /* Some plugins may manipulate velocity, but it is not directly acted upon by the sprite itself.This is world-space velocity, so to update a sprite's position based upon it, and in an isometricmap, only half of this value should be applied.
     </div>
     
     
@@ -482,8 +437,7 @@ map, only half of this value should be applied.
     
     
     <div class="description">
-        Determines whether this sprite has the given fully-qualified (i.e. including
-extension) state name.
+        Determines whether this sprite has the given fully-qualified (i.e. includingextension) state name.
     </div>
     
 
@@ -533,8 +487,7 @@ extension) state name.
             
             
             
-            <td class="description last">The state of the sprite as specified in its sprite
-definition.</td>
+            <td class="description last">The state of the sprite as specified in its spritedefinition.</td>
         </tr>
 	
 	
@@ -613,8 +566,7 @@ definition.</td>
     
     
     <div class="description">
-        Tests to see if this is an active sprite. Inactive sprites will be destroyed by the
-engine.
+        Tests to see if this is an active sprite. Inactive sprites will be destroyed by theengine.
     </div>
     
 
@@ -743,9 +695,7 @@ engine.
     
     
     <div class="description">
-        Returns the max duration of the sprite before it automatically expires.
-This value may change if the state changes. Does not take time already
-expired into account.
+        Returns the max duration of the sprite before it automatically expires.This value may change if the state changes. Does not take time alreadyexpired into account.
     </div>
     
 
@@ -792,8 +742,7 @@ expired into account.
     
             
 <div class="param-desc">
-    The max duration of the current state, or 0 if it will not
-expire.
+    The max duration of the current state, or 0 if it will notexpire.
 </div>
 
 
@@ -827,8 +776,7 @@ expire.
     
     
     <div class="description">
-        Move a sprite by a given amount, taking collision into account.
-If there is a collision, the sprite will be moved to the point of collision.
+        Move a sprite by a given amount, taking collision into account.If there is a collision, the sprite will be moved to the point of collision.
     </div>
     
 
@@ -1031,8 +979,7 @@ If there is a collision, the sprite will be moved to the point of collision.
     
     
     <div class="description">
-        Move a sprite to a point, taking collision into account.
-If there is a collision, the sprite will be moved to the point of collision.
+        Move a sprite to a point, taking collision into account.If there is a collision, the sprite will be moved to the point of collision.
     </div>
     
 
@@ -1235,10 +1182,7 @@ If there is a collision, the sprite will be moved to the point of collision.
     
     
     <div class="description">
-        Sets the direction of the sprite. This is expressed as a world
-position to look towards. This is not used in sprite rendering
-directly, but can be picked up by plugins. Direction is set automatically
-if the sprite moves, but you can then override direction by calling this.
+        Sets the direction of the sprite. This is expressed as a worldposition to look towards. This is not used in sprite renderingdirectly, but can be picked up by plugins. Direction is set automaticallyif the sprite moves, but you can then override direction by calling this.
     </div>
     
 
@@ -1367,9 +1311,7 @@ if the sprite moves, but you can then override direction by calling this.
     
     
     <div class="description">
-        Changes the state and extension of this sprite. States in sprite definitions are in the form
-'running_ne' where 'running' is the state and 'ne' is the extension.
-See morphState for an alternative option.
+        Changes the state and extension of this sprite. States in sprite definitions are in the form'running_ne' where 'running' is the state and 'ne' is the extension.See morphState for an alternative option.
     </div>
     
 
@@ -1429,8 +1371,7 @@ See morphState for an alternative option.
             
             
             
-            <td class="description last">The state of the sprite as specified in its sprite
-definition.</td>
+            <td class="description last">The state of the sprite as specified in its spritedefinition.</td>
         </tr>
 	
 	
@@ -1463,8 +1404,7 @@ definition.</td>
             
             
             
-            <td class="description last">The state extension to set, or undefined to leave unaltered, or an empty
-string to clear.</td>
+            <td class="description last">The state extension to set, or undefined to leave unaltered, or an emptystring to clear.</td>
         </tr>
 	
 	
@@ -1497,8 +1437,7 @@ string to clear.</td>
             
             
             
-            <td class="description last">If omitted, the state will begin now. Override this by passing in a
-time in order to skew the animation jog position.</td>
+            <td class="description last">If omitted, the state will begin now. Override this by passing in atime in order to skew the animation jog position.</td>
         </tr>
 	
 	
@@ -1543,8 +1482,7 @@ time in order to skew the animation jog position.</td>
     
             
 <div class="param-desc">
-    true if the state was changed. False if, for example, the state was already
-the one requested.
+    true if the state was changed. False if, for example, the state was alreadythe one requested.
 </div>
 
 
@@ -1578,14 +1516,7 @@ the one requested.
     
     
     <div class="description">
-        Changes the state and extension of this sprite. States in sprite definitions are in the form
-'running_ne' where 'running' is the state and 'ne' is the extension.
-<p>
-This method differs from setState in that it maintains the animation jog position of the state,
-e.g. if the sprite was halfway through its running animation in 'running_ne' and you called this
-method to change to 'running_e' then the animation would start halfway through its new state.
-<p>
-If you had called setState then the new state's animation would have started from the beginning.
+        Changes the state and extension of this sprite. States in sprite definitions are in the form'running_ne' where 'running' is the state and 'ne' is the extension.<p>This method differs from setState in that it maintains the animation jog position of the state,e.g. if the sprite was halfway through its running animation in 'running_ne' and you called thismethod to change to 'running_e' then the animation would start halfway through its new state.<p>If you had called setState then the new state's animation would have started from the beginning.
     </div>
     
 
@@ -1635,8 +1566,7 @@ If you had called setState then the new state's animation would have started fro
             
             
             
-            <td class="description last">The state of the sprite as specified in its sprite
-definition.</td>
+            <td class="description last">The state of the sprite as specified in its spritedefinition.</td>
         </tr>
 	
 	
@@ -1846,8 +1776,7 @@ definition.</td>
             
             
             
-            <td class="description last">An 2-length array that will recieve the xy values of
-the vector in that order.</td>
+            <td class="description last">An 2-length array that will recieve the xy values ofthe vector in that order.</td>
         </tr>
 	
 	
@@ -1999,8 +1928,7 @@ the vector in that order.</td>
             
             
             
-            <td class="description last">An 2-length array that will recieve the xy values of
-the vector in that order.</td>
+            <td class="description last">An 2-length array that will recieve the xy values ofthe vector in that order.</td>
         </tr>
 	
 	
