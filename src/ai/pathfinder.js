@@ -1,6 +1,6 @@
 /*global define*/
 
-define(function() {
+define(['util/clock'], function(clock) {
 
     'use strict';
 
@@ -182,7 +182,7 @@ define(function() {
                 current = current.cameFrom;
             }
 
-            path.push(this.startx,this.starty);
+            path.push(this.x0, this.y0);
 
             return path;
         };
@@ -440,25 +440,55 @@ define(function() {
      * @return {Array} An array of points as a 1d spanned array
      * of the form x,y,x,y,x,y...
      */
-    PathFinder.prototype.route = function(x0,y0,x1,y1) {
+    PathFinder.prototype.route = function(x0, y0, x1, y1) {
+        this.taskBegin({
+            x0:x0,
+            y0:y0,
+            x1:x1,
+            y1:y1
+        });
+        return this.taskResume(0);
+    };
 
+    /**
+     * Begins routing as a task.
+     * @param {Object} parameters Parameters of the form:
+     * <dl>
+     *  <dt>x0</dt><dd>Starting tile X column position</dd>
+     *  <dt>y0</dt><dd>Starting tile Y row position</dd>
+     *  <dt>x1</dt><dd>Ending tile X column position</dd>
+     *  <dt>y1</dt><dd>Ending tile Y row position</dd>
+     * </dl>
+     */
+    PathFinder.prototype.taskBegin = function(parameters) {
         var i;
 
-        this.startx = x0;
-        this.starty = y0;
+        this.x0 = parameters.x0;
+        this.y0 = parameters.y0;
+
+        this.x1 = parameters.x1;
+        this.y1 = parameters.y1;
 
         /* Reset everything */
         for (i = this.nodeRows.length - 1; i >= 0; i--) {
             this.nodeRows[i].length = 0;
         }
-        var n = this.node(x0,y0);
+
+        var n = this.node(this.x0, this.y0);
         if (n===null) {
             /* This means the first square was solid. Call off the search. */
             return [];
         }
         n.open = true;
         this.scoreHeap.clear().push(n);
-        n.fscore = distance2(x0,y0,x1,y1);
+        n.fscore = distance2(this.x0, this.y0, this.x1, this.y1);
+    };
+
+    PathFinder.prototype.taskResume = function(endTime) {
+
+        var x1=this.x1,
+            y1=this.y1,
+            i;
 
         while(this.scoreHeap.size()>0)
         {
@@ -494,6 +524,10 @@ define(function() {
                         this.scoreHeap.push(neighbour);
                     }
                 }
+            }
+
+            if (endTime && clock.now() >= endTime) {
+                return null; /* Suspend */
             }
         }
 

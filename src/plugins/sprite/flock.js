@@ -79,7 +79,7 @@ define(function() {
      */
     Flock.prototype.update = function(now, phaseOn) {
 
-        var dt, mag, count;
+        var dt, mag, count, max;
         if (this.lastTime===undefined) {
             dt = 16;
         } else {
@@ -156,7 +156,8 @@ define(function() {
 
         /* separation: Any flockmates that are too close should repel the sprite. */
         count = 0;
-        for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
+        max = Math.min(this.flock_neighbor_limit, neighbors.length); /* TODO: Should separation have a separate neighbour limit */
+        for (x = 0, y = 0, i = 0; i < max; i++) {
             n = neighbors[i];
             if (s.nuid===n.nuid) {
                 continue;
