@@ -150,6 +150,7 @@ function(MinHeap, uid, clock) {
 
         if (t.onComplete) {
             t.onComplete(result);
+            this.currentTask = null;
         }
     };
 

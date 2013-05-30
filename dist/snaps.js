@@ -434,6 +434,17 @@ define('sprites/sprite',['util/js'], function(js) {
         this.setState(state, ext, now - this.state.dur * this.state.jogPos(this.epoch, now));
     };
 
+    /** Sets the position in the current state's animation. E.g. set to 0.5 to place the
+     * jog position halfway through the sprite's current animation.
+     * @method module:sprites/sprite.Sprite#setJog
+     * @param {Number} pos A jog position from 0 to 1.
+     */
+    Sprite.prototype.setJog = function(pos) {
+        /* TODO: Validate value? */
+        var now = this.sn.getNow();
+        this.epoch = now - this.state.dur * pos;
+    };
+
     /**
      * @private
      * @method module:sprites/sprite.Sprite#update
@@ -1694,6 +1705,48 @@ define('util/uid',[],function() {
 });
 
 /*global define*/
+define('util/clock',[],function() {
+
+    
+
+    /**
+     * @module util/clock
+     */
+
+    /**
+     * Construct a clock.
+     * @constructor module:util/clock.Clock
+     * @private
+     */
+    function Clock() {
+    }
+
+    /**
+     * Gets the current time.
+     * @function module:util/clock#now
+     * @return {Number} The current time as a millisecond timer value.
+     */
+    Clock.prototype.now = function() {
+        return +new Date();
+    };
+
+    /**
+     * Fixes the output of the clock to predictable values to aid unit testing.
+     * @function module:util/clock#fix
+     * @private
+     */
+    Clock.prototype.fixedOutput = function() {
+        this.now = function() {
+            /* TODO */
+            return +new Date();
+        };
+    };
+
+
+    return new Clock();
+});
+
+/*global define*/
 define('util/url',[],function() {
 
     
@@ -1728,8 +1781,9 @@ define('util/all',[
     'util/minheap',
     'util/stats',
     'util/uid',
+    'util/clock',
     'util/url'],
-function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
+function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, clock, Url) {
 
     
 
@@ -1745,6 +1799,7 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
         MinHeap: MinHeap,
         Stats: Stats,
         uid: uid,
+        clock: clock,
         debug: debug,
         Bitmap: Bitmap,
         Url: Url
@@ -1875,7 +1930,13 @@ define('map/tile',['util/uid', 'util/js'], function(uid, js) {
 });
 
 /*global define*/
-define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitmap, debug, js) {
+define('map/staggered-isometric',['map/tile',
+        'util/bitmap',
+        'util/debug',
+        'util/js',
+        'util/clock'],
+
+function(Tile, Bitmap, debug, js, clock) {
 
     
 
@@ -2446,7 +2507,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
      * @private
      */
     StaggeredIsometric.prototype.updateLayers = function(now) {
-        var epoch = +new Date();
+        var epoch = clock.now();
         var map   = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
@@ -2454,7 +2515,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                 l.update(now);
             }
         }
-        this.stats.count('updateLayers', (+new Date())-epoch);
+        this.stats.count('updateLayers', clock.now()-epoch);
     };
 
     /** Finds the index of the ground layer.
@@ -2509,7 +2570,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
         var endx   = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
-        epoch = +new Date();
+        epoch = clock.now();
         /* Sort sprites first by y-axis, then by height, then creation order */
         /* TODO: Cull off-screen sprites first? */
         sprites.sort(function(a, b) {
@@ -2520,10 +2581,10 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
             n = a.h - b.h;
             return n!==0?n:a.nuid - b.nuid;
         });
-        this.stats.count('spriteSort', (+new Date())-epoch);
+        this.stats.count('spriteSort', clock.now()-epoch);
 
 
-        epoch = +new Date();
+        epoch = clock.now();
         var spriteCursor = 0;
         var stagger = 0;
         var x, y, r, l, i, layerEndY, layerEndX;
@@ -2565,7 +2626,7 @@ define('map/staggered-isometric',['map/tile', 'util/bitmap', 'util/debug', 'util
                 }
             }
         }
-        this.stats.count('paintWorld', (+new Date())-epoch);
+        this.stats.count('paintWorld', clock.now()-epoch);
     };
 
     return StaggeredIsometric;
@@ -3176,7 +3237,7 @@ define('plugins/sprite/flock',[],function() {
      */
     Flock.prototype.update = function(now, phaseOn) {
 
-        var dt, mag, count;
+        var dt, mag, count, max;
         if (this.lastTime===undefined) {
             dt = 16;
         } else {
@@ -3253,7 +3314,8 @@ define('plugins/sprite/flock',[],function() {
 
         /* separation: Any flockmates that are too close should repel the sprite. */
         count = 0;
-        for (x = 0, y = 0, i = 0; i < neighbors.length; i++) {
+        max = Math.min(this.flock_neighbor_limit, neighbors.length); /* TODO: Should separation have a separate neighbour limit */
+        for (x = 0, y = 0, i = 0; i < max; i++) {
             n = neighbors[i];
             if (s.nuid===n.nuid) {
                 continue;
@@ -4698,7 +4760,11 @@ function() {
 });
 
 /*global define*/
-define('tasks/slowqueue',['util/minheap', 'util/uid'], function(MinHeap, uid) {
+define('tasks/slowqueue',['util/minheap',
+        'util/uid',
+        'util/clock'],
+
+function(MinHeap, uid, clock) {
 
     
 
@@ -4716,30 +4782,102 @@ define('tasks/slowqueue',['util/minheap', 'util/uid'], function(MinHeap, uid) {
      * may exceed this if a task does not honour its promise to return within the given time.
      */
     function SlowQueue(maxFrameTime) {
-        /* TODO: Perhaps a started task should always take priority, since you might be able to post
-         * a higher priority task on the same object, and explode its state. */
-        this.queue = new MinHeap();
+        this.queue        = new MinHeap();
         this.maxFrameTime = maxFrameTime;
-        this.id = uid();
+        this.id           = uid();
+        this.currentTask  = null;
     }
 
     /**
      * Add a new task to the queue
      * @method module:util/slowqueue.SlowQueue#addTask
-     * @param  {Object} task A task to add
-     * @param  {Number} [priority=1] The task priority. High priority tasks will be
+     * @param  {Object} task A task to add. This is an object that exposes two function
+     * properties.
+     * <dl>
+     *  <dt>taskBegin</dt><dd>A function that is passed the parameters object given in this method. The
+     *      cost of calling this method does not count towards the time consumed by the task, so it should
+     *      return as quickly as possible. Any value returned from this function is discarded.</dd>
+     *  <dt>taskResume</dt><dd>A function that is called one or more times in order to complete the task.
+     *      It takes one parameter, which is the time at which it is expected to complete by. If it has
+     *      not completed by that time, it should return. The taskResume function will be called again on
+     *      the next frame.
+     *      It should return null if the task is incomplete, and any other value as the task result.
+     *      If a task is passed 0 as its completion time, it should consider itself unlimited in the
+     *      amount of time it can use.</dd>
+     * </dl>
+     * Note that task objects are expected to maintain state between calls to taskResume. This means that
+     * using the object outside a queue could potentially yield unpredictable results. The best idea is to
+     * create objects specifically for the queue. E.g. create two pathfinders; one for the task queue to
+     * utilise and one to use outside the queue.
+     * @param  {Object} [parameters] Arbitrary object passed to <code>taskBegin</code>.
+     * @param  {Number} [priority=2] The task priority. High priority tasks will be
      * done before low ones. Partially completed tasks always have top priority. Low numbers
      * are higher priority than high numbers.
+     * @param {String} [handle] A handle for the task so that groups of tasks can be aborted. E.g.
+     * if the queue is full of tasks with the handle 'hostile_behaviour' then you can abort all
+     * tasks of that kind.
+     * @param  {Function} [onComplete] Once the task is complete, this function will be called, passing
+     * in any result object from the task.
      */
-    SlowQueue.prototype.addTask = function(task, priority) {
-        priority = priority===undefined?1:priority;
-
-        /* TODO: What the heck is a task? */
+    SlowQueue.prototype.addTask = function(task, parameters, priority, handle, onComplete) {
+        priority = priority===undefined?2:priority;
 
         this.queue.push({
-            task:task,
-            priority:priority
+            task:       task,
+            handle:     handle,
+            parameters: parameters,
+            priority:   priority,
+            onComplete: onComplete
         });
+    };
+
+    SlowQueue.prototype.size = function() {
+        var count = this.queue.size();
+        if (this.currentTask===null) {
+            return count;
+        }
+        return count + 1;
+    };
+
+
+    /**
+     * Aborts tasks running or in the queue.
+     * @param  {String} [handle] Tasks with this handle will be aborted. If omitted, all
+     * tasks will be aborted.
+     */
+    SlowQueue.prototype.abort = function(handle) {
+        var t;
+
+        if (handle) {
+            if (this.currentTask!==null && this.currentTask.handle===handle) {
+                this.currentTask = null;
+            }
+
+            if (this.queue.size()>0) {
+                var newq = new MinHeap();
+                while(t = this.queue.pop()) {
+                    if (t.handle!==handle) {
+                        newq.push(t);
+                    }
+                }
+            }
+        } else {
+            this.currentTask = null;
+            this.queue.clear();
+        }
+    };
+
+    var nextTask = function() {
+        if (this.currentTask !== null || this.queue.size()===0) {
+            return false;
+        }
+
+        var task = this.queue.pop();
+        if (task) {
+            this.currentTask = task;
+            return true;
+        }
+        return false;
     };
 
     /**
@@ -4748,7 +4886,33 @@ define('tasks/slowqueue',['util/minheap', 'util/uid'], function(MinHeap, uid) {
      * @method module:util/slowqueue.SlowQueue#run
      */
     SlowQueue.prototype.run = function() {
-        /* TODO */
+
+        var now = clock.now();
+        var end = now + this.maxFrameTime;
+
+        var isnew = nextTask.call(this);
+        if (this.currentTask===null) {
+            /* Well, that was easy. */
+            return;
+        }
+        var t = this.currentTask;
+
+        if (isnew) {
+            t.task.taskBegin(t.parameters);
+        }
+
+        /* TODO: Run more than one task per frame if we have the time budget */
+
+        var result = t.task.taskResume(end);
+        if (result === null) {
+            /* Task incomplete */
+            return;
+        }
+
+        if (t.onComplete) {
+            t.onComplete(result);
+            this.currentTask = null;
+        }
     };
 
     return SlowQueue;
@@ -5343,7 +5507,7 @@ define('ai/proximity-tracker',[],function() {
 
 /*global define*/
 
-define('ai/pathfinder',[],function() {
+define('ai/pathfinder',['util/clock'], function(clock) {
 
     
 
@@ -5525,7 +5689,7 @@ define('ai/pathfinder',[],function() {
                 current = current.cameFrom;
             }
 
-            path.push(this.startx,this.starty);
+            path.push(this.x0, this.y0);
 
             return path;
         };
@@ -5783,25 +5947,55 @@ define('ai/pathfinder',[],function() {
      * @return {Array} An array of points as a 1d spanned array
      * of the form x,y,x,y,x,y...
      */
-    PathFinder.prototype.route = function(x0,y0,x1,y1) {
+    PathFinder.prototype.route = function(x0, y0, x1, y1) {
+        this.taskBegin({
+            x0:x0,
+            y0:y0,
+            x1:x1,
+            y1:y1
+        });
+        return this.taskResume(0);
+    };
 
+    /**
+     * Begins routing as a task.
+     * @param {Object} parameters Parameters of the form:
+     * <dl>
+     *  <dt>x0</dt><dd>Starting tile X column position</dd>
+     *  <dt>y0</dt><dd>Starting tile Y row position</dd>
+     *  <dt>x1</dt><dd>Ending tile X column position</dd>
+     *  <dt>y1</dt><dd>Ending tile Y row position</dd>
+     * </dl>
+     */
+    PathFinder.prototype.taskBegin = function(parameters) {
         var i;
 
-        this.startx = x0;
-        this.starty = y0;
+        this.x0 = parameters.x0;
+        this.y0 = parameters.y0;
+
+        this.x1 = parameters.x1;
+        this.y1 = parameters.y1;
 
         /* Reset everything */
         for (i = this.nodeRows.length - 1; i >= 0; i--) {
             this.nodeRows[i].length = 0;
         }
-        var n = this.node(x0,y0);
+
+        var n = this.node(this.x0, this.y0);
         if (n===null) {
             /* This means the first square was solid. Call off the search. */
             return [];
         }
         n.open = true;
         this.scoreHeap.clear().push(n);
-        n.fscore = distance2(x0,y0,x1,y1);
+        n.fscore = distance2(this.x0, this.y0, this.x1, this.y1);
+    };
+
+    PathFinder.prototype.taskResume = function(endTime) {
+
+        var x1=this.x1,
+            y1=this.y1,
+            i;
 
         while(this.scoreHeap.size()>0)
         {
@@ -5838,6 +6032,10 @@ define('ai/pathfinder',[],function() {
                     }
                 }
             }
+
+            if (endTime && clock.now() >= endTime) {
+                return null; /* Suspend */
+            }
         }
 
         return [];
@@ -5848,7 +6046,7 @@ define('ai/pathfinder',[],function() {
 });
 
 /*global define*/
-define('polyfills/requestAnimationFrame',[],function() {
+define('polyfills/requestAnimationFrame',['util/clock'], function(clock) {
 
     
 
@@ -5865,6 +6063,23 @@ define('polyfills/requestAnimationFrame',[],function() {
     // requestAnimationFrame polyfill by Erik Möller
     // fixes from Paul Irish and Tino Zijdel
 
+    var fixRequestAnimationFrame = function() {
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = clock.now();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+    };
+
+    var fixCancelAnimationFrame = function() {
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+    };
+
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
     for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
@@ -5874,22 +6089,23 @@ define('polyfills/requestAnimationFrame',[],function() {
     }
 
     if (!window.requestAnimationFrame) {
-        window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-              timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        };
+        fixRequestAnimationFrame();
     }
 
     if (!window.cancelAnimationFrame) {
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
+        fixCancelAnimationFrame();
     }
 
+    /**
+     * Overrides the clock and requestAnimationFrame to allow predictable timings
+     * in unit tests.
+     * @function module:polyfills/requestAnimationFrame#overrideClock
+     */
+    return function() {
+        clock.fixedOutput();
+        fixRequestAnimationFrame();
+        fixCancelAnimationFrame();
+    };
 });
 
 /*global define*/
@@ -5947,14 +6163,18 @@ define('snaps',['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
         'ai/proximity-tracker',
         'ai/pathfinder',
 
+        /* Testing */
+        'polyfills/requestAnimationFrame',
+
         /* Non-referenced */
-        'polyfills/requestAnimationFrame', 'polyfills/bind'],
+        'polyfills/bind'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
         SlowQueue,
         tweens,
-        ProximityTracker, PathFinder) {
+        ProximityTracker, PathFinder,
+        overrideClock) {
 
     /*
      * TODO: https://github.com/izb/snaps.js/wiki/Todo
@@ -5974,6 +6194,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var MinHeap   = util.MinHeap;
     var uid       = util.uid;
     var Stats     = util.Stats;
+    var clock     = util.clock;
 
     /**
      * The main class of the game engine
@@ -6293,11 +6514,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updateTasks = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             for (var i = _this.taskQueues.length - 1; i >= 0; i--) {
                 _this.taskQueues[i].run();
             }
-            this.stats.count('updateTasks', (+new Date())-epoch);
+            this.stats.count('updateTasks', clock.now()-epoch);
         };
 
         /**
@@ -6305,11 +6526,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updatePhasers = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
                 _this.phasers[i].rebalance(_this.now);
             }
-            this.stats.count('updatePhasers', (+new Date())-epoch);
+            this.stats.count('updatePhasers', clock.now()-epoch);
         };
 
         /**
@@ -6317,14 +6538,14 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updateFX = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
                 if (!fx.update(_this.now)) {
                     _this.activeFX.splice(i, 1);
                 }
             }
-            this.stats.count('updateFX', (+new Date())-epoch);
+            this.stats.count('updateFX', clock.now()-epoch);
         };
 
         /**
@@ -6459,7 +6680,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
 
                 /* Start the paint loop */
-                this.halt = false;
+                _this.halt = false;
+                _this.overrideClock();
                 setTimeout(function(){loop(0);}, 0);
             },
 
@@ -6837,7 +7059,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updateSprites = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             var keepsprites = [];
             var i, s;
             for ( i = _this.sprites.length - 1; i >= 0; i--) {
@@ -6859,7 +7081,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 s = _this.sprites[i];
                 s.commit(_this.now);
             }
-            this.stats.count('updateSprites', (+new Date())-epoch);
+            this.stats.count('updateSprites', clock.now()-epoch);
         };
 
         /**
@@ -6869,6 +7091,16 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.getNow = function() {
             return _this.now;
+        };
+
+        /**
+         * Overrides the clock in order to create predictable frame timings in
+         * unit tests.
+         * @method module:snaps.Snaps#overrideClock
+         * @private
+         */
+        this.overrideClock = function() {
+            overrideClock();
         };
 
         /**
