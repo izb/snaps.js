@@ -1,5 +1,5 @@
 /*global define*/
-define(function() {
+define(['util/clock'], function(clock) {
 
     'use strict';
 
@@ -16,6 +16,23 @@ define(function() {
     // requestAnimationFrame polyfill by Erik Möller
     // fixes from Paul Irish and Tino Zijdel
 
+    var fixRequestAnimationFrame = function() {
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = clock.now();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+    };
+
+    var fixCancelAnimationFrame = function() {
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+    };
+
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
     for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
@@ -25,20 +42,21 @@ define(function() {
     }
 
     if (!window.requestAnimationFrame) {
-        window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-              timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        };
+        fixRequestAnimationFrame();
     }
 
     if (!window.cancelAnimationFrame) {
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
+        fixCancelAnimationFrame();
     }
 
+    /**
+     * Overrides the clock and requestAnimationFrame to allow predictable timings
+     * in unit tests.
+     * @function module:polyfills/requestAnimationFrame#overrideClock
+     */
+    return function() {
+        clock.fixedOutput();
+        fixRequestAnimationFrame();
+        fixCancelAnimationFrame();
+    };
 });

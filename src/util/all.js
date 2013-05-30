@@ -8,8 +8,9 @@ define([
     'util/minheap',
     'util/stats',
     'util/uid',
+    'util/clock',
     'util/url'],
-function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
+function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, clock, Url) {
 
     'use strict';
 
@@ -25,6 +26,7 @@ function(Preloader, rnd, Bitmap, debug, js, MinHeap, Stats, uid, Url) {
         MinHeap: MinHeap,
         Stats: Stats,
         uid: uid,
+        clock: clock,
         debug: debug,
         Bitmap: Bitmap,
         Url: Url

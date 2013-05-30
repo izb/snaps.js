@@ -257,6 +257,17 @@ define(['util/js'], function(js) {
         this.setState(state, ext, now - this.state.dur * this.state.jogPos(this.epoch, now));
     };
 
+    /** Sets the position in the current state's animation. E.g. set to 0.5 to place the
+     * jog position halfway through the sprite's current animation.
+     * @method module:sprites/sprite.Sprite#setJog
+     * @param {Number} pos A jog position from 0 to 1.
+     */
+    Sprite.prototype.setJog = function(pos) {
+        /* TODO: Validate value? */
+        var now = this.sn.getNow();
+        this.epoch = now - this.state.dur * pos;
+    };
+
     /**
      * @private
      * @method module:sprites/sprite.Sprite#update

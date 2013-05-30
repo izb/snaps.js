@@ -17,14 +17,18 @@ define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
         'ai/proximity-tracker',
         'ai/pathfinder',
 
+        /* Testing */
+        'polyfills/requestAnimationFrame',
+
         /* Non-referenced */
-        'polyfills/requestAnimationFrame', 'polyfills/bind'],
+        'polyfills/bind'],
 
 function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
         regPlugins,
         SlowQueue,
         tweens,
-        ProximityTracker, PathFinder) {
+        ProximityTracker, PathFinder,
+        overrideClock) {
 
     /*
      * TODO: https://github.com/izb/snaps.js/wiki/Todo
@@ -44,6 +48,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var MinHeap   = util.MinHeap;
     var uid       = util.uid;
     var Stats     = util.Stats;
+    var clock     = util.clock;
 
     /**
      * The main class of the game engine
@@ -363,11 +368,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updateTasks = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             for (var i = _this.taskQueues.length - 1; i >= 0; i--) {
                 _this.taskQueues[i].run();
             }
-            this.stats.count('updateTasks', (+new Date())-epoch);
+            this.stats.count('updateTasks', clock.now()-epoch);
         };
 
         /**
@@ -375,11 +380,11 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updatePhasers = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             for (var i = _this.phasers.length - 1; i >= 0; i--) {
                 _this.phasers[i].rebalance(_this.now);
             }
-            this.stats.count('updatePhasers', (+new Date())-epoch);
+            this.stats.count('updatePhasers', clock.now()-epoch);
         };
 
         /**
@@ -387,14 +392,14 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updateFX = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             for (var i = _this.activeFX.length - 1; i >= 0; i--) {
                 var fx = _this.activeFX[i];
                 if (!fx.update(_this.now)) {
                     _this.activeFX.splice(i, 1);
                 }
             }
-            this.stats.count('updateFX', (+new Date())-epoch);
+            this.stats.count('updateFX', clock.now()-epoch);
         };
 
         /**
@@ -529,7 +534,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 }
 
                 /* Start the paint loop */
-                this.halt = false;
+                _this.halt = false;
+                _this.overrideClock();
                 setTimeout(function(){loop(0);}, 0);
             },
 
@@ -907,7 +913,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @private
          */
         this.updateSprites = function() {
-            var epoch = +new Date();
+            var epoch = clock.now();
             var keepsprites = [];
             var i, s;
             for ( i = _this.sprites.length - 1; i >= 0; i--) {
@@ -929,7 +935,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 s = _this.sprites[i];
                 s.commit(_this.now);
             }
-            this.stats.count('updateSprites', (+new Date())-epoch);
+            this.stats.count('updateSprites', clock.now()-epoch);
         };
 
         /**
@@ -939,6 +945,16 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.getNow = function() {
             return _this.now;
+        };
+
+        /**
+         * Overrides the clock in order to create predictable frame timings in
+         * unit tests.
+         * @method module:snaps.Snaps#overrideClock
+         * @private
+         */
+        this.overrideClock = function() {
+            overrideClock();
         };
 
         /**

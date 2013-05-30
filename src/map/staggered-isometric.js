@@ -1,5 +1,11 @@
 /*global define*/
-define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitmap, debug, js) {
+define(['map/tile',
+        'util/bitmap',
+        'util/debug',
+        'util/js',
+        'util/clock'],
+
+function(Tile, Bitmap, debug, js, clock) {
 
     'use strict';
 
@@ -570,7 +576,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
      * @private
      */
     StaggeredIsometric.prototype.updateLayers = function(now) {
-        var epoch = +new Date();
+        var epoch = clock.now();
         var map   = this.data;
         for (var i = 0; i < map.layers.length; i++) {
             var l = map.layers[i];
@@ -578,7 +584,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 l.update(now);
             }
         }
-        this.stats.count('updateLayers', (+new Date())-epoch);
+        this.stats.count('updateLayers', clock.now()-epoch);
     };
 
     /** Finds the index of the ground layer.
@@ -633,7 +639,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
         var startx = Math.floor((this.xoffset+this.clientWidth -1 ) / xstep);
         var endx   = Math.floor((this.xoffset-xstep/2-this.maxXOverdraw) / xstep);
 
-        epoch = +new Date();
+        epoch = clock.now();
         /* Sort sprites first by y-axis, then by height, then creation order */
         /* TODO: Cull off-screen sprites first? */
         sprites.sort(function(a, b) {
@@ -644,10 +650,10 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
             n = a.h - b.h;
             return n!==0?n:a.nuid - b.nuid;
         });
-        this.stats.count('spriteSort', (+new Date())-epoch);
+        this.stats.count('spriteSort', clock.now()-epoch);
 
 
-        epoch = +new Date();
+        epoch = clock.now();
         var spriteCursor = 0;
         var stagger = 0;
         var x, y, r, l, i, layerEndY, layerEndX;
@@ -689,7 +695,7 @@ define(['map/tile', 'util/bitmap', 'util/debug', 'util/js'], function(Tile, Bitm
                 }
             }
         }
-        this.stats.count('paintWorld', (+new Date())-epoch);
+        this.stats.count('paintWorld', clock.now()-epoch);
     };
 
     return StaggeredIsometric;
