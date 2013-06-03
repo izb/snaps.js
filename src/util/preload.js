@@ -12,15 +12,49 @@ define(function() {
       * @constructor module:util/preload.Preloader
       */
     function Preloader() {
-        this.batch = [];
+        this.imagebatch = [];
+        this.audiobatch = [];
         this.errorstate = false;
     }
 
+    var mimeTypesAudio = [
+        {ext:'.ogg', mime:'audio/ogg; codecs="vorbis"'},
+        {ext:'.mp3', mime:'audio/mpeg'}
+    ];
+
+    var audioExt;
+
     /**
-     * Initialize the composite before use.
-     * @method module:util/preload.Preloader#add
+     * Adds an audio file to the preloader. The correct file extension for the
+     * current browser will be determined. The extension will be either .ogg or .mp3
+     * @param  {String} file The filename without extension. The extension will
+     *                       be added automatically. You should therefore have a
+     *                       range of file types available for different browsers.
+     * @param  {[type]} tag     [description]
+     * @param  {[type]} fnStore [description]
+     * @return {[type]}         [description]
+     */
+    Preloader.prototype.addAudio = function(file, tag, fnStore) {
+        if (audioExt===undefined) {
+            /* First time in, determine the audio type for the platform */
+            var s = new Audio();
+
+            for (var i = 0; i < mimeTypesAudio.length; i++) {
+                var t = mimeTypesAudio[i];
+                if (s.canPlayType(t.mime)) {
+                    audioExt = t.ext;
+                    break;
+                }
+            }
+        }
+        this.audiobatch.push({file:file+audioExt, tag:tag, fnStore:fnStore});
+    };
+
+    /**
+     * Adds an image file to the preloader.
+     * @method module:util/preload.Preloader#addImage
      * @param {String} file The file to load
-     * @param {String} tag Some tag to help you identify the image when it's loaded
+     * @param {String} tag Some tag to help you identify the file when it's loaded
      * @param {Function} [fnStore] A callback to receive the loaded image, in the form
      * <pre>
      * function(image, tag) {
@@ -28,8 +62,8 @@ define(function() {
      * </pre>
      * Where the image is a loaded Image object.
      */
-    Preloader.prototype.add = function(file, tag, fnStore) {
-        this.batch.push({file:file, tag:tag, fnStore:fnStore});
+    Preloader.prototype.addImage = function(file, tag, fnStore) {
+        this.imagebatch.push({file:file, tag:tag, fnStore:fnStore});
     };
 
     /**
@@ -42,21 +76,26 @@ define(function() {
      */
     Preloader.prototype.load = function(fnComplete, fnProgress, fnError) {
 
-        var count = this.batch.length;
-        var _this = this;
+        var count = this.imagebatch.length + this.audiobatch.length,
+            _this = this,
+            i, next;
 
         fnProgress(0);
 
-        function loadHandler(item, img) {
-            return function() {
+        function loadHandler(item, ob) {
+            return function() { /* TODO: Use bind instead. */
                 if (_this.errorstate) {
                     return;
                 }
+
                 count--;
+
                 if (item.fnStore!==undefined) {
-                    item.fnStore(img, item.tag);
+                    item.fnStore(ob, item.tag);
                 }
-                fnProgress(1-count/_this.batch.length);
+
+                fnProgress(1-count/(_this.imagebatch.length + _this.audiobatch.length));
+
                 if (count===0) {
                     fnComplete();
                 }
@@ -70,8 +109,8 @@ define(function() {
             }
         }
 
-        for (var i = 0; i < this.batch.length; i++) {
-            var next = this.batch[i];
+        for (i = 0; i < this.imagebatch.length; i++) {
+            next = this.imagebatch[i];
 
             var img = new Image();
             img.onload = loadHandler(next, img);
@@ -79,6 +118,14 @@ define(function() {
             img.src = next.file;
         }
 
+        for (i = 0; i < this.audiobatch.length; i++) {
+            next = this.audiobatch[i];
+
+            var snd = new Audio();
+            snd.oncanplaythrough = loadHandler(next, snd);
+            snd.onerror = error;
+            snd.src =  next.file;
+        }
     };
 
     return Preloader;

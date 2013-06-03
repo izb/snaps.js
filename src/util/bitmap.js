@@ -12,9 +12,16 @@ define(function() {
          * Extract the red channel from an image into an array.
          * @function module:util/bitmap#imageToRData
          * @param {DOMElement} image The source image
-         * @return {Array} An array of byte values as a regular array
+         * @param {Array} [r] Output: An array that will be filled with the red channel
+         * bitmap data. Length will be reset.
+         * @param {Array} [g] Output: An array that will be filled with the green channel
+         * bitmap data. Length will be reset.
+         * @param {Array} [b] Output: An array that will be filled with the blue channel
+         * bitmap data. Length will be reset.
+         * @param {Array} [a] Output: An array that will be filled with the alpha channel
+         * bitmap data. Length will be reset.
          */
-        imageToRData: function(image)
+        imageToData: function(image, r, g, b, a)
         {
             var w = image.width;
             var h = image.height;
@@ -28,13 +35,41 @@ define(function() {
 
             var rgba = ctx.getImageData(0,0,w,h).data;
 
-            var r = new Array(rgba.length/4);
+            var len = rgba.length/4;
 
-            for (var i = 0; i < r.length; i++) {
-                r[i] = rgba[i*4];
+            if (r) {
+                r.length = len;
             }
 
-            return r;
+            if (g) {
+                g.length = len;
+            }
+
+            if (b) {
+                b.length = len;
+            }
+
+            if (a) {
+                a.length = len;
+            }
+
+            for (var i = 0; i < len; i++) {
+                if (r) {
+                    r[i] = rgba[i*4];
+                }
+
+                if (g) {
+                    g[i] = rgba[i*4+1];
+                }
+
+                if (b) {
+                    b[i] = rgba[i*4+2];
+                }
+
+                if (a) {
+                    a[i] = rgba[i*4+3];
+                }
+            }
         }
     };
 

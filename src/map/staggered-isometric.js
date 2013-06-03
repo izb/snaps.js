@@ -123,7 +123,7 @@ function(Tile, Bitmap, debug, js, clock) {
 
         for (var i = 0; i < map.tilesets.length; i++) {
             var ts = map.tilesets[i];
-            preloader.add(ts.image, ts, storeTile);
+            preloader.addImage(ts.image, ts, storeTile);
         }
 
         var storeHitTest = function(image, name) {
@@ -132,7 +132,23 @@ function(Tile, Bitmap, debug, js, clock) {
             }
 
             if (name==='hit') {
-                _this.hitTest = Bitmap.imageToRData(image);
+                _this.hitTest     = []; /* Red channel shows distance from closest edge, and can be used to determine
+                                         * if a point lies on a tile. */
+                _this.edgeNormals = []; /* Green channel points away from the closest edge at 90 degrees. */
+                Bitmap.imageToRData(image, _this.hitTest, _this.edgeNormals);
+
+                /* Normals in vector form too. */
+                _this.edgeNormalsX = new Array(_this.edgeNormals.length);
+                _this.edgeNormalsY = new Array(_this.edgeNormals.length);
+                /* Convert normals to radians for convenience */
+                for (var i = _this.edgeNormals.length - 1; i >= 0; i--) {
+                    var n = _this.edgeNormals[i];
+                    n = (3*n*Math.PI)/180; /* Normal values are to the closes 3 degrees */
+                    _this.edgeNormals[i] = n;
+                    _this.edgeNormalsX[i] = Math.cos(n);
+                    _this.edgeNormalsY[i] = Math.sin(n);
+                }
+
                 /* TODO: It should be noted in documentation that the hit test image
                  * should under no circumstances be re-saved with a colour profile attached. */
 
@@ -144,7 +160,7 @@ function(Tile, Bitmap, debug, js, clock) {
         };
 
         for(var testName in this.hitTests) {
-            preloader.add(this.hitTests[testName], testName, storeHitTest);
+            preloader.addImage(this.hitTests[testName], testName, storeHitTest);
         }
     };
 

@@ -112,6 +112,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.PathFinder = PathFinder.bind(PathFinder, this);
 
         settings = settings || {};
+
         this.dbgShowMouse     = !!settings.showMouse;
         this.dbgShowCounts    = !!settings.showCounts;
         this.dbgShowMouseTile = !!settings.showMouseTile;
@@ -119,9 +120,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * then those property values are shown on each tile. */
         this.dbgShowRegions   = !!settings.showRegions;
         this.dbgRegionProps   = settings.showRegions&&settings.showRegions.length>0&&settings.showRegions!=='true'?
-            settings.showRegions.split(','):[];
+                settings.showRegions.split(','):[];
 
         this.imageCache     = {};
+        this.audioCache     = {};
         this.spriteUpdaters = {};
         this.colliders      = {};
         this.fxUpdaters     = {};
@@ -262,12 +264,23 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         /* Add game-added images to the preloader */
         if (typeof game.preloadImages === 'object') {
 
-            var storePreloaded = function(image, tag){
+            var storePreloadedImage = function(image, tag){
                 _this.imageCache[tag] = image;
             };
 
             for(var pathName in game.preloadImages) {
-                preloader.add(game.preloadImages[pathName], pathName, storePreloaded);
+                preloader.addImage(game.preloadImages[pathName], pathName, storePreloadedImage);
+            }
+        }
+
+        if (typeof game.sounds === 'object') {
+
+            var storePreloadedSound = function(sound, tag){
+                _this.audioCache[tag] = sound;
+            };
+
+            for(var pathName in game.sounds) {
+                preloader.addAudio(game.sounds[pathName], pathName, storePreloadedSound);
             }
         }
 
@@ -300,7 +313,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             };
 
             for(var spriteName in _this.game.spriteDefs) {
-                preloader.add(_this.game.spriteDefs[spriteName].path, spriteName, storeSpriteSheet);
+                preloader.addImage(_this.game.spriteDefs[spriteName].path, spriteName, storeSpriteSheet);
             }
         }
 
@@ -535,7 +548,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
                 /* Start the paint loop */
                 _this.halt = false;
-                _this.overrideClock();
                 setTimeout(function(){loop(0);}, 0);
             },
 
@@ -690,11 +702,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.tileDimensions(out);
             if ((r&1)===0) {
                 out[0] = (c+1)*out[0] - (out[0]/2);
-                out[1] = (r+1)*(out[1]/2);
             } else {
                 out[0] = (c+1)*out[0];
-                out[1] = (r+1)*(out[1]/2);
             }
+            out[1] = (r+1)*(out[1]/2);
         };
 
         /** Get a tile property from a world position. Starts at the topmost
@@ -816,10 +827,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             if (opts.id===undefined) {
                 opts.id = uid();
-            } else {
-                if(_this.spriteMap.hasOwnProperty(opts.id)) {
-                    throw "Error: duplicate sprite id " + opts.id;
-                }
+            } else if(_this.spriteMap.hasOwnProperty(opts.id)) {
+                throw "Error: duplicate sprite id " + opts.id;
             }
 
             var s = Sprite.construct(_this, defName, stateName, stateExt, x, y, h, opts);
@@ -843,10 +852,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             if (id===undefined) {
                 id = 'id'+uid();
-            } else {
-                if(_this.spriteMap.hasOwnProperty(id)) {
-                    throw "Warning: duplicate sprite (composite) id " + id;
-                }
+            } else if(_this.spriteMap.hasOwnProperty(id)) {
+                throw "Warning: duplicate sprite (composite) id " + id;
             }
 
             var comp = new Composite(this, x, y, id, endCallback);
