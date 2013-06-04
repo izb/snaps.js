@@ -346,7 +346,7 @@ define(['util/js'], function(js) {
      * @method module:sprites/sprite.Sprite#move
      * @param  {Number} dx Amount to alter x position
      * @param  {Number} dy Amount to alter y position
-     * @param  {Number} [dh] Amount to alter height
+     * @param  {Number} [dh=0] Amount to alter height
      * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.move = function(dx,dy,dh, collide) {
@@ -364,8 +364,8 @@ define(['util/js'], function(js) {
             this.x = this.collisionPoint[0];
             this.y = this.collisionPoint[1];
         } else {
-            this.x=this.x+dx;
-            this.y=this.y+dy;
+            this.x = this.x+dx;
+            this.y = this.y+dy;
         }
 
         this.setDirection(this.x + dx, this.y + dy);
@@ -377,11 +377,8 @@ define(['util/js'], function(js) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;
-
-                return true;
             } else {
                 this.h+=dh;
-                return false;
             }
         }
 

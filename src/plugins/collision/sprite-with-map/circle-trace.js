@@ -63,6 +63,25 @@ function(traceProp, midPtEllipse, localScan) {
         }
     }
 
+    /**
+     * Tests the sample ring around a point to check if a point is solid or not.
+     * @param  {Number} x World position
+     * @param  {Number} y World position
+     * @return {Boolean} true if solid
+     */
+    CircleTrace.prototype.isPointSolid = function(x, y, h) {
+        for (var j = this.samples.length - 2; j >= 0; j-=2) {
+            var sxo = this.samples[j];
+            var syo = this.samples[j+1];
+
+            var sampleHeight = sn.getTilePropsAtWorldPos('height',x+sxo,y+syo);
+            if (sampleHeight>h) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     /** Perform a trace to test for collision along a line with radius.
      * Effectively traces an ellipse  from one point to another, with some
      * important performance compromises in accuracy.
@@ -100,7 +119,7 @@ function(traceProp, midPtEllipse, localScan) {
         }
 
         if (this.autoSlip) {
-            /* First, distance ourself from key jagged shapes in key directions,
+            /* First, distance ourself from key jagged shapes in key directions
              * to ensure the player can slip past isometric lines without getting
              * caught on pixels. */
             var slip = 0;
@@ -122,11 +141,11 @@ function(traceProp, midPtEllipse, localScan) {
         var route = []; /* Route will be populated with non-collision positions
                          * along the path. */
         var collisionRatio = traceProp(sn,
-            'height',
-            this.edges,
-            x0, y0,
-            dx, dy,
-            h, this.lineHit, route);
+                'height',
+                this.edges,
+                x0, y0,
+                dx, dy,
+                h, this.lineHit, route);
 
         var routeidx = route.length - 2;
         var rx, ry;
@@ -138,8 +157,8 @@ function(traceProp, midPtEllipse, localScan) {
             for (var j = this.samples.length - 2; j >= 0; j-=2) {
                 sxo = this.samples[j];
                 syo = this.samples[j+1];
-                rx = route[i];
-                ry = route[i+1];
+                rx  = route[i];
+                ry  = route[i+1];
 
                 var sampleHeight = sn.getTilePropsAtWorldPos('height',rx+sxo,ry+syo);
 
@@ -153,11 +172,13 @@ function(traceProp, midPtEllipse, localScan) {
                     /* Clear to the end/linear collision */
                     out[0] = this.lineHit[0];
                     out[1] = this.lineHit[1];
+
                     return collisionRatio;
                 } else {
                     /* Clear to part-way along */
                     out[0] = rx;
                     out[1] = ry;
+
                     if (dx>dy) {
                         return (rx-x0)/dx;
                     } else {
@@ -175,6 +196,7 @@ function(traceProp, midPtEllipse, localScan) {
 
         out[0] = x0;
         out[1] = y0;
+
         return 0;
     };
 

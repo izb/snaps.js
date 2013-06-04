@@ -1502,7 +1502,8 @@ position in its 0/1 values.</td>
             
 <div class="param-desc">
     The distance from the given screen position to the
-closest tile edge, capped at 127px.
+closest tile edge, capped at 127px. Not that this distance is screen distance,
+in pixels.
 </div>
 
 
@@ -2219,6 +2220,187 @@ x then y.</td>
         
             
 <dt>
+    <h4 class="name" id="worldEdgeNormal"><span class="type-signature"></span>worldEdgeNormal<span class="signature">(x, y, out)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        From a world position, this function determines the closest tile edge and
+works out a vector pointing away from it.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">A world x position</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">A world y position</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>out</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">A 2-length array that will recieve the vector x/y
+components in its 0/1 values.</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    The distance from the given world position to the
+closest tile edge, capped at 127px. Note that this distance is given
+in world-space, not screen space, to allow for the isometric
+projection. This means that the distance will be different to the distance
+returned from <a href="staggered-isometric.StaggeredIsometric.html#worldEdgeNormal"><code>worldToTilePos</code></a>
+</div>
+
+
+
+<dl>
+	<dt class="oneline">
+		Type
+	</dt>
+	<dd class="oneline">
+		
+<span class="param-type">Number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="worldToScreenPos"><span class="type-signature"></span>worldToScreenPos<span class="signature">(out)</span><span class="type-signature"></span></h4>
     
     
@@ -2478,7 +2660,8 @@ position in its 0/1 values.</td>
             
 <div class="param-desc">
     The distance from the given world position to the
-closest tile edge, capped at 127px.
+closest tile edge, capped at 127px. Not that this distance is screen distance,
+in pixels.
 </div>
 
 

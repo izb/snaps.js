@@ -132,10 +132,12 @@ function(Tile, Bitmap, debug, js, clock) {
             }
 
             if (name==='hit') {
-                _this.hitTest     = []; /* Red channel shows distance from closest edge, and can be used to determine
-                                         * if a point lies on a tile. */
+                _this.hitTest     = []; /* Red channel shows distance from closest edge in screen space, and can
+                                         * be used to determine if a point lies on a tile. */
                 _this.edgeNormals = []; /* Green channel points away from the closest edge at 90 degrees. */
-                Bitmap.imageToData(image, _this.hitTest, _this.edgeNormals);
+                _this.worldEdgeDistance = []; /* Blue channel shows distance from closest edge in world space, and can
+                                               * also be used to determine if a point lies on a tile. */
+                Bitmap.imageToData(image, _this.hitTest, _this.edgeNormals, _this.worldEdgeDistance);
 
                 /* Normals in vector form too. */
                 _this.edgeNormalsX = new Array(_this.edgeNormals.length);
@@ -146,7 +148,7 @@ function(Tile, Bitmap, debug, js, clock) {
                     n = (3*n*Math.PI)/180; /* Normal values are to the closes 3 degrees */
                     _this.edgeNormals[i] = n;
                     _this.edgeNormalsX[i] = Math.cos(n);
-                    _this.edgeNormalsY[i] = Math.sin(n);
+                    _this.edgeNormalsY[i] = -Math.sin(n);
                 }
 
                 /* TODO: It should be noted in documentation that the hit test image
@@ -414,12 +416,13 @@ function(Tile, Bitmap, debug, js, clock) {
      * @param {Array} out A 2-length array that will recieve the tile x/y
      * position in its 0/1 values.
      * @return {Number} The distance from the given world position to the
-     * closest tile edge, capped at 127px.
+     * closest tile edge, capped at 127px. Not that this distance is screen distance,
+     * in pixels.
      */
     StaggeredIsometric.prototype.worldToTilePos = function(x, y, out) {
         // http://gamedev.stackexchange.com/a/48507/3188
 
-        var map = this.data;
+        var map = this.data; /* TODO: Why isn't 'data' called 'map' ? */
 
         var tw  = map.tilewidth;
         var th  = map.tileheight;
@@ -445,6 +448,46 @@ function(Tile, Bitmap, debug, js, clock) {
             out[0] = (((x + tw / 2) / tw)|0) - 1;
             out[1] = 2 * (((y + th / 2) / th)|0) - 1;
 
+            return dist;
+        }
+    };
+
+    /**
+     * From a world position, this function determines the closest tile edge and
+     * works out a vector pointing away from it.
+     * @method module:map/staggered-isometric.StaggeredIsometric#worldEdgeNormal
+     * @param {Number} x A world x position
+     * @param {Number} y A world y position
+     * @param {Array} out A 2-length array that will recieve the vector x/y
+     * components in its 0/1 values.
+     * @return {Number} The distance from the given world position to the
+     * closest tile edge, capped at 127px. Note that this distance is given
+     * in world-space, not screen space, to allow for the isometric
+     * projection. This means that the distance will be different to the distance
+     * returned from {@link module:map/staggered-isometric.StaggeredIsometric#worldEdgeNormal|worldToTilePos}
+     */
+    StaggeredIsometric.prototype.worldEdgeNormal = function(x, y, out) {
+        var map = this.data; /* TODO: Why isn't 'data' called 'map' ? */
+
+        var tw  = map.tilewidth;
+        var th  = map.tileheight;
+
+        x=x|0;
+        y=y|0;
+
+        var eventilex = Math.floor(x%tw);
+        var eventiley = Math.floor(y%th);
+
+        var testpos = eventilex + eventiley * tw;
+        var dist = this.worldEdgeDistance[testpos];
+        out[0] = this.edgeNormalsX[testpos];
+        out[1] = this.edgeNormalsY[testpos];
+
+        if (dist >= 128) {
+            /* On even tile */
+            return dist-128;
+        } else {
+            /* On odd tile */
             return dist;
         }
     };
@@ -548,7 +591,8 @@ function(Tile, Bitmap, debug, js, clock) {
      * @param {Array} out A 2-length array that will recieve the tile x/y
      * position in its 0/1 values.
      * @return {Number} The distance from the given screen position to the
-     * closest tile edge, capped at 127px.
+     * closest tile edge, capped at 127px. Not that this distance is screen distance,
+     * in pixels.
      */
     StaggeredIsometric.prototype.screenToTilePos = function(x, y, out) {
         return this.worldToTilePos(x+this.xoffset, y+this.yoffset, out);

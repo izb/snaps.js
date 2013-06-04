@@ -667,6 +667,20 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             return this.map.worldToTilePos(x,y, out);
         };
 
+        /**
+         * From a world position, this function determines the closest tile edge and
+         * works out a vector pointing away from it.
+         * @param {Number} x A world x position
+         * @param {Number} y A world y position
+         * @param {Array} out A 2-length array that will recieve the vector x/y
+         * components in its 0/1 values.
+         * @return {Number} The distance from the given world position to the
+         * closest tile edge, capped at 127px.
+         */
+        this.worldEdgeNormal = function(x, y, out) {
+            return this.map.worldEdgeNormal(x,y, out);
+        };
+
         /** Takes a screen position and tells you what tile it lies on. Take
          * care with the return value, the function signature is all backwards.
          * @method module:snaps.Snaps#screenToTilePos

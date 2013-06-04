@@ -97,7 +97,7 @@ define(function() {
             for (var i = this.jitterBuffer.length - 1; i >= 0; i--) {
                 var jd = this.jitterBuffer[i];
                 if(jd===this.direction) {
-                    return;
+                    return true;
                 }
             }
             this.jitterBuffer = new Array(this.anti_jitter);

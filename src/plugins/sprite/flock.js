@@ -128,6 +128,7 @@ define(function() {
             x=x/count;
             y=y/count;
             s.vectorTo(x, y, xy2);
+
             xy[0] = xy[0] + weightCohesion * xy2[0];
             xy[1] = xy[1] + weightCohesion * (2*xy2[1]); /* *2 to convert from screen to world space for isometric */
         }
@@ -150,6 +151,7 @@ define(function() {
                     y = weightAlignment * y/mag;
                 }
             }
+
             xy[0] = xy[0] + x;
             xy[1] = xy[1] + y;
         }

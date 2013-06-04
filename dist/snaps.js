@@ -523,7 +523,7 @@ define('sprites/sprite',['util/js'], function(js) {
      * @method module:sprites/sprite.Sprite#move
      * @param  {Number} dx Amount to alter x position
      * @param  {Number} dy Amount to alter y position
-     * @param  {Number} [dh] Amount to alter height
+     * @param  {Number} [dh=0] Amount to alter height
      * @return {Boolean} True if there was a collision.
      */
     Sprite.prototype.move = function(dx,dy,dh, collide) {
@@ -541,8 +541,8 @@ define('sprites/sprite',['util/js'], function(js) {
             this.x = this.collisionPoint[0];
             this.y = this.collisionPoint[1];
         } else {
-            this.x=this.x+dx;
-            this.y=this.y+dy;
+            this.x = this.x+dx;
+            this.y = this.y+dy;
         }
 
         this.setDirection(this.x + dx, this.y + dy);
@@ -554,11 +554,8 @@ define('sprites/sprite',['util/js'], function(js) {
                 /* If collided, we adjust the height be a proportion of the
                  * requested amount. */
                 this.h+=dh*collisionRatio;
-
-                return true;
             } else {
                 this.h+=dh;
-                return false;
             }
         }
 
@@ -2153,10 +2150,12 @@ function(Tile, Bitmap, debug, js, clock) {
             }
 
             if (name==='hit') {
-                _this.hitTest     = []; /* Red channel shows distance from closest edge, and can be used to determine
-                                         * if a point lies on a tile. */
+                _this.hitTest     = []; /* Red channel shows distance from closest edge in screen space, and can
+                                         * be used to determine if a point lies on a tile. */
                 _this.edgeNormals = []; /* Green channel points away from the closest edge at 90 degrees. */
-                Bitmap.imageToData(image, _this.hitTest, _this.edgeNormals);
+                _this.worldEdgeDistance = []; /* Blue channel shows distance from closest edge in world space, and can
+                                               * also be used to determine if a point lies on a tile. */
+                Bitmap.imageToData(image, _this.hitTest, _this.edgeNormals, _this.worldEdgeDistance);
 
                 /* Normals in vector form too. */
                 _this.edgeNormalsX = new Array(_this.edgeNormals.length);
@@ -2167,7 +2166,7 @@ function(Tile, Bitmap, debug, js, clock) {
                     n = (3*n*Math.PI)/180; /* Normal values are to the closes 3 degrees */
                     _this.edgeNormals[i] = n;
                     _this.edgeNormalsX[i] = Math.cos(n);
-                    _this.edgeNormalsY[i] = Math.sin(n);
+                    _this.edgeNormalsY[i] = -Math.sin(n);
                 }
 
                 /* TODO: It should be noted in documentation that the hit test image
@@ -2435,12 +2434,13 @@ function(Tile, Bitmap, debug, js, clock) {
      * @param {Array} out A 2-length array that will recieve the tile x/y
      * position in its 0/1 values.
      * @return {Number} The distance from the given world position to the
-     * closest tile edge, capped at 127px.
+     * closest tile edge, capped at 127px. Not that this distance is screen distance,
+     * in pixels.
      */
     StaggeredIsometric.prototype.worldToTilePos = function(x, y, out) {
         // http://gamedev.stackexchange.com/a/48507/3188
 
-        var map = this.data;
+        var map = this.data; /* TODO: Why isn't 'data' called 'map' ? */
 
         var tw  = map.tilewidth;
         var th  = map.tileheight;
@@ -2466,6 +2466,46 @@ function(Tile, Bitmap, debug, js, clock) {
             out[0] = (((x + tw / 2) / tw)|0) - 1;
             out[1] = 2 * (((y + th / 2) / th)|0) - 1;
 
+            return dist;
+        }
+    };
+
+    /**
+     * From a world position, this function determines the closest tile edge and
+     * works out a vector pointing away from it.
+     * @method module:map/staggered-isometric.StaggeredIsometric#worldEdgeNormal
+     * @param {Number} x A world x position
+     * @param {Number} y A world y position
+     * @param {Array} out A 2-length array that will recieve the vector x/y
+     * components in its 0/1 values.
+     * @return {Number} The distance from the given world position to the
+     * closest tile edge, capped at 127px. Note that this distance is given
+     * in world-space, not screen space, to allow for the isometric
+     * projection. This means that the distance will be different to the distance
+     * returned from {@link module:map/staggered-isometric.StaggeredIsometric#worldEdgeNormal|worldToTilePos}
+     */
+    StaggeredIsometric.prototype.worldEdgeNormal = function(x, y, out) {
+        var map = this.data; /* TODO: Why isn't 'data' called 'map' ? */
+
+        var tw  = map.tilewidth;
+        var th  = map.tileheight;
+
+        x=x|0;
+        y=y|0;
+
+        var eventilex = Math.floor(x%tw);
+        var eventiley = Math.floor(y%th);
+
+        var testpos = eventilex + eventiley * tw;
+        var dist = this.worldEdgeDistance[testpos];
+        out[0] = this.edgeNormalsX[testpos];
+        out[1] = this.edgeNormalsY[testpos];
+
+        if (dist >= 128) {
+            /* On even tile */
+            return dist-128;
+        } else {
+            /* On odd tile */
             return dist;
         }
     };
@@ -2569,7 +2609,8 @@ function(Tile, Bitmap, debug, js, clock) {
      * @param {Array} out A 2-length array that will recieve the tile x/y
      * position in its 0/1 values.
      * @return {Number} The distance from the given screen position to the
-     * closest tile edge, capped at 127px.
+     * closest tile edge, capped at 127px. Not that this distance is screen distance,
+     * in pixels.
      */
     StaggeredIsometric.prototype.screenToTilePos = function(x, y, out) {
         return this.worldToTilePos(x+this.xoffset, y+this.yoffset, out);
@@ -3095,7 +3136,7 @@ define('plugins/sprite/8way',[],function() {
             for (var i = this.jitterBuffer.length - 1; i >= 0; i--) {
                 var jd = this.jitterBuffer[i];
                 if(jd===this.direction) {
-                    return;
+                    return true;
                 }
             }
             this.jitterBuffer = new Array(this.anti_jitter);
@@ -3184,7 +3225,7 @@ define('plugins/sprite/track',[],function() {
      *  <dt>always</dt><dd>A function to call on every frame, regardless of whether the position
      *    changed. If you specify this and <code>fn</code> together, then fn will be called first.
      *    <pre>
-     *    function(sprite) {
+     *    function(sprite, hasMoved) {
      *        // track sprite
      *    }
      *    </pre>
@@ -3216,7 +3257,9 @@ define('plugins/sprite/track',[],function() {
 
         var s = this.sprite;
 
-        if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
+        var moved = (s.x!==this.x || s.y!==this.y || s.h!==this.h);
+
+        if (moved) {
             if (this.fn) {
                 this.fn(s);
             }
@@ -3224,8 +3267,9 @@ define('plugins/sprite/track',[],function() {
             this.y=s.y;
             this.h=s.h;
         }
+
         if (this.always) {
-            this.always(s);
+            this.always(s, moved);
         }
 
         return true;
@@ -3392,6 +3436,7 @@ define('plugins/sprite/flock',[],function() {
             x=x/count;
             y=y/count;
             s.vectorTo(x, y, xy2);
+
             xy[0] = xy[0] + weightCohesion * xy2[0];
             xy[1] = xy[1] + weightCohesion * (2*xy2[1]); /* *2 to convert from screen to world space for isometric */
         }
@@ -3414,6 +3459,7 @@ define('plugins/sprite/flock',[],function() {
                     y = weightAlignment * y/mag;
                 }
             }
+
             xy[0] = xy[0] + x;
             xy[1] = xy[1] + y;
         }
@@ -3572,6 +3618,7 @@ define('plugins/sprite/apply-velocity',[],function() {
      */
     ApplyVelocity.prototype.update = function(now, phaseOn) {
         var s = this.sprite;
+
         if(s.move(s.velocityx, s.velocityy/2) && this.on_collision!==undefined) {
             /* y/2 because we're assuming an isometric map and the velocity is in
              * world-space. */
@@ -4701,6 +4748,25 @@ function(traceProp, midPtEllipse, localScan) {
         }
     }
 
+    /**
+     * Tests the sample ring around a point to check if a point is solid or not.
+     * @param  {Number} x World position
+     * @param  {Number} y World position
+     * @return {Boolean} true if solid
+     */
+    CircleTrace.prototype.isPointSolid = function(x, y, h) {
+        for (var j = this.samples.length - 2; j >= 0; j-=2) {
+            var sxo = this.samples[j];
+            var syo = this.samples[j+1];
+
+            var sampleHeight = sn.getTilePropsAtWorldPos('height',x+sxo,y+syo);
+            if (sampleHeight>h) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     /** Perform a trace to test for collision along a line with radius.
      * Effectively traces an ellipse  from one point to another, with some
      * important performance compromises in accuracy.
@@ -4738,7 +4804,7 @@ function(traceProp, midPtEllipse, localScan) {
         }
 
         if (this.autoSlip) {
-            /* First, distance ourself from key jagged shapes in key directions,
+            /* First, distance ourself from key jagged shapes in key directions
              * to ensure the player can slip past isometric lines without getting
              * caught on pixels. */
             var slip = 0;
@@ -4760,11 +4826,11 @@ function(traceProp, midPtEllipse, localScan) {
         var route = []; /* Route will be populated with non-collision positions
                          * along the path. */
         var collisionRatio = traceProp(sn,
-            'height',
-            this.edges,
-            x0, y0,
-            dx, dy,
-            h, this.lineHit, route);
+                'height',
+                this.edges,
+                x0, y0,
+                dx, dy,
+                h, this.lineHit, route);
 
         var routeidx = route.length - 2;
         var rx, ry;
@@ -4776,8 +4842,8 @@ function(traceProp, midPtEllipse, localScan) {
             for (var j = this.samples.length - 2; j >= 0; j-=2) {
                 sxo = this.samples[j];
                 syo = this.samples[j+1];
-                rx = route[i];
-                ry = route[i+1];
+                rx  = route[i];
+                ry  = route[i+1];
 
                 var sampleHeight = sn.getTilePropsAtWorldPos('height',rx+sxo,ry+syo);
 
@@ -4791,11 +4857,13 @@ function(traceProp, midPtEllipse, localScan) {
                     /* Clear to the end/linear collision */
                     out[0] = this.lineHit[0];
                     out[1] = this.lineHit[1];
+
                     return collisionRatio;
                 } else {
                     /* Clear to part-way along */
                     out[0] = rx;
                     out[1] = ry;
+
                     if (dx>dy) {
                         return (rx-x0)/dx;
                     } else {
@@ -4813,6 +4881,7 @@ function(traceProp, midPtEllipse, localScan) {
 
         out[0] = x0;
         out[1] = y0;
+
         return 0;
     };
 
@@ -6917,6 +6986,20 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.worldToTilePos = function(x, y, out) {
             return this.map.worldToTilePos(x,y, out);
+        };
+
+        /**
+         * From a world position, this function determines the closest tile edge and
+         * works out a vector pointing away from it.
+         * @param {Number} x A world x position
+         * @param {Number} y A world y position
+         * @param {Array} out A 2-length array that will recieve the vector x/y
+         * components in its 0/1 values.
+         * @return {Number} The distance from the given world position to the
+         * closest tile edge, capped at 127px.
+         */
+        this.worldEdgeNormal = function(x, y, out) {
+            return this.map.worldEdgeNormal(x,y, out);
         };
 
         /** Takes a screen position and tells you what tile it lies on. Take

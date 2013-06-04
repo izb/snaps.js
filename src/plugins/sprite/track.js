@@ -47,7 +47,7 @@ define(function() {
      *  <dt>always</dt><dd>A function to call on every frame, regardless of whether the position
      *    changed. If you specify this and <code>fn</code> together, then fn will be called first.
      *    <pre>
-     *    function(sprite) {
+     *    function(sprite, hasMoved) {
      *        // track sprite
      *    }
      *    </pre>
@@ -79,7 +79,9 @@ define(function() {
 
         var s = this.sprite;
 
-        if (s.x!==this.x || s.y!==this.y || s.h!==this.h) {
+        var moved = (s.x!==this.x || s.y!==this.y || s.h!==this.h);
+
+        if (moved) {
             if (this.fn) {
                 this.fn(s);
             }
@@ -87,8 +89,9 @@ define(function() {
             this.y=s.y;
             this.h=s.h;
         }
+
         if (this.always) {
-            this.always(s);
+            this.always(s, moved);
         }
 
         return true;

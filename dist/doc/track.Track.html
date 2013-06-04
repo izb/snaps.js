@@ -89,7 +89,7 @@ Alongside the name, you can pass the following options
  <dt>always</dt><dd>A function to call on every frame, regardless of whether the position
    changed. If you specify this and <code>fn</code> together, then fn will be called first.
    <pre>
-   function(sprite) {
+   function(sprite, hasMoved) {
        // track sprite
    }
    </pre>
