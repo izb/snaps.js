@@ -135,7 +135,7 @@ function(Tile, Bitmap, debug, js, clock) {
                 _this.hitTest     = []; /* Red channel shows distance from closest edge, and can be used to determine
                                          * if a point lies on a tile. */
                 _this.edgeNormals = []; /* Green channel points away from the closest edge at 90 degrees. */
-                Bitmap.imageToRData(image, _this.hitTest, _this.edgeNormals);
+                Bitmap.imageToData(image, _this.hitTest, _this.edgeNormals);
 
                 /* Normals in vector form too. */
                 _this.edgeNormalsX = new Array(_this.edgeNormals.length);

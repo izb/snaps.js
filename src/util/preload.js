@@ -30,9 +30,13 @@ define(function() {
      * @param  {String} file The filename without extension. The extension will
      *                       be added automatically. You should therefore have a
      *                       range of file types available for different browsers.
-     * @param  {[type]} tag     [description]
-     * @param  {[type]} fnStore [description]
-     * @return {[type]}         [description]
+     * @param {String} tag Some tag to help you identify the file when it's loaded
+     * @param {Function} [fnStore] A callback to receive the loaded image, in the form
+     * <pre>
+     * function(sound, tag) {
+     * }
+     * </pre>
+     * Where the sound is a loaded Audio object.
      */
     Preloader.prototype.addAudio = function(file, tag, fnStore) {
         if (audioExt===undefined) {
@@ -102,11 +106,13 @@ define(function() {
             };
         }
 
-        function error(e) {
-            if (!_this.errorstate) {
-                _this.errorstate = true;
-                fnError();
-            }
+        function errorHandler(item) {
+            return function(e) {
+                if (!_this.errorstate) {
+                    _this.errorstate = true;
+                    fnError("Failed to load "+item.file);
+                }
+            };
         }
 
         for (i = 0; i < this.imagebatch.length; i++) {
@@ -114,7 +120,7 @@ define(function() {
 
             var img = new Image();
             img.onload = loadHandler(next, img);
-            img.onerror = error;
+            img.onerror = errorHandler(next);
             img.src = next.file;
         }
 
@@ -122,8 +128,8 @@ define(function() {
             next = this.audiobatch[i];
 
             var snd = new Audio();
-            snd.oncanplaythrough = loadHandler(next, snd);
-            snd.onerror = error;
+            snd.addEventListener('canplaythrough', loadHandler(next, snd));
+            snd.onerror = errorHandler(next);
             snd.src =  next.file;
         }
     };

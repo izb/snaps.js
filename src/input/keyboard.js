@@ -147,7 +147,9 @@ define(function() {
 
             var keycode = e.keyCode;
             var action = _this.keys[keycode];
-            if (action) {
+            if (action && _this.actions[action] !== keycode) {
+                /* TODO: At this point, we could fire a one-off 'key is down' event that
+                 * has no key repeat. */
                 _this.actions[action] = keycode;
             }
         };

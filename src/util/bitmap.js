@@ -10,7 +10,7 @@ define(function() {
 
         /**
          * Extract the red channel from an image into an array.
-         * @function module:util/bitmap#imageToRData
+         * @function module:util/bitmap#imageToData
          * @param {DOMElement} image The source image
          * @param {Array} [r] Output: An array that will be filled with the red channel
          * bitmap data. Length will be reset.

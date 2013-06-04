@@ -61,6 +61,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /* TODO: Docs - document settings object options */
 
+        /* TODO: This might be a good place to document all the requirements of the game object,
+         * i.e. what properties it should expose. */
+
         var _this = this;
 
         /* For testing, we'd like to perhaps re-bind this function later, so... */
@@ -261,6 +264,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.primePreloader(preloader);
         }
 
+        var pathName;
+
         /* Add game-added images to the preloader */
         if (typeof game.preloadImages === 'object') {
 
@@ -268,18 +273,32 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
                 _this.imageCache[tag] = image;
             };
 
-            for(var pathName in game.preloadImages) {
+            for(pathName in game.preloadImages) {
                 preloader.addImage(game.preloadImages[pathName], pathName, storePreloadedImage);
             }
         }
 
         if (typeof game.sounds === 'object') {
 
+            /* If a game has sounds, we should expect to find audio channels defined. */
+            if (typeof game.audioChannels !== 'object') {
+                throw "Game defines sounds, but is missing audioChannels";
+            }
+
+            _this.audioChannels = {};
+            for(var channel in game.audioChannels) {
+                _this.audioChannels[channel] = [];
+                var poly = game.audioChannels[channel];
+                while(poly-->0) {
+                    _this.audioChannels[channel].push(null);
+                }
+            }
+
             var storePreloadedSound = function(sound, tag){
                 _this.audioCache[tag] = sound;
             };
 
-            for(var pathName in game.sounds) {
+            for(pathName in game.sounds) {
                 preloader.addAudio(game.sounds[pathName], pathName, storePreloadedSound);
             }
         }
@@ -561,7 +580,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             /* Preloading failed */
             function() {
                 if (typeof _this.game.onLoadError === 'function') {
-                    _this.game.onLoadError();
+                    _this.game.onLoadError.apply(_this.game, arguments);
                 }
             }
         );
@@ -952,6 +971,42 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.getNow = function() {
             return _this.now;
+        };
+
+        /**
+         * Plays a sound in a given channel.
+         * @param {String} sound The sound to play, as defined in your game.
+         * @param {String} channel The channel to play it in, as defined in your game.
+         * @return {Boolean} true if the sound was played, false if there was no free
+         * space in the channel.
+         */
+        this.playAudio = function(sound, channel) {
+
+            var checkTrack = function(ch, i) {
+                if (ch[i]===null) {
+                    var s = _this.audioCache[sound];
+                    ch[i] = s;
+                    var endHandler = function(e) {
+                        ch[i] = null;
+                        s.removeEventListener('ended', endHandler);
+                    };
+                    s.addEventListener('ended', endHandler);
+                    s.play();
+                    return true;
+                }
+                return false;
+            };
+
+            var ch = _this.audioChannels[channel];
+            for (var i = ch.length - 1; i >= 0; i--) {
+                if(checkTrack(ch, i)) {
+                    return true;
+                }
+            }
+
+            /* If here, there are no free channels, so the sound
+             * was not played. */
+            return false;
         };
 
         /**

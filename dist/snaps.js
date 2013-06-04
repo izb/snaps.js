@@ -1121,7 +1121,9 @@ define('input/keyboard',[],function() {
 
             var keycode = e.keyCode;
             var action = _this.keys[keycode];
-            if (action) {
+            if (action && _this.actions[action] !== keycode) {
+                /* TODO: At this point, we could fire a one-off 'key is down' event that
+                 * has no key repeat. */
                 _this.actions[action] = keycode;
             }
         };
@@ -1227,15 +1229,53 @@ define('util/preload',[],function() {
       * @constructor module:util/preload.Preloader
       */
     function Preloader() {
-        this.batch = [];
+        this.imagebatch = [];
+        this.audiobatch = [];
         this.errorstate = false;
     }
 
+    var mimeTypesAudio = [
+        {ext:'.ogg', mime:'audio/ogg; codecs="vorbis"'},
+        {ext:'.mp3', mime:'audio/mpeg'}
+    ];
+
+    var audioExt;
+
     /**
-     * Initialize the composite before use.
-     * @method module:util/preload.Preloader#add
+     * Adds an audio file to the preloader. The correct file extension for the
+     * current browser will be determined. The extension will be either .ogg or .mp3
+     * @param  {String} file The filename without extension. The extension will
+     *                       be added automatically. You should therefore have a
+     *                       range of file types available for different browsers.
+     * @param {String} tag Some tag to help you identify the file when it's loaded
+     * @param {Function} [fnStore] A callback to receive the loaded image, in the form
+     * <pre>
+     * function(sound, tag) {
+     * }
+     * </pre>
+     * Where the sound is a loaded Audio object.
+     */
+    Preloader.prototype.addAudio = function(file, tag, fnStore) {
+        if (audioExt===undefined) {
+            /* First time in, determine the audio type for the platform */
+            var s = new Audio();
+
+            for (var i = 0; i < mimeTypesAudio.length; i++) {
+                var t = mimeTypesAudio[i];
+                if (s.canPlayType(t.mime)) {
+                    audioExt = t.ext;
+                    break;
+                }
+            }
+        }
+        this.audiobatch.push({file:file+audioExt, tag:tag, fnStore:fnStore});
+    };
+
+    /**
+     * Adds an image file to the preloader.
+     * @method module:util/preload.Preloader#addImage
      * @param {String} file The file to load
-     * @param {String} tag Some tag to help you identify the image when it's loaded
+     * @param {String} tag Some tag to help you identify the file when it's loaded
      * @param {Function} [fnStore] A callback to receive the loaded image, in the form
      * <pre>
      * function(image, tag) {
@@ -1243,8 +1283,8 @@ define('util/preload',[],function() {
      * </pre>
      * Where the image is a loaded Image object.
      */
-    Preloader.prototype.add = function(file, tag, fnStore) {
-        this.batch.push({file:file, tag:tag, fnStore:fnStore});
+    Preloader.prototype.addImage = function(file, tag, fnStore) {
+        this.imagebatch.push({file:file, tag:tag, fnStore:fnStore});
     };
 
     /**
@@ -1257,43 +1297,58 @@ define('util/preload',[],function() {
      */
     Preloader.prototype.load = function(fnComplete, fnProgress, fnError) {
 
-        var count = this.batch.length;
-        var _this = this;
+        var count = this.imagebatch.length + this.audiobatch.length,
+            _this = this,
+            i, next;
 
         fnProgress(0);
 
-        function loadHandler(item, img) {
-            return function() {
+        function loadHandler(item, ob) {
+            return function() { /* TODO: Use bind instead. */
                 if (_this.errorstate) {
                     return;
                 }
+
                 count--;
+
                 if (item.fnStore!==undefined) {
-                    item.fnStore(img, item.tag);
+                    item.fnStore(ob, item.tag);
                 }
-                fnProgress(1-count/_this.batch.length);
+
+                fnProgress(1-count/(_this.imagebatch.length + _this.audiobatch.length));
+
                 if (count===0) {
                     fnComplete();
                 }
             };
         }
 
-        function error(e) {
-            if (!_this.errorstate) {
-                _this.errorstate = true;
-                fnError();
-            }
+        function errorHandler(item) {
+            return function(e) {
+                if (!_this.errorstate) {
+                    _this.errorstate = true;
+                    fnError("Failed to load "+item.file);
+                }
+            };
         }
 
-        for (var i = 0; i < this.batch.length; i++) {
-            var next = this.batch[i];
+        for (i = 0; i < this.imagebatch.length; i++) {
+            next = this.imagebatch[i];
 
             var img = new Image();
             img.onload = loadHandler(next, img);
-            img.onerror = error;
+            img.onerror = errorHandler(next);
             img.src = next.file;
         }
 
+        for (i = 0; i < this.audiobatch.length; i++) {
+            next = this.audiobatch[i];
+
+            var snd = new Audio();
+            snd.addEventListener('canplaythrough', loadHandler(next, snd));
+            snd.onerror = errorHandler(next);
+            snd.src =  next.file;
+        }
     };
 
     return Preloader;
@@ -1414,11 +1469,18 @@ define('util/bitmap',[],function() {
 
         /**
          * Extract the red channel from an image into an array.
-         * @function module:util/bitmap#imageToRData
+         * @function module:util/bitmap#imageToData
          * @param {DOMElement} image The source image
-         * @return {Array} An array of byte values as a regular array
+         * @param {Array} [r] Output: An array that will be filled with the red channel
+         * bitmap data. Length will be reset.
+         * @param {Array} [g] Output: An array that will be filled with the green channel
+         * bitmap data. Length will be reset.
+         * @param {Array} [b] Output: An array that will be filled with the blue channel
+         * bitmap data. Length will be reset.
+         * @param {Array} [a] Output: An array that will be filled with the alpha channel
+         * bitmap data. Length will be reset.
          */
-        imageToRData: function(image)
+        imageToData: function(image, r, g, b, a)
         {
             var w = image.width;
             var h = image.height;
@@ -1432,13 +1494,41 @@ define('util/bitmap',[],function() {
 
             var rgba = ctx.getImageData(0,0,w,h).data;
 
-            var r = new Array(rgba.length/4);
+            var len = rgba.length/4;
 
-            for (var i = 0; i < r.length; i++) {
-                r[i] = rgba[i*4];
+            if (r) {
+                r.length = len;
             }
 
-            return r;
+            if (g) {
+                g.length = len;
+            }
+
+            if (b) {
+                b.length = len;
+            }
+
+            if (a) {
+                a.length = len;
+            }
+
+            for (var i = 0; i < len; i++) {
+                if (r) {
+                    r[i] = rgba[i*4];
+                }
+
+                if (g) {
+                    g[i] = rgba[i*4+1];
+                }
+
+                if (b) {
+                    b[i] = rgba[i*4+2];
+                }
+
+                if (a) {
+                    a[i] = rgba[i*4+3];
+                }
+            }
         }
     };
 
@@ -2054,7 +2144,7 @@ function(Tile, Bitmap, debug, js, clock) {
 
         for (var i = 0; i < map.tilesets.length; i++) {
             var ts = map.tilesets[i];
-            preloader.add(ts.image, ts, storeTile);
+            preloader.addImage(ts.image, ts, storeTile);
         }
 
         var storeHitTest = function(image, name) {
@@ -2063,7 +2153,23 @@ function(Tile, Bitmap, debug, js, clock) {
             }
 
             if (name==='hit') {
-                _this.hitTest = Bitmap.imageToRData(image);
+                _this.hitTest     = []; /* Red channel shows distance from closest edge, and can be used to determine
+                                         * if a point lies on a tile. */
+                _this.edgeNormals = []; /* Green channel points away from the closest edge at 90 degrees. */
+                Bitmap.imageToData(image, _this.hitTest, _this.edgeNormals);
+
+                /* Normals in vector form too. */
+                _this.edgeNormalsX = new Array(_this.edgeNormals.length);
+                _this.edgeNormalsY = new Array(_this.edgeNormals.length);
+                /* Convert normals to radians for convenience */
+                for (var i = _this.edgeNormals.length - 1; i >= 0; i--) {
+                    var n = _this.edgeNormals[i];
+                    n = (3*n*Math.PI)/180; /* Normal values are to the closes 3 degrees */
+                    _this.edgeNormals[i] = n;
+                    _this.edgeNormalsX[i] = Math.cos(n);
+                    _this.edgeNormalsY[i] = Math.sin(n);
+                }
+
                 /* TODO: It should be noted in documentation that the hit test image
                  * should under no circumstances be re-saved with a colour profile attached. */
 
@@ -2075,7 +2181,7 @@ function(Tile, Bitmap, debug, js, clock) {
         };
 
         for(var testName in this.hitTests) {
-            preloader.add(this.hitTests[testName], testName, storeHitTest);
+            preloader.addImage(this.hitTests[testName], testName, storeHitTest);
         }
     };
 
@@ -6207,6 +6313,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
         /* TODO: Docs - document settings object options */
 
+        /* TODO: This might be a good place to document all the requirements of the game object,
+         * i.e. what properties it should expose. */
+
         var _this = this;
 
         /* For testing, we'd like to perhaps re-bind this function later, so... */
@@ -6258,6 +6367,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
         this.PathFinder = PathFinder.bind(PathFinder, this);
 
         settings = settings || {};
+
         this.dbgShowMouse     = !!settings.showMouse;
         this.dbgShowCounts    = !!settings.showCounts;
         this.dbgShowMouseTile = !!settings.showMouseTile;
@@ -6265,9 +6375,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * then those property values are shown on each tile. */
         this.dbgShowRegions   = !!settings.showRegions;
         this.dbgRegionProps   = settings.showRegions&&settings.showRegions.length>0&&settings.showRegions!=='true'?
-            settings.showRegions.split(','):[];
+                settings.showRegions.split(','):[];
 
         this.imageCache     = {};
+        this.audioCache     = {};
         this.spriteUpdaters = {};
         this.colliders      = {};
         this.fxUpdaters     = {};
@@ -6405,15 +6516,42 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.primePreloader(preloader);
         }
 
+        var pathName;
+
         /* Add game-added images to the preloader */
         if (typeof game.preloadImages === 'object') {
 
-            var storePreloaded = function(image, tag){
+            var storePreloadedImage = function(image, tag){
                 _this.imageCache[tag] = image;
             };
 
-            for(var pathName in game.preloadImages) {
-                preloader.add(game.preloadImages[pathName], pathName, storePreloaded);
+            for(pathName in game.preloadImages) {
+                preloader.addImage(game.preloadImages[pathName], pathName, storePreloadedImage);
+            }
+        }
+
+        if (typeof game.sounds === 'object') {
+
+            /* If a game has sounds, we should expect to find audio channels defined. */
+            if (typeof game.audioChannels !== 'object') {
+                throw "Game defines sounds, but is missing audioChannels";
+            }
+
+            _this.audioChannels = {};
+            for(var channel in game.audioChannels) {
+                _this.audioChannels[channel] = [];
+                var poly = game.audioChannels[channel];
+                while(poly-->0) {
+                    _this.audioChannels[channel].push(null);
+                }
+            }
+
+            var storePreloadedSound = function(sound, tag){
+                _this.audioCache[tag] = sound;
+            };
+
+            for(pathName in game.sounds) {
+                preloader.addAudio(game.sounds[pathName], pathName, storePreloadedSound);
             }
         }
 
@@ -6446,7 +6584,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             };
 
             for(var spriteName in _this.game.spriteDefs) {
-                preloader.add(_this.game.spriteDefs[spriteName].path, spriteName, storeSpriteSheet);
+                preloader.addImage(_this.game.spriteDefs[spriteName].path, spriteName, storeSpriteSheet);
             }
         }
 
@@ -6681,7 +6819,6 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
                 /* Start the paint loop */
                 _this.halt = false;
-                _this.overrideClock();
                 setTimeout(function(){loop(0);}, 0);
             },
 
@@ -6695,7 +6832,7 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             /* Preloading failed */
             function() {
                 if (typeof _this.game.onLoadError === 'function') {
-                    _this.game.onLoadError();
+                    _this.game.onLoadError.apply(_this.game, arguments);
                 }
             }
         );
@@ -6836,11 +6973,10 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
             this.map.tileDimensions(out);
             if ((r&1)===0) {
                 out[0] = (c+1)*out[0] - (out[0]/2);
-                out[1] = (r+1)*(out[1]/2);
             } else {
                 out[0] = (c+1)*out[0];
-                out[1] = (r+1)*(out[1]/2);
             }
+            out[1] = (r+1)*(out[1]/2);
         };
 
         /** Get a tile property from a world position. Starts at the topmost
@@ -6962,10 +7098,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             if (opts.id===undefined) {
                 opts.id = uid();
-            } else {
-                if(_this.spriteMap.hasOwnProperty(opts.id)) {
-                    throw "Error: duplicate sprite id " + opts.id;
-                }
+            } else if(_this.spriteMap.hasOwnProperty(opts.id)) {
+                throw "Error: duplicate sprite id " + opts.id;
             }
 
             var s = Sprite.construct(_this, defName, stateName, stateExt, x, y, h, opts);
@@ -6989,10 +7123,8 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
 
             if (id===undefined) {
                 id = 'id'+uid();
-            } else {
-                if(_this.spriteMap.hasOwnProperty(id)) {
-                    throw "Warning: duplicate sprite (composite) id " + id;
-                }
+            } else if(_this.spriteMap.hasOwnProperty(id)) {
+                throw "Warning: duplicate sprite (composite) id " + id;
             }
 
             var comp = new Composite(this, x, y, id, endCallback);
@@ -7091,6 +7223,42 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          */
         this.getNow = function() {
             return _this.now;
+        };
+
+        /**
+         * Plays a sound in a given channel.
+         * @param {String} sound The sound to play, as defined in your game.
+         * @param {String} channel The channel to play it in, as defined in your game.
+         * @return {Boolean} true if the sound was played, false if there was no free
+         * space in the channel.
+         */
+        this.playAudio = function(sound, channel) {
+
+            var checkTrack = function(ch, i) {
+                if (ch[i]===null) {
+                    var s = _this.audioCache[sound];
+                    ch[i] = s;
+                    var endHandler = function(e) {
+                        ch[i] = null;
+                        s.removeEventListener('ended', endHandler);
+                    };
+                    s.addEventListener('ended', endHandler);
+                    s.play();
+                    return true;
+                }
+                return false;
+            };
+
+            var ch = _this.audioChannels[channel];
+            for (var i = ch.length - 1; i >= 0; i--) {
+                if(checkTrack(ch, i)) {
+                    return true;
+                }
+            }
+
+            /* If here, there are no free channels, so the sound
+             * was not played. */
+            return false;
         };
 
         /**

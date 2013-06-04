@@ -120,7 +120,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="add"><span class="type-signature"></span>add<span class="signature">(file, tag, <span class="optional">fnStore</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="addImage"><span class="type-signature"></span>addImage<span class="signature">(file, tag, <span class="optional">fnStore</span>)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -128,7 +128,7 @@
     
     
     <div class="description">
-        Initialize the composite before use.
+        Adds an image file to the preloader.
     </div>
     
 
@@ -219,7 +219,7 @@
             
             
             
-            <td class="description last">Some tag to help you identify the image when it's loaded</td>
+            <td class="description last">Some tag to help you identify the file when it's loaded</td>
         </tr>
 	
 	
@@ -252,7 +252,12 @@
             
             
             
-            <td class="description last">A callback to receive the loaded image, in the form<pre>function(image, tag) {}</pre>Where the image is a loaded Image object.</td>
+            <td class="description last">A callback to receive the loaded image, in the form
+<pre>
+function(image, tag) {
+}
+</pre>
+Where the image is a loaded Image object.</td>
         </tr>
 	
 	
@@ -381,7 +386,8 @@
             
             
             
-            <td class="description last">Called periodically with progress expressedas a number between 0 and 1.</td>
+            <td class="description last">Called periodically with progress expressed
+as a number between 0 and 1.</td>
         </tr>
 	
 	
