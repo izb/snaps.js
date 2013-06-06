@@ -1,5 +1,8 @@
 /*global define*/
-define(function() {
+define(['util/uid',
+        'sprites/sprite'],
+
+function(uid, Sprite) {
 
     /**
      * @module input/ui/panel
@@ -14,6 +17,10 @@ define(function() {
      */
     function Panel(sn) {
         this.sn = sn;
+        this.id = uid();
+        this.children = [];
+        this.x = 0;
+        this.y = 0;
     }
 
     /**
@@ -70,7 +77,14 @@ define(function() {
             cx = true;
         }
 
-        /* TODO: Move to the screen center */
+        if (cy && this.height) {
+            this.y = ((this.sn.clientHeight - this.height) / 2)|0;
+        }
+
+        if (cx && this.width) {
+            this.x = ((this.sn.clientWidth - this.width) / 2)|0;
+        }
+
         return this;
     };
 
@@ -79,8 +93,27 @@ define(function() {
      * @param  {CanvasRenderingContext2D} ctx Drawing context
      * @private
      */
-    Panel.prototype.draw = function(ctx) {
-        /* TODO */
+    Panel.prototype.draw = function(now, ctx, xo, yo) {
+        xo = xo || 0;
+        yo = yo || 0;
+
+        xo+=this.x;
+        yo+=this.y;
+
+        var len = this.children.length;
+        for (var i = 0; i < len; i++) {
+            var c = this.children[i];
+            if (c instanceof Panel) {
+                c.draw(now, ctx, xo, yo);
+            } else if (c instanceof Sprite) {
+                /* Sprites expect map offsets, which are the opposite of our screen offsets, so we
+                 * negate them here. */
+                c.draw(ctx, -xo+this.x, -yo+this.y, now);
+            } else {
+                /* TODO */
+                throw "Can't draw "+c;
+            }
+        }
     };
 
     /* TODO: Panels should render off-screen so we can do transition in/out effects like

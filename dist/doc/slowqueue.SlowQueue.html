@@ -52,7 +52,9 @@
     
     
     <div class="description">
-        Implementation of a slow task queue. Task items are dequeued based on an allotted amountof processing time per frame. Normally you would not construct this directly, but rather youwould use the engine's <a href="module-snaps.Snaps.html#createTaskQueue"><code>createTaskQueue  factory method</code></a>.
+        Implementation of a slow task queue. Task items are dequeued based on an allotted amount
+of processing time per frame. Normally you would not construct this directly, but rather you
+would use the engine's <a href="module-snaps.Snaps.html#createTaskQueue"><code>createTaskQueue  factory method</code></a>.
     </div>
     
 
@@ -102,7 +104,9 @@
             
             
             
-            <td class="description last">The max time permitted on each frame for processingitems on the queue. Tasks may take more than one time slot to complete. Queue processingmay exceed this if a task does not honour its promise to return within the given time.</td>
+            <td class="description last">The max time permitted on each frame for processing
+items on the queue. Tasks may take more than one time slot to complete. Queue processing
+may exceed this if a task does not honour its promise to return within the given time.</td>
         </tr>
 	
 	
@@ -242,7 +246,24 @@
                 </td>
             
             
-            <td class="description last">A task to add. This is an object that exposes two functionproperties.<dl> <dt>taskBegin</dt><dd>A function that is passed the parameters object given in this method. The     cost of calling this method does not count towards the time consumed by the task, so it should     return as quickly as possible. Any value returned from this function is discarded.</dd> <dt>taskResume</dt><dd>A function that is called one or more times in order to complete the task.     It takes one parameter, which is the time at which it is expected to complete by. If it has     not completed by that time, it should return. The taskResume function will be called again on     the next frame.     It should return null if the task is incomplete, and any other value as the task result.     If a task is passed 0 as its completion time, it should consider itself unlimited in the     amount of time it can use.</dd></dl>Note that task objects are expected to maintain state between calls to taskResume. This means thatusing the object outside a queue could potentially yield unpredictable results. The best idea is tocreate objects specifically for the queue. E.g. create two pathfinders; one for the task queue toutilise and one to use outside the queue.</td>
+            <td class="description last">A task to add. This is an object that exposes two function
+properties.
+<dl>
+ <dt>taskBegin</dt><dd>A function that is passed the parameters object given in this method. The
+     cost of calling this method does not count towards the time consumed by the task, so it should
+     return as quickly as possible. Any value returned from this function is discarded.</dd>
+ <dt>taskResume</dt><dd>A function that is called one or more times in order to complete the task.
+     It takes one parameter, which is the time at which it is expected to complete by. If it has
+     not completed by that time, it should return. The taskResume function will be called again on
+     the next frame.
+     It should return null if the task is incomplete, and any other value as the task result.
+     If a task is passed 0 as its completion time, it should consider itself unlimited in the
+     amount of time it can use.</dd>
+</dl>
+Note that task objects are expected to maintain state between calls to taskResume. This means that
+using the object outside a queue could potentially yield unpredictable results. The best idea is to
+create objects specifically for the queue. E.g. create two pathfinders; one for the task queue to
+utilise and one to use outside the queue.</td>
         </tr>
 	
 	
@@ -318,7 +339,9 @@
                 </td>
             
             
-            <td class="description last">The task priority. High priority tasks will bedone before low ones. Partially completed tasks always have top priority. Low numbersare higher priority than high numbers.</td>
+            <td class="description last">The task priority. High priority tasks will be
+done before low ones. Partially completed tasks always have top priority. Low numbers
+are higher priority than high numbers.</td>
         </tr>
 	
 	
@@ -355,7 +378,9 @@
                 </td>
             
             
-            <td class="description last">A handle for the task so that groups of tasks can be aborted. E.g.if the queue is full of tasks with the handle 'hostile_behaviour' then you can abort alltasks of that kind.</td>
+            <td class="description last">A handle for the task so that groups of tasks can be aborted. E.g.
+if the queue is full of tasks with the handle 'hostile_behaviour' then you can abort all
+tasks of that kind.</td>
         </tr>
 	
 	
@@ -392,7 +417,8 @@
                 </td>
             
             
-            <td class="description last">Once the task is complete, this function will be called, passingin any result object from the task.</td>
+            <td class="description last">Once the task is complete, this function will be called, passing
+in any result object from the task.</td>
         </tr>
 	
 	
@@ -448,7 +474,8 @@
     
     
     <div class="description">
-        Runs the task queue. The queue will make a best effort to return within theconfigured max frame time.
+        Runs the task queue. The queue will make a best effort to return within the
+configured max frame time.
     </div>
     
 

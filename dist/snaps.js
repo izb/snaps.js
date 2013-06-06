@@ -2781,7 +2781,10 @@ define('input/mouse',[],function() {
 });
 
 /*global define*/
-define('input/ui/panel',[],function() {
+define('input/ui/panel',['util/uid',
+        'sprites/sprite'],
+
+function(uid, Sprite) {
 
     /**
      * @module input/ui/panel
@@ -2796,6 +2799,10 @@ define('input/ui/panel',[],function() {
      */
     function Panel(sn) {
         this.sn = sn;
+        this.id = uid();
+        this.children = [];
+        this.x = 0;
+        this.y = 0;
     }
 
     /**
@@ -2852,7 +2859,14 @@ define('input/ui/panel',[],function() {
             cx = true;
         }
 
-        /* TODO: Move to the screen center */
+        if (cy && this.height) {
+            this.y = ((this.sn.clientHeight - this.height) / 2)|0;
+        }
+
+        if (cx && this.width) {
+            this.x = ((this.sn.clientWidth - this.width) / 2)|0;
+        }
+
         return this;
     };
 
@@ -2861,8 +2875,27 @@ define('input/ui/panel',[],function() {
      * @param  {CanvasRenderingContext2D} ctx Drawing context
      * @private
      */
-    Panel.prototype.draw = function(ctx) {
-        /* TODO */
+    Panel.prototype.draw = function(now, ctx, xo, yo) {
+        xo = xo || 0;
+        yo = yo || 0;
+
+        xo+=this.x;
+        yo+=this.y;
+
+        var len = this.children.length;
+        for (var i = 0; i < len; i++) {
+            var c = this.children[i];
+            if (c instanceof Panel) {
+                c.draw(now, ctx, xo, yo);
+            } else if (c instanceof Sprite) {
+                /* Sprites expect map offsets, which are the opposite of our screen offsets, so we
+                 * negate them here. */
+                c.draw(ctx, -xo+this.x, -yo+this.y, now);
+            } else {
+                /* TODO */
+                throw "Can't draw "+c;
+            }
+        }
     };
 
     /* TODO: Panels should render off-screen so we can do transition in/out effects like
@@ -6618,18 +6651,20 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
          * @member module:snaps.Snaps#stats
          * @type {Object}
          */
-        this.stats = new Stats();
+        this.stats          = new Stats();
 
-        this.timers     = {};
-        this.cameras    = {};
-        this.camera     = null;
+        this.timers         = {};
+        this.cameras        = {};
+        this.camera         = null;
 
-        this.activeFX   = [];
+        this.activeFX       = [];
 
-        this.taskQueues = [];
+        this.taskQueues     = [];
 
-        this.now   = 0;
-        this.epoch = 0; /* 0 in chrome, but moz passes unix time. Epoch will be adjusted on first repaint */
+        this.activeUIPanels = [];
+
+        this.now            = 0;
+        this.epoch          = 0; /* 0 in chrome, but moz passes unix time. Epoch will be adjusted on first repaint */
 
         var c = document.getElementById(canvasID);
         this.clientWidth  = c.clientWidth;
@@ -6847,6 +6882,38 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
         };
 
         /**
+         * Adds a panel to the list of currently rendered panels. Called via
+         * {@link module:input/ui/panel.Panel#show|Panel.show}
+         * @method module:snaps.Snaps#activatePanel
+         * @private
+         * @param  {Panel} panel The panel to show.
+         */
+        this.activatePanel = function(panel) {
+            for (var i = this.activeUIPanels.length - 1; i >= 0; i--) {
+                if(this.activeUIPanels[i].id===panel.id) {
+                    return;
+                }
+            }
+            this.activeUIPanels.push(panel);
+        };
+
+        /**
+         * Removes a panel from the list of currently rendered panels. Called via
+         * {@link module:input/ui/panel.Panel#show|Panel.hide}
+         * @method module:snaps.Snaps#deactivatePanel
+         * @private
+         * @param  {Panel} panel The panel to remove.
+         */
+        this.deactivatePanel = function(panel) {
+            for (var i = this.activeUIPanels.length - 1; i >= 0; i--) {
+                if(this.activeUIPanels[i].id===panel.id) {
+                    this.activeUIPanels.splice(i,1);
+                    return;
+                }
+            }
+        };
+
+        /**
          * Call this to bind keys to actions which you can test later on with
          * the {@link module:snaps.Snaps#actioning|actioning} method.
          * <pre>
@@ -6911,6 +6978,14 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
                 }
             }
             this.stats.count('updateFX', clock.now()-epoch);
+        };
+
+        this.drawUIPanels = function() {
+            var epoch = clock.now();
+            for (var i = 0; i < this.activeUIPanels.length; i++) {
+                this.activeUIPanels[i].draw(this.now, _this.ctx);
+            }
+            this.stats.count('drawUIPanels', clock.now()-epoch);
         };
 
         /**
@@ -7022,6 +7097,10 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
             draw(_this.ctx); /* This fn is also in the game code */
             if (_this.dbgShowRegions && _this.map!==undefined) {
                 _this.map.drawDebugRegions(_this.ctx, _this.dbgRegionProps);
+            }
+
+            if (_this.activeUIPanels.length>0) {
+                _this.drawUIPanels();
             }
 
             drawDebug();

@@ -247,7 +247,9 @@
 <dd>
     
     <div class="description">
-        The Button constructor is exposed here for general use, although you may wishto define UI via a definition file and load it via<a href="panel.Panel.html#load"><code>Panel.load</code></a>
+        The Button constructor is exposed here for general use, although you may wish
+to define UI via a definition file and load it via
+<a href="panel.Panel.html#load"><code>Panel.load</code></a>
     </div>
     
     
@@ -472,7 +474,8 @@
 <dd>
     
     <div class="description">
-        The Stats constructor is exposed here for general use. To access standard running stats youprobably want <a href="module-snaps.Snaps.html#stats"><code>stats</code></a> instead.
+        The Stats constructor is exposed here for general use. To access standard running stats you
+probably want <a href="module-snaps.Snaps.html#stats"><code>stats</code></a> instead.
     </div>
     
     
@@ -1044,7 +1047,22 @@
     
     
     <div class="description">
-        Call this to bind keys to actions which you can test later on withthe <a href="module-snaps.Snaps.html#actioning"><code>actioning</code></a> method.<pre>sn.bindKeys([    {key:'left',  action:'left'},    {key:'right', action:'right'},    {key:'up',    action:'up'},    {key:'down',  action:'down'},    // alternatives    {key:'w', action:'up'},    {key:'a', action:'left'},    {key:'s', action:'down'},    {key:'d', action:'right'}]);</pre>
+        Call this to bind keys to actions which you can test later on with
+the <a href="module-snaps.Snaps.html#actioning"><code>actioning</code></a> method.
+<pre>
+sn.bindKeys([
+    {key:'left',  action:'left'},
+    {key:'right', action:'right'},
+    {key:'up',    action:'up'},
+    {key:'down',  action:'down'},
+
+    // alternatives
+    {key:'w', action:'up'},
+    {key:'a', action:'left'},
+    {key:'s', action:'down'},
+    {key:'d', action:'right'}
+]);
+</pre>
     </div>
     
 
@@ -1094,7 +1112,8 @@
             
             
             
-            <td class="description last">An array of objects exposing key and actionproperties. See the description for an example.</td>
+            <td class="description last">An array of objects exposing key and action
+properties. See the description for an example.</td>
         </tr>
 	
 	
@@ -1243,7 +1262,9 @@
             
             
             
-            <td class="description last">If omitted, the timer will be removed. Ifpresent, the timer will be reset, adding resetMs to its currentexpired trigger time.</td>
+            <td class="description last">If omitted, the timer will be removed. If
+present, the timer will be reset, adding resetMs to its current
+expired trigger time.</td>
         </tr>
 	
 	
@@ -1288,7 +1309,9 @@
     
             
 <div class="param-desc">
-    true if the timer has triggered. Note that an immediatecall to checkTimer again will return false - The true value isonly returned once unless the timer is reset.
+    true if the timer has triggered. Note that an immediate
+call to checkTimer again will return false - The true value is
+only returned once unless the timer is reset.
 </div>
 
 
@@ -1322,7 +1345,8 @@
     
     
     <div class="description">
-        Clears the screen. Normally you don't need to do this if your map has no holesin it since the screen will be redrawn from corner to corner.
+        Clears the screen. Normally you don't need to do this if your map has no holes
+in it since the screen will be redrawn from corner to corner.
     </div>
     
 
@@ -1440,7 +1464,8 @@
     
     
     <div class="description">
-        Create a new camera for use in game. Creating a camera does notactivate it. You need to then call <a href="module-snaps.Snaps.html#switchToCamera"><code>switchToCamera</code></a>.
+        Create a new camera for use in game. Creating a camera does not
+activate it. You need to then call <a href="module-snaps.Snaps.html#switchToCamera"><code>switchToCamera</code></a>.
     </div>
     
 
@@ -1490,7 +1515,8 @@
             
             
             
-            <td class="description last">The name of the camera so that you can referto it again.</td>
+            <td class="description last">The name of the camera so that you can refer
+to it again.</td>
         </tr>
 	
 	
@@ -1922,7 +1948,8 @@
             
             
             
-            <td class="description last">Once the composite and all its child sprites expire,this is called.</td>
+            <td class="description last">Once the composite and all its child sprites expire,
+this is called.</td>
         </tr>
 	
 	
@@ -2127,7 +2154,8 @@
     
     
     <div class="description">
-        Adds a new task queue. You can add task objects to this queue. Tasks arerun in a time-contrained prioritised way in the game loop.
+        Adds a new task queue. You can add task objects to this queue. Tasks are
+run in a time-contrained prioritised way in the game loop.
     </div>
     
 
@@ -2177,7 +2205,8 @@
             
             
             
-            <td class="description last">The maximum time permitted for this queue torun in during each frame.</td>
+            <td class="description last">The maximum time permitted for this queue to
+run in during each frame.</td>
         </tr>
 	
 	
@@ -2256,7 +2285,16 @@
     
     
     <div class="description">
-        If your game object exposes a <code>preloadImages</code> property, then those imageswill be preloaded by the engine along with the map images. Call this method to drawthe image by name, e.g.<pre>game.preloadImages = {    logo: 'mylogo.png'}//...sn.drawImage('logo', 50, 30);</pre>
+        If your game object exposes a <code>preloadImages</code> property, then those images
+will be preloaded by the engine along with the map images. Call this method to draw
+the image by name, e.g.
+<pre>
+game.preloadImages = {
+    logo: 'mylogo.png'
+}
+//...
+sn.drawImage('logo', 50, 30);
+</pre>
     </div>
     
 
@@ -2871,7 +2909,8 @@
     
     
     <div class="description">
-        Get a tile property from a tile column and row in the original map data.Starts at the topmost map layer and world down to the ground.
+        Get a tile property from a tile column and row in the original map data.
+Starts at the topmost map layer and world down to the ground.
     </div>
     
 
@@ -3046,7 +3085,8 @@
     
     
     <div class="description">
-        Get a tile property from a world position. Starts at the topmostmap layer and world down to the ground.
+        Get a tile property from a world position. Starts at the topmost
+map layer and world down to the ground.
     </div>
     
 
@@ -3190,7 +3230,9 @@
     
             
 <div class="param-desc">
-    The property value, or <code>undefined</code> if not found.If the prop parameter was an array, the return value will be an object describingall the properties required.
+    The property value, or <code>undefined</code> if not found.
+If the prop parameter was an array, the return value will be an object describing
+all the properties required.
 </div>
 
 
@@ -3277,7 +3319,8 @@
             
             
             
-            <td class="description last">An object containing all the propertiesto copy into the tile's properties.</td>
+            <td class="description last">An object containing all the properties
+to copy into the tile's properties.</td>
         </tr>
 	
 	
@@ -3379,7 +3422,8 @@
     
     
     <div class="description">
-        Get a tile by it's row and column position and find the world positionof its center point.
+        Get a tile by it's row and column position and find the world position
+of its center point.
     </div>
     
 
@@ -3578,7 +3622,8 @@
     
             
 <div class="param-desc">
-    Contains 4 properties, le, te, re and be which holdthe left, top, right and bottom edges respectively.
+    Contains 4 properties, le, te, re and be which hold
+the left, top, right and bottom edges respectively.
 </div>
 
 
@@ -3612,7 +3657,9 @@
     
     
     <div class="description">
-        Marks a time in the future for a timer to trigger. Timers arenot events driven by the engine, but rather need to be explicitelychecked in a timely fashion by the game, via <a href="module-snaps.Snaps.html#markTime"><code>checkTimer</code></a>.
+        Marks a time in the future for a timer to trigger. Timers are
+not events driven by the engine, but rather need to be explicitely
+checked in a timely fashion by the game, via <a href="module-snaps.Snaps.html#markTime"><code>checkTimer</code></a>.
     </div>
     
 
@@ -3791,7 +3838,8 @@
             
             
             
-            <td class="description last">An 2-length array that will recieve the xy values ofthe mouse position in that order.</td>
+            <td class="description last">An 2-length array that will recieve the xy values of
+the mouse position in that order.</td>
         </tr>
 	
 	
@@ -3897,7 +3945,8 @@
             
             
             
-            <td class="description last">An 2-length array that will recieve the xy values ofthe mouse position in that order.</td>
+            <td class="description last">An 2-length array that will recieve the xy values of
+the mouse position in that order.</td>
         </tr>
 	
 	
@@ -3953,7 +4002,8 @@
     
     
     <div class="description">
-        Registers a new camera plugin. See other plugin code for an example of howto call this.
+        Registers a new camera plugin. See other plugin code for an example of how
+to call this.
     </div>
     
 
@@ -4082,7 +4132,8 @@
     
     
     <div class="description">
-        Registers a new collider plugin. See other plugin code for an example of howto call this.
+        Registers a new collider plugin. See other plugin code for an example of how
+to call this.
     </div>
     
 
@@ -4211,7 +4262,8 @@
     
     
     <div class="description">
-        Registers a new effect plugin. See other plugin code for an example of howto call this.
+        Registers a new effect plugin. See other plugin code for an example of how
+to call this.
     </div>
     
 
@@ -4340,7 +4392,8 @@
     
     
     <div class="description">
-        Registers a new layer plugin. See other plugin code for an example of howto call this.
+        Registers a new layer plugin. See other plugin code for an example of how
+to call this.
     </div>
     
 
@@ -4469,7 +4522,8 @@
     
     
     <div class="description">
-        Registers a new phaser plugin. See other plugin code for an example of howto call this.
+        Registers a new phaser plugin. See other plugin code for an example of how
+to call this.
     </div>
     
 
@@ -4598,7 +4652,8 @@
     
     
     <div class="description">
-        Registers a new updater plugin. See other plugin code for an example of howto call this.
+        Registers a new updater plugin. See other plugin code for an example of how
+to call this.
     </div>
     
 
@@ -4785,7 +4840,8 @@
     
     
     <div class="description">
-        Takes a screen position and tells you what tile it lies on. Takecare with the return value, the function signature is all backwards.
+        Takes a screen position and tells you what tile it lies on. Take
+care with the return value, the function signature is all backwards.
     </div>
     
 
@@ -4881,7 +4937,8 @@
             
             
             
-            <td class="description last">A 2-length array that will recieve the tile x/yposition in its 0/1 values.</td>
+            <td class="description last">A 2-length array that will recieve the tile x/y
+position in its 0/1 values.</td>
         </tr>
 	
 	
@@ -4926,7 +4983,8 @@
     
             
 <div class="param-desc">
-    The distance from the given screen position to theclosest tile edge, capped at 127px.
+    The distance from the given screen position to the
+closest tile edge, capped at 127px.
 </div>
 
 
@@ -5010,7 +5068,8 @@
             
             
             
-            <td class="description last">An 2-length array that will recieve the xy values ofthe position in that order.</td>
+            <td class="description last">An 2-length array that will recieve the xy values of
+the position in that order.</td>
         </tr>
 	
 	
@@ -5384,7 +5443,8 @@
             
             
             
-            <td class="description last">The name of the sprite definition to use. These areset up in your game's spriteDefs data.</td>
+            <td class="description last">The name of the sprite definition to use. These are
+set up in your game's spriteDefs data.</td>
         </tr>
 	
 	
@@ -5415,7 +5475,8 @@
             
             
             
-            <td class="description last">The initial state. This too is defined in thesprite's definition, in your game's spriteDefs data.</td>
+            <td class="description last">The initial state. This too is defined in the
+sprite's definition, in your game's spriteDefs data.</td>
         </tr>
 	
 	
@@ -5446,7 +5507,8 @@
             
             
             
-            <td class="description last">The world x coordinate. Can be a function which takesno parameters and returns a number.</td>
+            <td class="description last">The world x coordinate. Can be a function which takes
+no parameters and returns a number.</td>
         </tr>
 	
 	
@@ -5477,7 +5539,8 @@
             
             
             
-            <td class="description last">The world y coordinate. Can be a function which takesno parameters and returns a number.</td>
+            <td class="description last">The world y coordinate. Can be a function which takes
+no parameters and returns a number.</td>
         </tr>
 	
 	
@@ -5508,7 +5571,8 @@
             
             
             
-            <td class="description last">The height off the ground. Can be a function which takesno parameters and returns a number.</td>
+            <td class="description last">The height off the ground. Can be a function which takes
+no parameters and returns a number.</td>
         </tr>
 	
 	
@@ -5541,7 +5605,8 @@
             
             
             
-            <td class="description last">Optional sprite parameters. For a list of parameterssee the opts parameter on the <a href="sprite.Sprite.html"><code>Sprite class constructor</code></a>.</td>
+            <td class="description last">Optional sprite parameters. For a list of parameters
+see the opts parameter on the <a href="sprite.Sprite.html"><code>Sprite class constructor</code></a>.</td>
         </tr>
 	
 	
@@ -5963,7 +6028,8 @@
             
             
             
-            <td class="description last">An 2-length array that will recieve the xy values ofthe position in that order.</td>
+            <td class="description last">An 2-length array that will recieve the xy values of
+the position in that order.</td>
         </tr>
 	
 	
@@ -6019,7 +6085,8 @@
     
     
     <div class="description">
-        Takes a world position and tells you what tile it lies on. Takecare with the return value, the function signature is all backwards.
+        Takes a world position and tells you what tile it lies on. Take
+care with the return value, the function signature is all backwards.
     </div>
     
 
@@ -6115,7 +6182,8 @@
             
             
             
-            <td class="description last">A 2-length array that will recieve the tile x/yposition in its 0/1 values.</td>
+            <td class="description last">A 2-length array that will recieve the tile x/y
+position in its 0/1 values.</td>
         </tr>
 	
 	
@@ -6160,7 +6228,8 @@
     
             
 <div class="param-desc">
-    The distance from the given world position to theclosest tile edge, capped at 127px.
+    The distance from the given world position to the
+closest tile edge, capped at 127px.
 </div>
 
 

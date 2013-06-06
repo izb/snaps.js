@@ -52,7 +52,10 @@
     
     
     <div class="description">
-        Creates a circle tracer that traces a circle (An on-screen elipse in isometric-land)along a path to detect collision.Note that this should not be constructed directly, but rather via the plugin factory method<a href="module-snaps.Snaps.html#createCollider"><code>createCollider</code></a> on the engine.
+        Creates a circle tracer that traces a circle (An on-screen elipse in isometric-land)
+along a path to detect collision.
+Note that this should not be constructed directly, but rather via the plugin factory method
+<a href="module-snaps.Snaps.html#createCollider"><code>createCollider</code></a> on the engine.
     </div>
     
 
@@ -102,7 +105,15 @@
             
             
             
-            <td class="description last">An object with assorted options set in it.<dl> <dt>radius</dt><dd>The radius must be >0 and describes the x radius of the elipse as projected on-screen.</dd> <dt>autoSlip</dt><dd>Defaults to true for isometric maps. If set, the collision trace will 'slip' away from jagged pixel edges to prevent sprites from being caught up in jaggies when moving at isometric angles. In unsure, omit this property to use the default.</dd></dl></td>
+            <td class="description last">An object with assorted options set in it.
+<dl>
+ <dt>radius</dt><dd>The radius must be >0 and describes the x radius of the elipse as
+ projected on-screen.</dd>
+ <dt>autoSlip</dt><dd>Defaults to true for isometric maps. If set, the collision trace
+ will 'slip' away from jagged pixel edges to prevent sprites from being caught up in
+ jaggies when moving at isometric angles. In unsure, omit this property to use the
+ default.</dd>
+</dl></td>
         </tr>
 	
 	
@@ -176,7 +187,9 @@
     
     
     <div class="description">
-        Perform a trace to test for collision along a line with radius.Effectively traces an ellipse  from one point to another, with someimportant performance compromises in accuracy.
+        Perform a trace to test for collision along a line with radius.
+Effectively traces an ellipse  from one point to another, with some
+important performance compromises in accuracy.
     </div>
     
 
@@ -341,7 +354,11 @@
             
             
             
-            <td class="description last">An optional 2-length array which will recieve thepoint of contact. You can interpret this as the position to which thecharacter can go along its path at which it will be touching a solidobject. If there is no collision, the output position will be thedesired new position.</td>
+            <td class="description last">An optional 2-length array which will recieve the
+point of contact. You can interpret this as the position to which the
+character can go along its path at which it will be touching a solid
+object. If there is no collision, the output position will be the
+desired new position.</td>
         </tr>
 	
 	
@@ -386,7 +403,8 @@
     
             
 <div class="param-desc">
-    A number from 0-1 representing how far along the routethe trace managed to get. 1 means no collision.
+    A number from 0-1 representing how far along the route
+the trace managed to get. 1 means no collision.
 </div>
 
 

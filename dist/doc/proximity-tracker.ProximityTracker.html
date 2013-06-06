@@ -52,7 +52,17 @@
     
     
     <div class="description">
-        The proximity tracker tracks sprites and allows you to perform fast queriesto find what sprites are closest to a given point.<p>The proximity tracker must be informed when a sprite moves. The easiest way todo this is via the <code>track</code> sprite plugin. See<a href="proximity-tracker.ProximityTracker.html"><code>track</code></a> for implementationdetails.<p>This constructor is curried when exposed through <a href="module-snaps.Snaps.html#ProximityTracker"><code>the engine ref</code></a>,which is the prefered way to create it. This means construct it without the first parameter, e.g.new sn.ProximityTracker(myCellSize);
+        The proximity tracker tracks sprites and allows you to perform fast queries
+to find what sprites are closest to a given point.
+<p>
+The proximity tracker must be informed when a sprite moves. The easiest way to
+do this is via the <code>track</code> sprite plugin. See
+<a href="proximity-tracker.ProximityTracker.html"><code>track</code></a> for implementation
+details.
+<p>
+This constructor is curried when exposed through <a href="module-snaps.Snaps.html#ProximityTracker"><code>the engine ref</code></a>,
+which is the prefered way to create it. This means construct it without the first parameter, e.g.
+new sn.ProximityTracker(myCellSize);
     </div>
     
 
@@ -102,7 +112,8 @@
             
             
             
-            <td class="description last">The width of each cell in the regular gridtracking the map contents.</td>
+            <td class="description last">The width of each cell in the regular grid
+tracking the map contents.</td>
         </tr>
 	
 	
@@ -272,7 +283,9 @@
             
             
             
-            <td class="description last">The radius to search. Note that although this isin pixels, it is horizontal pixels. The search area will be an ellipseto account for the isometric projection.</td>
+            <td class="description last">The radius to search. Note that although this is
+in pixels, it is horizontal pixels. The search area will be an ellipse
+to account for the isometric projection.</td>
         </tr>
 	
 	
@@ -295,7 +308,8 @@
             
             
             
-            <td class="description last">Pass true to have the results sorted inascending distance from the test point.</td>
+            <td class="description last">Pass true to have the results sorted in
+ascending distance from the test point.</td>
         </tr>
 	
 	
@@ -374,7 +388,9 @@
     
     
     <div class="description">
-        Register a sprite with this tracker.See <a href="proximity-tracker.ProximityTracker.html"><code>track</code></a> foran example of how this is used with the track sprite plugin.
+        Register a sprite with this tracker.
+See <a href="proximity-tracker.ProximityTracker.html"><code>track</code></a> for
+an example of how this is used with the track sprite plugin.
     </div>
     
 
@@ -480,7 +496,19 @@
     
     
     <div class="description">
-        Use this in conjunction with the track plugin. Add it to the list of spriteupdaters on your tracked sprites, after the sprite has moved. E.g.<pre>updates:[{  name: 'some-sprite-moving-plugin'}, {  name:'track',  fn: myTracker.track.bind(myProximityTracker),  register: myTracker.register.bind(myProximityTracker),  deregister: myTracker.unregister.bind(myProximityTracker)}]</pre>
+        Use this in conjunction with the track plugin. Add it to the list of sprite
+updaters on your tracked sprites, after the sprite has moved. E.g.
+
+<pre>
+updates:[{
+  name: 'some-sprite-moving-plugin'
+}, {
+  name:'track',
+  fn: myTracker.track.bind(myProximityTracker),
+  register: myTracker.register.bind(myProximityTracker),
+  deregister: myTracker.unregister.bind(myProximityTracker)
+}]
+</pre>
     </div>
     
 
@@ -586,7 +614,9 @@
     
     
     <div class="description">
-        Unregister a sprite with this tracker.See <a href="proximity-tracker.ProximityTracker.html"><code>track</code></a> foran example of how this is used with the track sprite plugin.
+        Unregister a sprite with this tracker.
+See <a href="proximity-tracker.ProximityTracker.html"><code>track</code></a> for
+an example of how this is used with the track sprite plugin.
     </div>
     
 

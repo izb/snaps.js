@@ -52,7 +52,26 @@
     
     
     <div class="description">
-        A sprite updater that sets the sprite's state extension to a compass direction('n', 'ne', 'e', 'se'...)based on the direction values in the sprite. Direction updates automatically when the spritemoves but can be overridden with <a href="sprite.Sprite.html#setDirection"><code>setDirection</code></a>.The compass direction takes into account the isometric projection.<p>Note that this should not be constructed directly, but rather via the updates or commitproperty in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.<p>See The <code>opts<code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a><p>Alongside the name, you can pass the following options<dl> <dt>anti_jitter</dt><dd>Creates a buffer between direction changes. Waits a certain number of frames before changing the direction. The direction only changes if the new direction is not the current direction for a set number of frames. Defaults to 0.</dd> <dt>bounce_base</dt><dd>Where is the 'floor'? E.g. a bounce_base of 25 and an bounce height of 100 will bounce up 100px on top of the floor level of 25. The height value will be 125 at its apex, midway through the state animation.</dd></dl>
+        A sprite updater that sets the sprite's state extension to a compass direction
+('n', 'ne', 'e', 'se'...)
+based on the direction values in the sprite. Direction updates automatically when the sprite
+moves but can be overridden with <a href="sprite.Sprite.html#setDirection"><code>setDirection</code></a>.
+The compass direction takes into account the isometric projection.
+<p>
+Note that this should not be constructed directly, but rather via the updates or commit
+property in your spawnSprite data, e.g. <code>updates:[{name:'8way'}]</code>.
+<p>
+See The <code>opts<code> parameter in the <a href="sprite.Sprite.html"><code>Sprite constructor</code></a>
+<p>
+Alongside the name, you can pass the following options
+<dl>
+ <dt>anti_jitter</dt><dd>Creates a buffer between direction changes. Waits a certain number
+ of frames before changing the direction. The direction only changes if the new direction
+ is not the current direction for a set number of frames. Defaults to 0.</dd>
+ <dt>bounce_base</dt><dd>Where is the 'floor'? E.g. a bounce_base of 25 and an bounce height
+ of 100 will bounce up 100px on top of the floor level of 25. The height value will
+ be 125 at its apex, midway through the state animation.</dd>
+</dl>
     </div>
     
 
