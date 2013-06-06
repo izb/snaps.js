@@ -1,8 +1,10 @@
 /*global define*/
 define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
-        'input/keyboard', 'input/mouse',
         'util/all',
         'map/staggered-isometric',
+
+        /* UI */
+        'input/all',
 
         /* Plugins */
         'plugins/default-plugins',
@@ -23,7 +25,8 @@ define(['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
         /* Non-referenced */
         'polyfills/bind'],
 
-function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
+function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
+        ui,
         regPlugins,
         SlowQueue,
         tweens,
@@ -49,6 +52,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var uid       = util.uid;
     var Stats     = util.Stats;
     var clock     = util.clock;
+
+    var Keyboard  = ui.Keyboard;
+    var Mouse     = ui.Mouse;
 
     /**
      * The main class of the game engine
@@ -106,6 +112,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @type {Function}
          */
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
+
+        /**
+         * The Panel constructor is exposed here for general use.
+         * @member module:snaps.Snaps#Panel
+         * @type {Function}
+         */
+        this.Panel = ui.Panel.bind(ui.Panel, this);
+
+        /**
+         * The Button constructor is exposed here for general use, although you may wish
+         * to define UI via a definition file and load it via
+         * {@link module:input/ui/panel.Panel#load|Panel.load}
+         * @member module:snaps.Snaps#Button
+         * @type {Function}
+         */
+        this.Button = ui.Button.bind(ui.Button, this);
 
         /**
          * The PathFinder constructor is exposed here for general use.
