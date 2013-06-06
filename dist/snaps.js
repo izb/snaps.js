@@ -970,249 +970,6 @@ define('sprites/composite',['util/js', 'sprites/sprite'], function(js, Sprite) {
 });
 
 /*global define*/
-define('input/keyboard',[],function() {
-
-    /**
-     * @module input/keyboard
-     */
-
-    
-
-    /** Creates a keyboard input handler and starts listening for
-     * keyboard events. You don't normally need to create this since the engine
-     * creates one by default.
-     * @constructor module:input/keyboard.Keyboard
-     */
-    function Keyboard() {
-
-        var _this = this;
-
-        /**
-         * A map of keycodes that you can use to set up keybindings.
-         * @member module:input/keyboard.Keyboard#keymap
-         */
-        this.keymap = {
-            backspace: 8,
-            tab      : 9,
-            enter    : 13,
-            pause    : 19,
-            capsLock : 20,
-            escape   : 27,
-            space    : 32,
-            pageUp   : 33,
-            pageDown : 34,
-            end      : 35,
-            home     : 36,
-            left     : 37,
-            up       : 38,
-            right    : 39,
-            down     : 40,
-            ins      : 45,
-            del      : 46,
-
-            /* Main keyboard */
-            plus     : 187,
-            comma    : 188,
-            minus    : 189,
-            period   : 190,
-
-            shift    : 16,
-            ctrl     : 17,
-            alt      : 18,
-
-            /* top row */
-            zero     : 48,
-            one      : 49,
-            two      : 50,
-            three    : 51,
-            four     : 52,
-            five     : 53,
-            six      : 54,
-            seven    : 55,
-            eight    : 56,
-            nine     : 57,
-
-            a        : 65,
-            b        : 66,
-            c        : 67,
-            d        : 68,
-            e        : 69,
-            f        : 70,
-            g        : 71,
-            h        : 72,
-            i        : 73,
-            j        : 74,
-            k        : 75,
-            l        : 76,
-            m        : 77,
-            n        : 78,
-            o        : 79,
-            p        : 80,
-            q        : 81,
-            r        : 82,
-            s        : 83,
-            t        : 84,
-            u        : 85,
-            v        : 86,
-            w        : 87,
-            x        : 88,
-            y        : 89,
-            z        : 90,
-
-            /* Number pad */
-            num0     : 96,
-            num1     : 97,
-            num2     : 98,
-            num3     : 99,
-            num4     : 100,
-            num5     : 101,
-            num6     : 102,
-            num7     : 103,
-            num8     : 104,
-            num9     : 105,
-
-            /* More number pad */
-            multiply : 106,
-            add      : 107,
-            substract: 109,
-            decimal  : 110,
-            divide   : 111,
-
-            /* Function keys */
-            F1       : 112,
-            F2       : 113,
-            F3       : 114,
-            F4       : 115,
-            F5       : 116,
-            F6       : 117,
-            F7       : 118,
-            F8       : 119,
-            F9       : 120,
-            F10      : 121,
-            F11      : 122,
-            F12      : 123
-        };
-
-        this.actions = [];
-        this.keys = [];
-
-        /* TODO: bind is reserved. Probably want to rename this. */
-
-        /**
-         * Binds a key to an action.
-         * @method module:input/keyboard.Keyboard#bind
-         * @param  {Number} key    A keycode from {@link module:input/keyboard.Keyboard#keymap|keymap}
-         * @param  {String} action An arbitrary action you want to bind to the key.
-         */
-        this.bind = function(key, action) {
-            _this.actions[action] = 0;
-            _this.keys[_this.keymap[key]] = action;
-        };
-
-        var keydown = function(e) {
-            var tag = e.target.tagName;
-            if (e.type !== 'keydown' || tag === 'INPUT' || tag === 'TEXTAREA') {
-                return;
-            }
-            e.preventDefault();
-
-            var keycode = e.keyCode;
-            var action = _this.keys[keycode];
-            if (action && _this.actions[action] !== keycode) {
-                /* TODO: At this point, we could fire a one-off 'key is down' event that
-                 * has no key repeat. */
-                _this.actions[action] = keycode;
-            }
-        };
-
-        var keyup = function(e) {
-            if (e.type !== 'keyup') {
-                return;
-            }
-            e.preventDefault();
-
-            var keycode = e.keyCode;
-            var action = _this.keys[keycode];
-            if (action) {
-                _this.actions[action] = 0;
-            }
-        };
-
-        /**
-         * Tests to see if any actions were pressed since the last check.
-         * @method module:input/keyboard.Keyboard#actionPressed
-         * @param  {String} action The action to test, previously set up with
-         * {@link module:input/keyboard.Keyboard#bind|bind}
-         * @return {Boolean} true if the action was pressed.
-         */
-        this.actionPressed = function(action) {
-            return !!_this.actions[action];
-        };
-
-        window.addEventListener('keydown', keydown, false);
-        window.addEventListener('keyup', keyup, false);
-    }
-
-    return Keyboard;
-
-});
-
-/*global define*/
-define('input/mouse',[],function() {
-
-    /**
-     * @module input/mouse
-     */
-
-    
-
-    /** Creates a mouse input handler and starts listening for
-     * mouse events. You don't normally need to create this since the engine
-     * creates one by default.
-     * @constructor module:input/mouse.Mouse
-     * @param {HTMLCanvasElement} canvas Mouse position will be
-     * relative to and constrained to the limits of the given canvas.
-     */
-    function Mouse(canvas) {
-
-        var _this = this;
-
-        /**
-         * The mouse X position, relative to the left-hand-edge of the canvas.
-         * @type {Number}
-         * @member module:input/mouse.Mouse#x
-         */
-        this.x = 0;
-
-        /**
-         * The mouse Y position, relative to the top of the canvas.
-         * @type {Number}
-         * @member module:input/mouse.Mouse#y
-         */
-        this.y = 0;
-
-        this.inputmap = {
-            mouse1   : -1,
-            mouse2   : -3,
-            wheelUp  : -4,
-            wheelDown: -5
-        };
-
-        var mousemoved = function(e) {
-            var rect = canvas.getBoundingClientRect();
-            _this.x  = e.clientX - rect.left;
-            _this.y  = e.clientY - rect.top;
-        };
-
-        canvas.addEventListener('mousemove', mousemoved, false);
-
-    }
-
-    return Mouse;
-
-});
-
-/*global define*/
 define('util/preload',[],function() {
 
     
@@ -2777,6 +2534,385 @@ function(Tile, Bitmap, debug, js, clock) {
     };
 
     return StaggeredIsometric;
+
+});
+
+/*global define*/
+define('input/keyboard',[],function() {
+
+    /**
+     * @module input/keyboard
+     */
+
+    
+
+    /** Creates a keyboard input handler and starts listening for
+     * keyboard events. You don't normally need to create this since the engine
+     * creates one by default.
+     * @constructor module:input/keyboard.Keyboard
+     */
+    function Keyboard() {
+
+        var _this = this;
+
+        /**
+         * A map of keycodes that you can use to set up keybindings.
+         * @member module:input/keyboard.Keyboard#keymap
+         */
+        this.keymap = {
+            backspace: 8,
+            tab      : 9,
+            enter    : 13,
+            pause    : 19,
+            capsLock : 20,
+            escape   : 27,
+            space    : 32,
+            pageUp   : 33,
+            pageDown : 34,
+            end      : 35,
+            home     : 36,
+            left     : 37,
+            up       : 38,
+            right    : 39,
+            down     : 40,
+            ins      : 45,
+            del      : 46,
+
+            /* Main keyboard */
+            plus     : 187,
+            comma    : 188,
+            minus    : 189,
+            period   : 190,
+
+            shift    : 16,
+            ctrl     : 17,
+            alt      : 18,
+
+            /* top row */
+            zero     : 48,
+            one      : 49,
+            two      : 50,
+            three    : 51,
+            four     : 52,
+            five     : 53,
+            six      : 54,
+            seven    : 55,
+            eight    : 56,
+            nine     : 57,
+
+            a        : 65,
+            b        : 66,
+            c        : 67,
+            d        : 68,
+            e        : 69,
+            f        : 70,
+            g        : 71,
+            h        : 72,
+            i        : 73,
+            j        : 74,
+            k        : 75,
+            l        : 76,
+            m        : 77,
+            n        : 78,
+            o        : 79,
+            p        : 80,
+            q        : 81,
+            r        : 82,
+            s        : 83,
+            t        : 84,
+            u        : 85,
+            v        : 86,
+            w        : 87,
+            x        : 88,
+            y        : 89,
+            z        : 90,
+
+            /* Number pad */
+            num0     : 96,
+            num1     : 97,
+            num2     : 98,
+            num3     : 99,
+            num4     : 100,
+            num5     : 101,
+            num6     : 102,
+            num7     : 103,
+            num8     : 104,
+            num9     : 105,
+
+            /* More number pad */
+            multiply : 106,
+            add      : 107,
+            substract: 109,
+            decimal  : 110,
+            divide   : 111,
+
+            /* Function keys */
+            F1       : 112,
+            F2       : 113,
+            F3       : 114,
+            F4       : 115,
+            F5       : 116,
+            F6       : 117,
+            F7       : 118,
+            F8       : 119,
+            F9       : 120,
+            F10      : 121,
+            F11      : 122,
+            F12      : 123
+        };
+
+        this.actions = [];
+        this.keys = [];
+
+        /* TODO: bind is reserved. Probably want to rename this. */
+
+        /**
+         * Binds a key to an action.
+         * @method module:input/keyboard.Keyboard#bind
+         * @param  {Number} key    A keycode from {@link module:input/keyboard.Keyboard#keymap|keymap}
+         * @param  {String} action An arbitrary action you want to bind to the key.
+         */
+        this.bind = function(key, action) {
+            _this.actions[action] = 0;
+            _this.keys[_this.keymap[key]] = action;
+        };
+
+        var keydown = function(e) {
+            var tag = e.target.tagName;
+            if (e.type !== 'keydown' || tag === 'INPUT' || tag === 'TEXTAREA') {
+                return;
+            }
+            e.preventDefault();
+
+            var keycode = e.keyCode;
+            var action = _this.keys[keycode];
+            if (action && _this.actions[action] !== keycode) {
+                /* TODO: At this point, we could fire a one-off 'key is down' event that
+                 * has no key repeat. */
+                _this.actions[action] = keycode;
+            }
+        };
+
+        var keyup = function(e) {
+            if (e.type !== 'keyup') {
+                return;
+            }
+            e.preventDefault();
+
+            var keycode = e.keyCode;
+            var action = _this.keys[keycode];
+            if (action) {
+                _this.actions[action] = 0;
+            }
+        };
+
+        /**
+         * Tests to see if any actions were pressed since the last check.
+         * @method module:input/keyboard.Keyboard#actionPressed
+         * @param  {String} action The action to test, previously set up with
+         * {@link module:input/keyboard.Keyboard#bind|bind}
+         * @return {Boolean} true if the action was pressed.
+         */
+        this.actionPressed = function(action) {
+            return !!_this.actions[action];
+        };
+
+        window.addEventListener('keydown', keydown, false);
+        window.addEventListener('keyup', keyup, false);
+    }
+
+    return Keyboard;
+
+});
+
+/*global define*/
+define('input/mouse',[],function() {
+
+    /**
+     * @module input/mouse
+     */
+
+    
+
+    /** Creates a mouse input handler and starts listening for
+     * mouse events. You don't normally need to create this since the engine
+     * creates one by default.
+     * @constructor module:input/mouse.Mouse
+     * @param {HTMLCanvasElement} canvas Mouse position will be
+     * relative to and constrained to the limits of the given canvas.
+     */
+    function Mouse(canvas) {
+
+        var _this = this;
+
+        /**
+         * The mouse X position, relative to the left-hand-edge of the canvas.
+         * @type {Number}
+         * @member module:input/mouse.Mouse#x
+         */
+        this.x = 0;
+
+        /**
+         * The mouse Y position, relative to the top of the canvas.
+         * @type {Number}
+         * @member module:input/mouse.Mouse#y
+         */
+        this.y = 0;
+
+        this.inputmap = {
+            mouse1   : -1,
+            mouse2   : -3,
+            wheelUp  : -4,
+            wheelDown: -5
+        };
+
+        var mousemoved = function(e) {
+            var rect = canvas.getBoundingClientRect();
+            _this.x  = e.clientX - rect.left;
+            _this.y  = e.clientY - rect.top;
+        };
+
+        canvas.addEventListener('mousemove', mousemoved, false);
+
+    }
+
+    return Mouse;
+
+});
+
+/*global define*/
+define('input/ui/panel',[],function() {
+
+    /**
+     * @module input/ui/panel
+     */
+
+    
+
+    /** A panel represents a set of UI elements which are drawn in order
+     * to the screen. E.g. a popup dialog panel that contains labels and
+     * buttons.
+     * @constructor module:input/ui/panel.Panel
+     */
+    function Panel(sn) {
+        this.sn = sn;
+    }
+
+    /**
+     * Panels can be defined in your game as JSON data. Call this static
+     * factory method to create a panel hierarchy from a JSON description.
+     * @member module:input/ui/panel.Panel#load
+     * @static
+     * @param {Object} data A JSON data structure that describes a nested
+     * UI arrangement with a root panel.
+     * @return {Panel} A new panel.
+     */
+    Panel.load = function(data) {
+        /* TODO */
+        return this;
+    };
+
+    /**
+     * Show this panel on-screen.
+     * @member module:input/ui/panel.Panel#show
+     * @param  {Boolean} [doShow=true] Pass true to show or false to hide.
+     */
+    Panel.prototype.show = function(doShow) {
+        if (doShow===undefined) {
+            doShow = true;
+        }
+        /* TODO */
+
+        return this;
+    };
+
+    /**
+     * Hide this panel.
+     * @member module:input/ui/panel.Panel#hide
+     */
+    Panel.prototype.hide = function() {
+        this.show(false);
+        return this;
+    };
+
+    /**
+     * Moves this panel to the center of the screen. Only works on the root
+     * panel if it has dimensions set. In all other cases, the behaviour is
+     * undefined.
+     * @member module:input/ui/panel.Panel#center
+     * @param  {Boolean} [cy=true] Pass true to center vertically.
+     * @param  {Boolean} [cx=true] Pass true to center horizontally.
+     */
+    Panel.prototype.center = function(cy, cx) {
+        if (cy===undefined) {
+            cy = true;
+        }
+
+        if (cx===undefined) {
+            cx = true;
+        }
+
+        /* TODO: Move to the screen center */
+        return this;
+    };
+
+    /**
+     * Draws this panel. This will be called on every frame.
+     * @param  {CanvasRenderingContext2D} ctx Drawing context
+     * @private
+     */
+    Panel.prototype.draw = function(ctx) {
+        /* TODO */
+    };
+
+    /* TODO: Panels should render off-screen so we can do transition in/out effects like
+     * fade. This implies that the root panel in the data should have dimensions. */
+
+    return Panel;
+});
+
+/*global define*/
+define('input/ui/button',[],function() {
+
+    /**
+     * @module input/ui/button
+     */
+
+    
+
+    /** A button reacts to mouse and touch events. It should be added to a panel
+     * in order to be presented on-screen.
+     * @constructor module:input/ui/button.Button
+     */
+    function Button() {
+
+    }
+
+
+    return Button;
+});
+
+/*global define*/
+define('input/all',[
+    'input/keyboard',
+    'input/mouse',
+    'input/ui/panel',
+    'input/ui/button'],
+function(Keyboard, Mouse, Panel, Button) {
+
+    
+
+    /**
+     * @module input/all
+     * @private
+     */
+
+    return {
+        Keyboard: Keyboard,
+        Mouse:    Mouse,
+        Panel:    Panel,
+        Button:   Button
+    };
 
 });
 
@@ -6321,9 +6457,11 @@ define('polyfills/bind',[],function() {
 
 /*global define*/
 define('snaps',['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
-        'input/keyboard', 'input/mouse',
         'util/all',
         'map/staggered-isometric',
+
+        /* UI */
+        'input/all',
 
         /* Plugins */
         'plugins/default-plugins',
@@ -6344,7 +6482,8 @@ define('snaps',['sprites/spritedef', 'sprites/sprite', 'sprites/composite',
         /* Non-referenced */
         'polyfills/bind'],
 
-function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric,
+function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
+        ui,
         regPlugins,
         SlowQueue,
         tweens,
@@ -6370,6 +6509,9 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
     var uid       = util.uid;
     var Stats     = util.Stats;
     var clock     = util.clock;
+
+    var Keyboard  = ui.Keyboard;
+    var Mouse     = ui.Mouse;
 
     /**
      * The main class of the game engine
@@ -6427,6 +6569,22 @@ function(SpriteDef, Sprite, Composite, Keyboard, Mouse, util, StaggeredIsometric
          * @type {Function}
          */
         this.ProximityTracker = ProximityTracker.bind(ProximityTracker, this);
+
+        /**
+         * The Panel constructor is exposed here for general use.
+         * @member module:snaps.Snaps#Panel
+         * @type {Function}
+         */
+        this.Panel = ui.Panel.bind(ui.Panel, this);
+
+        /**
+         * The Button constructor is exposed here for general use, although you may wish
+         * to define UI via a definition file and load it via
+         * {@link module:input/ui/panel.Panel#load|Panel.load}
+         * @member module:snaps.Snaps#Button
+         * @type {Function}
+         */
+        this.Button = ui.Button.bind(ui.Button, this);
 
         /**
          * The PathFinder constructor is exposed here for general use.
