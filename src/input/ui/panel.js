@@ -46,7 +46,12 @@ function(uid, Sprite) {
         if (doShow===undefined) {
             doShow = true;
         }
-        /* TODO */
+
+        if (doShow) {
+            this.sn.activatePanel(this);
+        } else {
+            this.sn.deactivatePanel(this);
+        }
 
         return this;
     };
