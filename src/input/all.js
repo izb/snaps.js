@@ -3,8 +3,9 @@ define([
     'input/keyboard',
     'input/mouse',
     'input/ui/panel',
+    'input/ui/label',
     'input/ui/button'],
-function(Keyboard, Mouse, Panel, Button) {
+function(Keyboard, Mouse, Panel, Label, Button) {
 
     'use strict';
 
@@ -17,6 +18,7 @@ function(Keyboard, Mouse, Panel, Button) {
         Keyboard: Keyboard,
         Mouse:    Mouse,
         Panel:    Panel,
+        Label:    Label,
         Button:   Button
     };
 

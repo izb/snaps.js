@@ -86,6 +86,17 @@ define('sprites/spritedef',[],function() {
     };
 
     /**
+     * Test to see if a state exists in this definition.
+     * @method module:sprites/spritedef.SpriteDef#hasState
+     * @param  {String} state The state to test for
+     * @return {Boolean} true if it exists.
+     * @private
+     */
+    SpriteDef.prototype.hasState = function(state) {
+        return this.states.hasOwnProperty(state);
+    };
+
+    /**
      * @private
      * @method module:sprites/spritedef.SpriteDef#aliasState
      */
@@ -2781,10 +2792,50 @@ define('input/mouse',[],function() {
 });
 
 /*global define*/
+define('input/ui/button',[],function() {
+
+    /**
+     * @module input/ui/button
+     */
+
+    
+
+    /** A button reacts to mouse and touch events. It should be added to a panel
+     * in order to be presented on-screen.
+     * @constructor module:input/ui/button.Button
+     */
+    function Button(sn) {
+        this.sn            = sn;
+        this.x             = 0;
+        this.y             = 0;
+        this.sprite        = undefined;
+
+        this.inactiveState = 'inactive';
+        this.activeState   = 'active';
+        this.hoverState    = 'hover';
+        this.disabledState = 'disabled';
+    }
+
+    /**
+     * Draw the button to the screen.
+     * @method module:input/ui/button.Button#draw
+     * @private
+     */
+    Button.prototype.draw = function(ctx, offsetx, offsety, now) {
+        /*(void)*/this.sprite.isActive(now); /* This sets the internal active flag on the sprite */
+        this.sprite.draw(ctx, offsetx-this.x, offsety-this.y, now);
+    };
+
+
+    return Button;
+});
+
+/*global define*/
 define('input/ui/panel',['util/uid',
+        'input/ui/button',
         'sprites/sprite'],
 
-function(uid, Sprite) {
+function(uid, Button, Sprite) {
 
     /**
      * @module input/ui/panel
@@ -2796,27 +2847,83 @@ function(uid, Sprite) {
      * to the screen. E.g. a popup dialog panel that contains labels and
      * buttons.
      * @constructor module:input/ui/panel.Panel
+     * @param {Object} data Panels can be defined in your game as JSON data.
+     * This data structure describes a nested UI arrangement with a root panel.
      */
-    function Panel(sn) {
+    function Panel(sn, data) {
         this.sn = sn;
         this.id = uid();
         this.children = [];
         this.x = 0;
         this.y = 0;
+
+        if (data) {
+            this.x=data.x;
+            this.y=data.y;
+            for (var i = 0; i < data.children.length; i++) {
+                var c = data.children[i];
+                var types = 0;
+                for(var type in c) {
+                    types++;
+                    if (types>1) {
+                        throw "Multiple types in UI element definition. Unexpected "+type;
+                    }
+                    var cd = c[type];
+
+                    if (type==='sprite') {
+
+                        var stateParts = parseSpriteRef(cd.def);
+                        var s = Sprite.construct(sn, stateParts[0], stateParts[1], undefined, cd.x, cd.y, 0, {});
+
+                        this.children.push(s);
+
+                    } else if(type==='button') {
+
+                        var b = new Button();
+
+                        b.x = cd.x;
+                        b.y = cd.y;
+
+                        if (!sn.spriteStateExists(cd.sprite, 'inactive')) {
+                            throw "Buttons must have at least an inactive state";
+                        }
+
+                        if (!sn.spriteStateExists(cd.sprite, 'active')) {
+                            b.activeState = 'inactive';
+                        }
+
+                        if (!sn.spriteStateExists(cd.sprite, 'hover')) {
+                            b.hoverState = 'inactive';
+                        }
+
+                        if (!sn.spriteStateExists(cd.sprite, 'disabled')) {
+                            b.disabledState = 'inactive';
+                        }
+
+                        b.sprite = Sprite.construct(sn, cd.sprite, 'inactive', undefined, 0, 0, 0, {maxloops:1,autoRemove:false});
+
+                        this.children.push(b);
+
+                    } else if(type==='panel') {
+
+                        this.children.push(new Panel(sn, cd));
+
+                    } else if(type==='label') {
+
+                        /* TODO */
+
+                    }
+                }
+            }
+        }
     }
 
-    /**
-     * Panels can be defined in your game as JSON data. Call this static
-     * factory method to create a panel hierarchy from a JSON description.
-     * @member module:input/ui/panel.Panel#load
-     * @static
-     * @param {Object} data A JSON data structure that describes a nested
-     * UI arrangement with a root panel.
-     * @return {Panel} A new panel.
-     */
-    Panel.load = function(data) {
-        /* TODO */
-        return this;
+    var parseSpriteRef = function(ref) {
+        var parts = ref.split(':');
+        if (parts.length!==2) {
+            throw "Badly formed sprite ref: '"+ref+"'";
+        }
+        return parts;
     };
 
     /**
@@ -2828,7 +2935,12 @@ function(uid, Sprite) {
         if (doShow===undefined) {
             doShow = true;
         }
-        /* TODO */
+
+        if (doShow) {
+            this.sn.activatePanel(this);
+        } else {
+            this.sn.deactivatePanel(this);
+        }
 
         return this;
     };
@@ -2890,7 +3002,12 @@ function(uid, Sprite) {
             } else if (c instanceof Sprite) {
                 /* Sprites expect map offsets, which are the opposite of our screen offsets, so we
                  * negate them here. */
-                c.draw(ctx, -xo+this.x, -yo+this.y, now);
+                /*(void)*/c.isActive(now); /* This sets the internal active flag on the sprite */
+                c.draw(ctx, -xo, -yo, now);
+            } else if (c instanceof Button) {
+                /* Sprites expect map offsets, which are the opposite of our screen offsets, so we
+                 * negate them here. */
+                c.draw(ctx, -xo, -yo, now);
             } else {
                 /* TODO */
                 throw "Can't draw "+c;
@@ -2905,24 +3022,22 @@ function(uid, Sprite) {
 });
 
 /*global define*/
-define('input/ui/button',[],function() {
+define('input/ui/label',[],function() {
 
     /**
-     * @module input/ui/button
+     * @module input/ui/label
      */
 
     
 
-    /** A button reacts to mouse and touch events. It should be added to a panel
-     * in order to be presented on-screen.
-     * @constructor module:input/ui/button.Button
+    /** A label is a piece of text to display on a UI layout.
+     * @constructor module:input/ui/label.Label
      */
-    function Button() {
-
+    function Label(sn) {
+        this.sn = sn;
     }
 
-
-    return Button;
+    return Label;
 });
 
 /*global define*/
@@ -2930,8 +3045,9 @@ define('input/all',[
     'input/keyboard',
     'input/mouse',
     'input/ui/panel',
+    'input/ui/label',
     'input/ui/button'],
-function(Keyboard, Mouse, Panel, Button) {
+function(Keyboard, Mouse, Panel, Label, Button) {
 
     
 
@@ -2944,6 +3060,7 @@ function(Keyboard, Mouse, Panel, Button) {
         Keyboard: Keyboard,
         Mouse:    Mouse,
         Panel:    Panel,
+        Label:    Label,
         Button:   Button
     };
 
@@ -6611,6 +6728,15 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
         this.Panel = ui.Panel.bind(ui.Panel, this);
 
         /**
+         * The Label constructor is exposed here for general use, although you may wish
+         * to define UI via a definition file and load it via
+         * {@link module:input/ui/panel.Panel#load|Panel.load}
+         * @member module:snaps.Snaps#Label
+         * @type {Function}
+         */
+        this.Label = ui.Label.bind(ui.Label, this);
+
+        /**
          * The Button constructor is exposed here for general use, although you may wish
          * to define UI via a definition file and load it via
          * {@link module:input/ui/panel.Panel#load|Panel.load}
@@ -6882,10 +7008,28 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
         };
 
         /**
+         * Test to see if a sprite state exists in the game.
+         * @method module:snaps.Snaps#spriteStateExists
+         * @private
+         * @param  {String} def The definition to test for
+         * @param  {String} state The state to test for within the definition.
+         * If omitted, only the definition will be tested for.
+         * @return {Boolean} true if the definition and/or state exists
+         * @param  {Panel} panel The panel to show.
+         */
+        this.spriteStateExists = function(def, state) {
+            var hasDef = _this.spriteDefs.hasOwnProperty(def);
+            if (!hasDef || state===undefined) {
+                return hasDef;
+            }
+            var sd = _this.spriteDefs[def];
+            return sd.hasState(state);
+        };
+
+        /**
          * Adds a panel to the list of currently rendered panels. Called via
          * {@link module:input/ui/panel.Panel#show|Panel.show}
          * @method module:snaps.Snaps#activatePanel
-         * @private
          * @param  {Panel} panel The panel to show.
          */
         this.activatePanel = function(panel) {

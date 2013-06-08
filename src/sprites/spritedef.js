@@ -85,6 +85,17 @@ define(function() {
     };
 
     /**
+     * Test to see if a state exists in this definition.
+     * @method module:sprites/spritedef.SpriteDef#hasState
+     * @param  {String} state The state to test for
+     * @return {Boolean} true if it exists.
+     * @private
+     */
+    SpriteDef.prototype.hasState = function(state) {
+        return this.states.hasOwnProperty(state);
+    };
+
+    /**
      * @private
      * @method module:sprites/spritedef.SpriteDef#aliasState
      */

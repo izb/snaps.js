@@ -121,6 +121,15 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
         this.Panel = ui.Panel.bind(ui.Panel, this);
 
         /**
+         * The Label constructor is exposed here for general use, although you may wish
+         * to define UI via a definition file and load it via
+         * {@link module:input/ui/panel.Panel#load|Panel.load}
+         * @member module:snaps.Snaps#Label
+         * @type {Function}
+         */
+        this.Label = ui.Label.bind(ui.Label, this);
+
+        /**
          * The Button constructor is exposed here for general use, although you may wish
          * to define UI via a definition file and load it via
          * {@link module:input/ui/panel.Panel#load|Panel.load}
@@ -392,10 +401,28 @@ function(SpriteDef, Sprite, Composite, util, StaggeredIsometric,
         };
 
         /**
+         * Test to see if a sprite state exists in the game.
+         * @method module:snaps.Snaps#spriteStateExists
+         * @private
+         * @param  {String} def The definition to test for
+         * @param  {String} state The state to test for within the definition.
+         * If omitted, only the definition will be tested for.
+         * @return {Boolean} true if the definition and/or state exists
+         * @param  {Panel} panel The panel to show.
+         */
+        this.spriteStateExists = function(def, state) {
+            var hasDef = _this.spriteDefs.hasOwnProperty(def);
+            if (!hasDef || state===undefined) {
+                return hasDef;
+            }
+            var sd = _this.spriteDefs[def];
+            return sd.hasState(state);
+        };
+
+        /**
          * Adds a panel to the list of currently rendered panels. Called via
          * {@link module:input/ui/panel.Panel#show|Panel.show}
          * @method module:snaps.Snaps#activatePanel
-         * @private
          * @param  {Panel} panel The panel to show.
          */
         this.activatePanel = function(panel) {
