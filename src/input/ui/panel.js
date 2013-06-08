@@ -1,9 +1,10 @@
 /*global define*/
 define(['util/uid',
         'input/ui/button',
+        'input/ui/label',
         'sprites/sprite'],
 
-function(uid, Button, Sprite) {
+function(uid, Button, Label, Sprite) {
 
     /**
      * @module input/ui/panel
@@ -176,6 +177,8 @@ function(uid, Button, Sprite) {
                 /* Sprites expect map offsets, which are the opposite of our screen offsets, so we
                  * negate them here. */
                 c.draw(ctx, -xo, -yo, now);
+            } else if (c instanceof Label) {
+                /* TODO */
             } else {
                 /* TODO */
                 throw "Can't draw "+c;

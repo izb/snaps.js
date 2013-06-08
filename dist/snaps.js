@@ -2831,11 +2831,31 @@ define('input/ui/button',[],function() {
 });
 
 /*global define*/
+define('input/ui/label',[],function() {
+
+    /**
+     * @module input/ui/label
+     */
+
+    
+
+    /** A label is a piece of text to display on a UI layout.
+     * @constructor module:input/ui/label.Label
+     */
+    function Label(sn) {
+        this.sn = sn;
+    }
+
+    return Label;
+});
+
+/*global define*/
 define('input/ui/panel',['util/uid',
         'input/ui/button',
+        'input/ui/label',
         'sprites/sprite'],
 
-function(uid, Button, Sprite) {
+function(uid, Button, Label, Sprite) {
 
     /**
      * @module input/ui/panel
@@ -3008,6 +3028,8 @@ function(uid, Button, Sprite) {
                 /* Sprites expect map offsets, which are the opposite of our screen offsets, so we
                  * negate them here. */
                 c.draw(ctx, -xo, -yo, now);
+            } else if (c instanceof Label) {
+                /* TODO */
             } else {
                 /* TODO */
                 throw "Can't draw "+c;
@@ -3019,25 +3041,6 @@ function(uid, Button, Sprite) {
      * fade. This implies that the root panel in the data should have dimensions. */
 
     return Panel;
-});
-
-/*global define*/
-define('input/ui/label',[],function() {
-
-    /**
-     * @module input/ui/label
-     */
-
-    
-
-    /** A label is a piece of text to display on a UI layout.
-     * @constructor module:input/ui/label.Label
-     */
-    function Label(sn) {
-        this.sn = sn;
-    }
-
-    return Label;
 });
 
 /*global define*/
