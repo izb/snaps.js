@@ -159,6 +159,7 @@ define(function() {
                             s  = cell.sprites[j];
                             dx = x-s.x;
                             dy = (y-s.y)*2;
+                            /* TODO: Sprites should declare a working area property to avoid deoptimization here. */
                             s.tmpDist2=(dx*dx+dy*dy);
                         }
                     }
